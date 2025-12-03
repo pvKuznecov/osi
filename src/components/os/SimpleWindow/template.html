@@ -1,0 +1,16 @@
+<div v-if="isVisible" class="simple-window" :style="windowStyle" @mousedown="focusWindow">
+    <div class="window-header">
+        <span class="window-title">{{ title }}</span>
+        <div class="window-controls">
+            <button class="window-btn minimize" @click="minimize">_</button>
+            <button class="window-btn maximize" @click="maximize">□</button>
+            <button class="window-btn close" @click="close">✕</button>
+        </div>
+    </div>
+    <div class="window-content">
+        <slot>
+            <p>Содержимое приложения {{ appName }}</p>
+            <p>Это простое окно, которое можно перемещать</p>
+        </slot>
+    </div>
+</div>
