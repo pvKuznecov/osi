@@ -1,11 +1,17 @@
-<div class="desktop-area" :style="desktopStyle" @click="activateDesktop">
+<div class="desktop-area" @click="activateDesktop">
     <!-- Иконки на рабочем столе -->
     <div class="desktop-icons">
-        <div v-for="app in apps" :key="app.name" class="desktop-icon" @dblclick="launchApp(app.name)">
-            <div class="icon">{{ app.icon }}</div>
-            <span class="label">{{ app.label }}</span>
-        </div>
+      <div 
+        v-for="app in apps" 
+        :key="app.name"
+        class="desktop-icon"
+        @dblclick="launchApp(app.name)"
+      >
+        <div class="icon">{{ app.icon }}</div>
+        <span class="label">{{ app.label }}</span>
+      </div>
     </div>
-    <!-- Здесь будут появляться окна приложений -->
+    
+    <!-- Слот для окон -->
     <slot></slot>
-</div>
+  </div>
