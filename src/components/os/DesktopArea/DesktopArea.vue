@@ -5,6 +5,7 @@
 
     export default {
         name: "DesktopArea",
+  
         data() {
             return {
                 apps: [
@@ -15,20 +16,49 @@
                 ]
             }
         },
-    
+  
         computed: {
+            // desktopStyle() {
+            //     return {
+            //         backgroundColor: '#0078d4',
+            //         backgroundImage: 'linear-gradient(135deg, #0078d4 0%, #106ebe 100%)'
+            //     };
+            // },
             desktopStyle() {
                 return {
-                    backgroundColor: '#0078d4',
-                    backgroundImage: 'linear-gradient(135deg, #0078d4 0%, #106ebe 100%)'
+                    backgroundImage: `url(${this.getWallpaperUrl()})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat'
                 }
+            },
+    
+            osStore() {
+                return useOsStore();
             }
         },
-    
+  
         methods: {
+            getWallpaperUrl() {
+                return require('@/assets/wallpapers/nwall.jpg');
+            },
+            activateDesktop() {
+                this.osStore.activeWindowId = null;
+            },
+    
             launchApp(appName) {
-                const osStore = useOsStore();
-                osStore.openWindow(appName);
+                // ПРОВЕРКА: есть ли уже открытое окно этого приложения?
+                const existingWindows = this.osStore.windows.filter(
+                    w => w.appName === appName && !w.isMinimized
+                );
+      
+                if (existingWindows.length > 0) {
+                    // Если есть открытое окно - активируем его
+                    this.osStore.activateWindow(existingWindows[0].id) // ИСПОЛЬЗУЕМ activateWindow
+                } else {
+                    // Иначе создаем новое окно
+                    this.osStore.openWindow(appName)
+                }
             }
         }
     }
