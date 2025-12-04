@@ -1,7 +1,6 @@
-// src/main.js
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import './styles/global.css' // ← ЭТА СТРОЧКА ДОЛЖНА БЫТЬ
+import './styles/global.css'
 import App from './App.vue'
 
 const app = createApp(App)
