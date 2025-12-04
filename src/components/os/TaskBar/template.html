@@ -1,0 +1,18 @@
+<div class="task-bar">
+    <!-- Кнопка Menu -->
+    <button class="start-button" @click="toggleStartMenu">
+        <span class="start-icon">🌀</span>
+        <span class="start-text">Menu</span>
+    </button>
+    <!-- Открытые приложения -->
+    <div class="taskbar-apps">
+        <button v-for="window in osStore.windows" :key="window.id" class="taskbar-app" :class="{ 'active': osStore.activeWindowId === window.id, 'minimized': window.isMinimized }" @click="toggleWindow(window.id)">
+            <span class="app-icon">{{ getAppIcon(window.appName) }}</span>
+            <span class="app-title">{{ window.title }}</span>
+        </button>
+    </div>
+    <!-- Системный трей -->
+    <div class="system-tray">
+        <div class="tray-time">{{ currentTime }}</div>
+    </div>
+</div>
