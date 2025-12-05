@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+// import { OSIHelper } from '@/apps/system/OSIHelper/OSIHelper.vue';
+
 export const useOsStore = defineStore('os', () => {
     const windows = ref([]);
     const activeWindowId = ref(null);
@@ -20,14 +22,21 @@ export const useOsStore = defineStore('os', () => {
         }
     };
   
-    const openWindow = (appName) => {
+    const openWindow = (appData) => {
+    // const openWindow = (appName, contentApp) => {
+        const appName = appData.name;
+        const appTitle = appData.label;
+        const contentApp = appData.contentapp;
+
         const newWindow = {
+            ...appData,
             id: Date.now().toString(),
             appName: appName,
-            title: `${appName} - Приложение`,
-            isMinimized: false,
-            isMaximized: false,
-            zIndex: nextZIndex++
+            contentApp: contentApp,
+            title: appTitle,
+            // isMinimized: false,
+            // isMaximized: false,
+            zIndex: nextZIndex++            
         };
     
         windows.value.push(newWindow);

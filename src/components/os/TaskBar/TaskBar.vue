@@ -30,7 +30,8 @@
                     notepad: '📝',
                     explorer: '📁',
                     calculator: '🧮',
-                    settings: '⚙️'
+                    settings: '⚙️',
+                    osihelper: 'ℹ️'
                 };
 
                 return icons[appName] || '📄';

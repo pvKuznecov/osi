@@ -7,6 +7,7 @@
         :windowId="window.id"
         :title="window.title"
         :appName="window.appName"
+        :contentApp="window.contentApp"
         :isMinimized="window.isMinimized"
         :isActive="osStore.activeWindowId === window.id"
         :isMaximized="window.isMaximized"
@@ -75,7 +76,8 @@ export default {
   mounted() {
     setTimeout(() => {
       if (this.osStore) {
-        this.osStore.openWindow('notepad')
+        // this.osStore.openWindow('notepad');
+        this.osStore.openWindow({ name: 'notepad', label: 'Блокнот', icon: '📝', contentapp: 'Notepad' });
       }
     }, 500)
   }

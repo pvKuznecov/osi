@@ -11,12 +11,17 @@
     </div>
     <div class="window-content">
         <slot>
-            <div class="default-content">
-                <p>Содержимое приложения {{ appName }}</p>
+            <div v-if="contentApp && contentApp == 'OSIHelper'" class="default-content">
+                <OSIHelper/>
+            </div>
+            <div v-else class="default-content">
                 <p>Это окно {{ isMaximized ? 'развернуто' : 'не развернуто' }}</p>
                 <p>Размер: {{ windowWidth }} × {{ windowHeight }}</p>
+                <hr>
+                <p>appName:: {{ appName }}</p>                
                 <p>isMinimized:: {{isMinimized}}</p>
                 <p>isMaximized:: {{isMaximized}}</p>
+                <p>contentApp:: {{ contentApp }}</p>
             </div>    
         </slot>
     </div>
