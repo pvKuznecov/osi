@@ -23,7 +23,6 @@ export const useOsStore = defineStore('os', () => {
     };
   
     const openWindow = (appData) => {
-    // const openWindow = (appName, contentApp) => {
         const appName = appData.name;
         const appTitle = appData.label;
         const contentApp = appData.contentapp;
@@ -34,8 +33,8 @@ export const useOsStore = defineStore('os', () => {
             appName: appName,
             contentApp: contentApp,
             title: appTitle,
-            // isMinimized: false,
-            // isMaximized: false,
+            isMinimized: (appData.isMinimized) ? appData.isMinimized : false,
+            isMaximized: (appData.isMaximized) ? appData.isMaximized : false,            
             zIndex: nextZIndex++            
         };
     
