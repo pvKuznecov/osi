@@ -1,8 +1,14 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
+    import OSIHelper from '@/apps/system/OSIHelper/OSIHelper.vue';
+
     export default {
         name: "SimpleWindow",
+
+        components: {
+            OSIHelper
+        },
   
         props: {
             windowId: String,
@@ -14,15 +20,19 @@
                 type: String,
                 default: 'app'
             },
+            contentApp: {
+                type: String,
+                default: '--'
+            },
             isMinimized: {
                 type: Boolean,
                 default: false
             },
-            isActive: {
+            isMaximized: {
                 type: Boolean,
                 default: false
             },
-            isMaximized: {
+            isActive: {
                 type: Boolean,
                 default: false
             },
@@ -56,6 +66,15 @@
         },
   
         computed: {
+            contentVal() {
+                const contentApp = this.contentApp;
+
+                if (contentApp && contentApp == 'OSIHelper') {
+                    return `<OSIHelper/>`;
+                } else {
+                    return false;
+                }
+            },
             windowStyles() {
                 const baseStyles = {zIndex: this.zIndex };
       

@@ -9,10 +9,11 @@
         data() {
             return {
                 apps: [
-                    { name: 'notepad', label: 'Блокнот', icon: '📝' },
-                    { name: 'explorer', label: 'Проводник', icon: '📁' },
-                    { name: 'calculator', label: 'Калькулятор', icon: '🧮' },
-                    { name: 'settings', label: 'Настройки', icon: '⚙️' }
+                    { name: 'notepad', label: 'Блокнот', icon: '📝', contentapp: 'Notepad' },
+                    { name: 'explorer', label: 'Проводник', icon: '📁', contentapp: 'Explorer' },
+                    { name: 'calculator', label: 'Калькулятор', icon: '🧮', contentapp: 'Calculator' },
+                    { name: 'settings', label: 'Настройки', icon: '⚙️', contentapp: 'Settings' },
+                    { name: 'osihelper', label: 'OSI помощник', icon: 'ℹ️', contentapp: 'OSIHelper', isMaximized: true }
                 ]
             }
         },
@@ -47,7 +48,11 @@
                 this.osStore.activeWindowId = null;
             },
     
-            launchApp(appName) {
+            // launchApp(appName, contentApp) {
+            launchApp(appData) {
+                const appName = appData.name;
+                // const contentApp = appData.contentapp;
+
                 const existingWindows = this.osStore.windows.filter(
                     w => w.appName === appName && !w.isMinimized
                 );
@@ -55,7 +60,8 @@
                 if (existingWindows.length > 0) {
                     this.osStore.activateWindow(existingWindows[0].id);
                 } else {
-                    this.osStore.openWindow(appName);
+                    this.osStore.openWindow(appData);
+                    // this.osStore.openWindow(appName, contentApp);
                 }
             }
         }
