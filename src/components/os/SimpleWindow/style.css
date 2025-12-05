@@ -11,7 +11,8 @@
 }
 
 .simple-window.active {
-  border-color: #0078d4;
+  /* border-color: #0078d4; */
+  border-color: rgba(57, 0, 212, 0.342);
   box-shadow: 0 6px 20px rgba(0, 120, 212, 0.25);
 }
 
@@ -22,7 +23,9 @@
 }
 
 .window-header {
-  background: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
+  /* background: linear-gradient(to bottom, #f0f0f0, #e0e0e0); */
+  background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85));
+  color: white;
   padding: 8px 12px;
   display: flex;
   justify-content: space-between;
