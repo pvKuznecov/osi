@@ -8,6 +8,8 @@
         :title="window.title"
         :appName="window.appName"
         :contentApp="window.contentApp"
+        :defWidth="window.defWidth"
+        :defHeight="window.defHeight"
         :isMinimized="window.isMinimized"
         :isActive="osStore.activeWindowId === window.id"
         :isMaximized="window.isMaximized"

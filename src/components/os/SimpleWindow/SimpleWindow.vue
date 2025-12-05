@@ -45,7 +45,7 @@
                 posX: 100,
                 posY: 100,
                 windowWidth: 400,
-                windowHeight: 300,
+                windowHeight: 600,
                 isDragging: false,
                 isResizing: false,
                 dragOffset: { x: 0, y: 0 },
@@ -66,6 +66,7 @@
                 // маппинг имен компонентов
                 const componentMap = {
                     'OSIHelper': () => import('@/apps/system/OSIHelper/OSIHelper.vue'),
+                    'OSICalculator': () => import('@/apps/system/OSICalculator/OSICalculator.vue'),
                 };
 
                 if (this.contentApp && componentMap[this.contentApp]) {
