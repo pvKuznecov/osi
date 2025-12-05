@@ -1,15 +1,11 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
-    import OSIHelper from '@/apps/system/OSIHelper/OSIHelper.vue';
+    import { defineAsyncComponent } from 'vue';
 
     export default {
         name: "SimpleWindow",
 
-        components: {
-            OSIHelper
-        },
-  
         props: {
             windowId: String,
             title: {
@@ -66,13 +62,16 @@
         },
   
         computed: {
-            contentVal() {
-                const contentApp = this.contentApp;
+            dynamicComponent() {
+                // маппинг имен компонентов
+                const componentMap = {
+                    'OSIHelper': () => import('@/apps/system/OSIHelper/OSIHelper.vue'),
+                };
 
-                if (contentApp && contentApp == 'OSIHelper') {
-                    return `<OSIHelper/>`;
+                if (this.contentApp && componentMap[this.contentApp]) {
+                    return defineAsyncComponent(componentMap[this.contentApp]);
                 } else {
-                    return false;
+                    return null;
                 }
             },
             windowStyles() {

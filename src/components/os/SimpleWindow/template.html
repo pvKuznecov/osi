@@ -1,6 +1,4 @@
-<div v-if="!isMinimized" class="simple-window" :class="{ 'active': isActive, 'maximized': isMaximized }"
-    :style="windowStyles"
-    @mousedown="activateWindow">
+<div v-if="!isMinimized" class="simple-window" :class="{ 'active': isActive, 'maximized': isMaximized }" :style="windowStyles" @mousedown="activateWindow">
     <div class="window-header" @mousedown="startDrag" @dblclick="toggleMaximize">
         <span class="window-title">{{ title }}</span>
         <div class="window-controls">
@@ -11,9 +9,7 @@
     </div>
     <div class="window-content">
         <slot>
-            <div v-if="contentApp && contentApp == 'OSIHelper'" class="default-content">
-                <OSIHelper/>
-            </div>
+            <component v-if="dynamicComponent" :is="dynamicComponent" :window-id="windowId"/>
             <div v-else class="default-content">
                 <p>Это окно {{ isMaximized ? 'развернуто' : 'не развернуто' }}</p>
                 <p>Размер: {{ windowWidth }} × {{ windowHeight }}</p>

@@ -19,12 +19,13 @@ dd {
     margin-bottom: 10px; }
 
 .pageheader {
-    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     width: 98%;
     height: 30px;
     background: linear-gradient(rgba(88, 26, 117, 0.85), rgba(117, 35, 155, 0.85), rgba(88, 26, 117, 0.85));
     color: white;
-    text-align: center;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
     padding: 3px 5px;
     font-size:large;
@@ -32,6 +33,10 @@ dd {
     border-radius: 5px;
     margin-top: 5px;
     margin-bottom: 5px;
+    margin-left: auto;
+    margin-right: auto; }
+
+.pageheader span {
     margin-left: auto;
     margin-right: auto; }
 
