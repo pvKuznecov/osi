@@ -1,0 +1,29 @@
+<div class="browser-app">
+    <!-- <div class="browser-controls">
+      <div class="url-bar">
+        <button @click="reload" title="Обновить">⟳</button>
+      </div>
+    </div> -->
+    
+    <div class="iframe-wrapper">
+      <iframe
+        ref="iframeRef"
+        :src="iframeSrc"
+        @load="onIframeLoad"
+        @error="onIframeError"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        referrerpolicy="no-referrer"
+        :key="iframeKey"
+      ></iframe>
+    </div>
+    
+    <div v-if="loading" class="loading-indicator">
+      <div class="spinner"></div>
+      <span>Загрузка...</span>
+    </div>
+    
+    <div v-if="error" class="error-message">
+      <p>⚠️ Не удалось загрузить страницу</p>
+      <button @click="reload">Повторить</button>
+    </div>
+  </div>
