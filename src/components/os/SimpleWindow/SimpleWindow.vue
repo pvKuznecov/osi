@@ -35,7 +35,15 @@
             zIndex: {
                 type: Number,
                 default: 100
-            }
+            },
+            defWidth: {
+                type: Number,
+                default: 400
+            },
+            defHeight: {
+                type: Number,
+                default: 600
+            }            
         },
   
         emits: ['close', 'minimize', 'focus', 'toggleMaximize'],
@@ -44,8 +52,8 @@
             return {
                 posX: 100,
                 posY: 100,
-                windowWidth: 400,
-                windowHeight: 300,
+                windowWidth: this.defWidth,
+                windowHeight: this.defHeight,
                 isDragging: false,
                 isResizing: false,
                 dragOffset: { x: 0, y: 0 },
@@ -66,6 +74,7 @@
                 // маппинг имен компонентов
                 const componentMap = {
                     'OSIHelper': () => import('@/apps/system/OSIHelper/OSIHelper.vue'),
+                    'OSICalculator': () => import('@/apps/system/OSICalculator/OSICalculator.vue'),
                 };
 
                 if (this.contentApp && componentMap[this.contentApp]) {

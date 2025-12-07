@@ -1,0 +1,40 @@
+<div class="calculator-app">
+    <div class="calculator-display">
+        <div class="expression">{{ expression || '0' }}</div>
+        <div class="result">{{ result }}</div>
+    </div>
+    <div class="calculator-buttons">
+        <button class="calc-btn clear" @click="clearAll">C</button>
+        <button class="calc-btn clear" @click="clearEntry">CE</button>
+        <button class="calc-btn operation" @click="backspace">⌫</button>
+        <button class="calc-btn operation" @click="appendOperation('÷')">÷</button>
+        
+        <button class="calc-btn number" @click="appendNumber('7')">7</button>
+        <button class="calc-btn number" @click="appendNumber('8')">8</button>
+        <button class="calc-btn number" @click="appendNumber('9')">9</button>
+        <button class="calc-btn operation" @click="appendOperation('×')">×</button>
+      
+        <button class="calc-btn number" @click="appendNumber('4')">4</button>
+        <button class="calc-btn number" @click="appendNumber('5')">5</button>
+        <button class="calc-btn number" @click="appendNumber('6')">6</button>
+        <button class="calc-btn operation" @click="appendOperation('-')">-</button>
+      
+        <button class="calc-btn number" @click="appendNumber('1')">1</button>
+        <button class="calc-btn number" @click="appendNumber('2')">2</button>
+        <button class="calc-btn number" @click="appendNumber('3')">3</button>
+        <button class="calc-btn operation" @click="appendOperation('+')">+</button>
+      
+        <button class="calc-btn number zero" @click="appendNumber('0')">0</button>
+        <button class="calc-btn number" @click="appendDecimal()">.</button>
+        <button class="calc-btn equals" @click="calculateAndAddHistory" :disabled="!expression">=</button>
+    </div>
+    <div class="calculator-history">
+        <h3>История</h3>
+        <ul>
+            <li v-for="(item, index) in reversedHistory" :key="index" @click="useHistoryItem(item)">
+                {{ item.expression }} = {{ item.result }}
+            </li>
+        </ul>
+        <button v-if="history.length > 0" class="clear-history" @click="clearHistory">Очистить историю</button>
+    </div>
+</div>
