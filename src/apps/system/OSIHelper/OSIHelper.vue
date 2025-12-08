@@ -2,6 +2,13 @@
 <style src="./style.css"></style>
 <script>
     export default {
-        name: "OSIHelper"
+        name: "OSIHelper",
+
+        props: {
+            windowId: {
+                type: String,
+                required: true
+            },
+        },
     }
 </script>
