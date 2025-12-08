@@ -29,6 +29,7 @@ import DesktopArea from './components/os/DesktopArea/DesktopArea.vue'
 import TaskBar from './components/os/TaskBar/TaskBar.vue'
 import SimpleWindow from './components/os/SimpleWindow/SimpleWindow.vue'
 import { useOsStore } from './stores/os.store'
+// import { useAppsStore } from './stores/apps.store'
 
 export default {
   name: 'App',
@@ -41,7 +42,8 @@ export default {
   
   data() {
     return {
-      osStore: null
+      osStore: null,
+      // useAppsStore: null
     }
   },
   
@@ -72,16 +74,17 @@ export default {
   },
   
   created() {
-    this.osStore = useOsStore()
+    this.osStore = useOsStore();
+    // this.useAppsStore = useAppsStore();
   },
   
   mounted() {
     setTimeout(() => {
-      if (this.osStore) {
-        // this.osStore.openWindow('notepad');
-        // this.osStore.openWindow({ name: 'notepad', label: 'Блокнот', icon: '📝', contentapp: 'Notepad' });
-        this.osStore.openWindow({ name: 'osihelper', label: 'OSI помощник', icon: 'ℹ️', contentapp: 'OSIHelper', defWidth: 600, defHeight: 700 });
-      }
+      // if (this.osStore) {
+      //   // this.osStore.openWindow('notepad');
+      //   // this.osStore.openWindow({ name: 'notepad', label: 'Блокнот', icon: '📝', contentapp: 'Notepad' });
+      //   this.osStore.openWindow({ name: 'osihelper', label: 'OSI помощник', icon: 'ℹ️', contentapp: 'OSIHelper', defWidth: 600, defHeight: 700 });
+      // }
     }, 500)
   }
 }
