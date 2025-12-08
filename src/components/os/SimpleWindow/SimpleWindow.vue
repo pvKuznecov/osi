@@ -42,7 +42,7 @@
             },
             defHeight: {
                 type: Number,
-                default: 600
+                default: 400
             }            
         },
   
@@ -75,6 +75,7 @@
                 const componentMap = {
                     'OSIHelper': () => import('@/apps/system/OSIHelper/OSIHelper.vue'),
                     'OSICalculator': () => import('@/apps/system/OSICalculator/OSICalculator.vue'),
+                    'AppWiki': () => import('@/apps/learn/AppWiki/AppWiki.vue'),
                 };
 
                 if (this.contentApp && componentMap[this.contentApp]) {

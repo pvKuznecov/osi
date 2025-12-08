@@ -79,7 +79,8 @@ export default {
     setTimeout(() => {
       if (this.osStore) {
         // this.osStore.openWindow('notepad');
-        this.osStore.openWindow({ name: 'notepad', label: 'Блокнот', icon: '📝', contentapp: 'Notepad' });
+        // this.osStore.openWindow({ name: 'notepad', label: 'Блокнот', icon: '📝', contentapp: 'Notepad' });
+        this.osStore.openWindow({ name: 'osihelper', label: 'OSI помощник', icon: 'ℹ️', contentapp: 'OSIHelper', defWidth: 600, defHeight: 700 });
       }
     }, 500)
   }
