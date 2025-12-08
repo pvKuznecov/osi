@@ -52,17 +52,27 @@
             // launchApp(appName, contentApp) {
             launchApp(appData) {
                 const appName = appData.name;
-                // const contentApp = appData.contentapp;
+                const contentApp = appData.contentapp;
 
-                const existingWindows = this.osStore.windows.filter(
-                    w => w.appName === appName && !w.isMinimized
+                // Ищем окно по windowId или по типу приложения
+                const existingWindow = this.osStore.windows.find(
+                    w => w.appName === appName && w.contentApp === contentApp
                 );
-      
-                if (existingWindows.length > 0) {
-                    this.osStore.activateWindow(existingWindows[0].id);
+                
+                if (existingWindow) {
+                    // Если окно существует, активируем его
+                    if (existingWindow.isMinimized) {
+                        this.osStore.restoreWindow(existingWindow.id);
+                    } else {
+                        this.osStore.activateWindow(existingWindow.id);
+                    }
                 } else {
-                    this.osStore.openWindow(appData);
-                    // this.osStore.openWindow(appName, contentApp);
+                    // Создаем новое окно
+                    this.osStore.openWindow({
+                        ...appData,
+                        defWidth: appData.defWidth || 800,
+                        defHeight: appData.defHeight || 600
+                    });
                 }
             }
         }
