@@ -1,0 +1,26 @@
+export const LangPack = {
+    en: {
+        description: 'Description',
+        name: 'Name',
+        version: 'Version',
+        accounts: 'Accounts',
+        design: 'Design',
+        desktopbgimg: 'Desktop background image',
+        memmanagment: 'Memory management',
+        clear: 'Clear',
+        delquest: 'Delete data from ',
+        select: 'Select',
+    },
+    ru: {
+        description: 'Описание',
+        name: 'Наименование',
+        version: 'Версия',
+        accounts: 'Учетные записи',
+        design: 'Оформление',
+        desktopbgimg: 'Фоновое изображение рабочего стола',
+        memmanagment: 'Управление памятью',
+        clear: 'Очистить',
+        delquest: 'Удалить данные из ',
+        select: 'Выбрать',
+    },
+};

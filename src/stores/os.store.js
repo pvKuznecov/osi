@@ -11,7 +11,7 @@ export const useOsStore = defineStore('os', () => {
     // Загружаем сохраненные окна из localStorage при инициализации
     const loadWindowsFromStorage = () => {
         try {
-            const saved = localStorage.getItem('os_windows_state');
+            const saved = localStorage.getItem('osi_windows_state');
             if (saved) {
                 const parsed = JSON.parse(saved);
                 if (parsed && Array.isArray(parsed.windows)) {
@@ -45,11 +45,11 @@ export const useOsStore = defineStore('os', () => {
                     isMaximized: w.isMaximized,
                     zIndex: w.zIndex,
                     defWidth: w.defWidth,
-                    defHeight: w.defHeight
+                    defHeight: w.defHeight,
                 })),
                 activeWindowId: activeWindowId.value
             };
-            localStorage.setItem('os_windows_state', JSON.stringify(state));
+            localStorage.setItem('osi_windows_state', JSON.stringify(state));
         } catch (error) {
             console.error('Failed to save windows to storage:', error);
         }
@@ -105,7 +105,7 @@ export const useOsStore = defineStore('os', () => {
             isMaximized: appData.isMaximized || false,            
             zIndex: nextZIndex++,
             defWidth: appData.defWidth || 400,
-            defHeight: appData.defHeight || 400
+            defHeight: appData.defHeight || 400,
         };
     
         windows.value.push(newWindow);
@@ -168,7 +168,7 @@ export const useOsStore = defineStore('os', () => {
     const clearAllWindows = () => {
         windows.value = [];
         activeWindowId.value = null;
-        localStorage.removeItem('os_windows_state');
+        localStorage.removeItem('osi_windows_state');
     };
   
     return {

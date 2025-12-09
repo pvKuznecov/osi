@@ -43,7 +43,7 @@
             defHeight: {
                 type: Number,
                 default: 400
-            }            
+            },
         },
   
         emits: ['close', 'minimize', 'focus', 'toggleMaximize'],
@@ -75,7 +75,8 @@
                 const componentMap = {
                     'OSIHelper': () => import('@/apps/system/OSIHelper/OSIHelper.vue'),
                     'OSICalculator': () => import('@/apps/system/OSICalculator/OSICalculator.vue'),
-                    'AppWiki': () => import('@/apps/learn/AppWiki/AppWiki.vue'),
+                    'OSISettings': () => import('@/apps/system/OSISettings/OSISettings.vue'),
+                    // 'AppWiki': () => import('@/apps/learn/AppWiki/AppWiki.vue'),
                 };
 
                 if (this.contentApp && componentMap[this.contentApp]) {
@@ -238,11 +239,17 @@
                 this.isResizing = false;
             },
     
-            minimize() { this.$emit('minimize', this.windowId); },
+            minimize() {
+                this.$emit('minimize', this.windowId);
+            },
     
-            toggleMaximize() { this.$emit('toggleMaximize', this.windowId); },
+            toggleMaximize() {
+                this.$emit('toggleMaximize', this.windowId);
+            },
     
-            close() { this.$emit('close', this.windowId); }
+            close() {
+                this.$emit('close', this.windowId);
+            }
         }
     }
 </script>

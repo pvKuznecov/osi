@@ -11,6 +11,7 @@
                 apps: [
                     { name: 'osihelper', label: 'OSI помощник', icon: 'ℹ️', contentapp: 'OSIHelper', defWidth: 600, defHeight: 700 },
                     { name: 'calculator', label: 'Калькулятор', icon: '🧮', contentapp: 'OSICalculator', defWidth: 400, defHeight: 670 },
+                    { name: 'osisettings', label: 'Настройки', icon: '⚙️', contentapp: 'OSISettings', defWidth: 400, defHeight: 600 },
                     // { name: 'wiki', label: 'Wikipedia', icon: 'W', contentapp: 'AppWiki', isMaximized: true },
                     // { name: 'notepad', label: 'Блокнот', icon: '📝', contentapp: 'Notepad' },
                     // { name: 'explorer', label: 'Проводник', icon: '📁', contentapp: 'Explorer' },
