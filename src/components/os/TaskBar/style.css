@@ -9,6 +9,35 @@
     backdrop-filter: blur(10px);
     border-top: 1px solid rgba(255, 255, 255, 0.1); }
 
+.task-bar-overplace {
+    position: absolute;
+    bottom: 40px;
+    width: 100%;
+    height: calc(100% - 40px);
+    z-index: 2000; }
+.task-bar-menu {
+    position: absolute;
+    bottom: 40px;
+    left: 3px;
+    width: 300px;
+    min-height: 50px;
+    background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85));
+    padding: 5px;
+    color: white;
+    border-radius: 5px 5px 0 0;
+    z-index: 2001; }
+
+.task-bar-menu-header {
+    background: linear-gradient(to bottom, rgb(103, 55, 235), rgb(80, 33, 209));
+    padding: 3px 5px;
+    border-radius: 5px;
+}
+
+.task-bar-menu-elem {
+    padding-left: 10px;
+    margin-top: 5px;
+}
+
 .start-button {
     display: flex;
     height: 30px;

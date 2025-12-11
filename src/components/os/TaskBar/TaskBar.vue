@@ -2,6 +2,7 @@
 <style src="./style.css"></style>
 <script>
     import { useOsStore } from '@/stores/os.store';
+    import { appsConfig } from '@/config/applications';
 
     export default {
         name: "TaskBar",
@@ -9,13 +10,18 @@
         data() {
             return {
                 currentTime: '',
-                timer: null
+                timer: null,
+                showMenu: false,
             };
         },
   
         computed: {
             osStore() {
                 return useOsStore();
+            },
+
+            appsList() {
+                return appsConfig.getStartMenuApps();
             }
         },
   
@@ -25,22 +31,11 @@
                 this.currentTime = now.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
             },
     
-            getAppIcon(appName) {
-                const icons = {
-                    notepad: '📝',
-                    explorer: '📁',
-                    calculator: '🧮',
-                    settings: '⚙️',
-                    osihelper: 'ℹ️'
-                };
-
-                return icons[appName] || '📄';
-            },
-    
             toggleWindow(windowId) {
                 const window = this.osStore.windows.find(w => w.id === windowId);
                 
                 if (window) {
+                    console.log('window', window);
                     if (window.isMinimized) {
                         this.osStore.restoreWindow(windowId);
                     } else {
@@ -50,7 +45,7 @@
             },
     
             toggleStartMenu() {
-                console.log('Меню Пуск');
+                this.showMenu = !this.showMenu;
             }
         },
   

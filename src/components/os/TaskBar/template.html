@@ -1,3 +1,11 @@
+<div v-if="showMenu" class="task-bar-overplace" @click="toggleStartMenu"></div>
+<div v-if="showMenu" class="task-bar-menu">
+    <div class="task-bar-menu-header">
+        <span class="start-icon">🌀</span>
+        <span class="start-text"> Меню</span>
+    </div>
+    <div class="task-bar-menu-elem" v-for="app in appsList">{{app.icon}} {{app.label}}</div>
+</div>
 <div class="task-bar">
     <!-- Кнопка Menu -->
     <button class="start-button" @click="toggleStartMenu">
@@ -7,7 +15,7 @@
     <!-- Открытые приложения -->
     <div class="taskbar-apps">
         <button v-for="window in osStore.windows" :key="window.id" class="taskbar-app" :class="{ 'active': osStore.activeWindowId === window.id }" @click="toggleWindow(window.id)">
-            <span class="app-icon">{{ getAppIcon(window.appName) }}</span>
+            <span class="app-icon">{{ window.icon || '📄' }}</span>
             <span class="app-title">{{ window.title }}</span>
         </button>
     </div>    

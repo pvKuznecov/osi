@@ -7,7 +7,10 @@
         :windowId="window.id"
         :title="window.title"
         :appName="window.appName"
+        
         :contentApp="window.contentApp"
+        :icon="window.icon"
+
         :defWidth="window.defWidth"
         :defHeight="window.defHeight"
         :isMinimized="window.isMinimized"

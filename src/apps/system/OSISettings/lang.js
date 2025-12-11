@@ -10,6 +10,8 @@ export const LangPack = {
         clear: 'Clear',
         delquest: 'Delete data from ',
         select: 'Select',
+        date: 'Date',
+        collapse: 'Collapse',
     },
     ru: {
         description: 'Описание',
@@ -22,5 +24,7 @@ export const LangPack = {
         clear: 'Очистить',
         delquest: 'Удалить данные из ',
         select: 'Выбрать',
+        date: 'Дата',
+        collapse: 'Свернуть',
     },
 };
