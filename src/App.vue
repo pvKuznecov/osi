@@ -7,7 +7,10 @@
         :windowId="window.id"
         :title="window.title"
         :appName="window.appName"
+        
         :contentApp="window.contentApp"
+        :icon="window.icon"
+
         :defWidth="window.defWidth"
         :defHeight="window.defHeight"
         :isMinimized="window.isMinimized"
@@ -79,13 +82,13 @@ export default {
   },
   
   mounted() {
-    setTimeout(() => {
-      // if (this.osStore) {
-      //   // this.osStore.openWindow('notepad');
-      //   // this.osStore.openWindow({ name: 'notepad', label: 'Блокнот', icon: '📝', contentapp: 'Notepad' });
-      //   this.osStore.openWindow({ name: 'osihelper', label: 'OSI помощник', icon: 'ℹ️', contentapp: 'OSIHelper', defWidth: 600, defHeight: 700 });
-      // }
-    }, 500)
+    // setTimeout(() => {
+    //   // if (this.osStore) {
+    //   //   // this.osStore.openWindow('notepad');
+    //   //   // this.osStore.openWindow({ name: 'notepad', label: 'Блокнот', icon: '📝', contentapp: 'Notepad' });
+    //   //   this.osStore.openWindow({ name: 'osihelper', label: 'OSI помощник', icon: 'ℹ️', contentapp: 'OSIHelper', defWidth: 600, defHeight: 700 });
+    //   // }
+    // }, 500)
   }
 }
 </script>

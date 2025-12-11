@@ -1,0 +1,53 @@
+<div class="osisettings-app">
+    <div class="osisettings-menu">
+        <ul>
+            <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('description'))}"><span class="osisettings-menu-elem" @click="ChngArea('description')">{{ LangData.description }}</span></li>
+            <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('accounts'))}"><span class="osisettings-menu-elem" @click="ChngArea('accounts')">{{ LangData.accounts }}</span></li>
+            <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('design'))}"><span class="osisettings-menu-elem" @click="ChngArea('design')">{{ LangData.design }}</span></li>
+            <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('memmanagment'))}"><span class="osisettings-menu-elem" @click="ChngArea('memmanagment')">{{ LangData.memmanagment }}</span></li>
+        </ul>
+    </div>
+    <div class="osisettings-content">
+        <img src="@/assets/img/logo.png" alt="OSI" class="osilogo">
+        <div v-if="SelectArea === 'description'" class="osisettings-elem-info">
+            <h2>{{LangData.description}}</h2>
+            <ul>
+                <li>{{LangData.name}}: <i>"{{ OSIData.name }}"</i></li>
+                <li>{{LangData.version}}: <i>"{{ OSIData.versionName }}"</i></li>
+                <li>№: <i>{{ OSIData.version }}</i></li>
+                <li>{{ LangData.date }}: <i>{{ OSIData.date }}</i></li>
+            </ul>
+        </div>
+        <div v-if="SelectArea === 'accounts'" class="osisettings-elem-info">
+            <h2>{{LangData.accounts}}</h2>
+        </div>
+        <div v-if="SelectArea === 'design'" class="osisettings-elem-info">
+            <h2>{{LangData.design}}</h2>
+            <ul>
+                <li>
+                    <h3>{{LangData.desktopbgimg}}:</h3>
+                    <button v-if="!showPanel_deskimg" class="osisettings-btn" @click="Chng_showPanel('deskimg')">{{LangData.select}}</button>
+                    <div v-if="showPanel_deskimg">
+                        <button class="osisettings-btn" @click="Chng_showPanel('deskimg')">{{LangData.collapse}}</button>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div v-if="SelectArea === 'memmanagment'" class="osisettings-elem-info">
+            <h2>{{ LangData.memmanagment }}</h2>
+            <ul>
+                <li>
+                    <h3>Local Storage:</h3>
+                    <ul>
+                        <li>osi_windows_state: <button class="osisettings-btn-warning" @click="StoreClear('osi_windows_state')">{{LangData.clear}}</button></li>
+                        <li>osi_app_store: <button class="osisettings-btn-warning" @click="StoreClear('osi_app_store')">{{LangData.clear}}</button></li>
+                    </ul>
+                </li>
+                <li>
+                    <h3>IndexedDB:</h3>
+                </li>
+            </ul>            
+        </div>        
+    </div>
+        
+</div>    

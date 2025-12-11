@@ -1,0 +1,101 @@
+<template src="./template.html"></template>
+<style src="./style.css"></style>
+<script>
+    import { useAppsStore } from '@/stores/apps.store';
+    import { LangPack } from './lang';
+    // import { useOsStore } from '@/stores/os.store';
+    import { mapStores } from 'pinia';
+    import { OSIDATA } from '@/config/os';
+    import { OSICONFIG } from '@/config/config';
+
+    const ComponentName = 'OSISettings';
+
+    export default {
+        name: ComponentName,
+
+        props: {
+            windowId: {
+                type: String,
+                required: true
+            },
+        },
+
+        data() {
+            return {
+                SelectArea: 'description',
+                UserLang: '',
+                LangData: {},
+                showPanel_deskimg: false,
+            }
+        },
+
+        computed: {
+            ...mapStores(useAppsStore),
+
+            OSIData() {
+                return {
+                    ...OSIDATA[this.UserLang],
+                    name: OSIDATA.name,
+                    version: OSIDATA.version,
+                    date: OSIDATA.date
+                };
+            },
+
+            OSIConfig() {
+                return {
+                    ...OSICONFIG,
+                }
+            }
+        },
+
+        mounted() {
+            console.log(`${ComponentName} mounted with windowId:`, this.windowId);
+
+            const userLang = navigator.language || navigator.userLanguage;
+            const userLangS = userLang.split('-')[0];
+            this.UserLang = userLangS; 
+            
+            const LangPackData = LangPack;
+            this.LangData = (userLangS && LangPackData && LangPackData[userLangS]) ? LangPackData[userLangS] : LangPackData.en;
+        },
+        beforeUnmount() {
+
+        },
+
+        methods: {
+            Chk_selectedArea(inpVal) {
+                return (this.SelectArea === inpVal) ? true : false;
+            },
+            // Инициализация из store
+            initFromStore() {
+                if (!this.windowId || !this.appsStore) {
+                    console.error(`${ComponentName}: windowId or appsStore is missing`);
+                    return;
+                }
+            
+                const savedState = this.appsStore.getWindowState(this.windowId);
+                console.log(`${ComponentName} loaded state:`, savedState);
+                
+                this.isInitialized = true;
+                console.log(`${ComponentName} initialized`);
+            },
+
+            StoreClear(key) {
+                let userAnsver = confirm(`${this.LangData.delquest}${key}?`);
+                console.log("userAnsver", userAnsver);
+
+                if (userAnsver) {
+                    localStorage.removeItem(key);
+                }
+            },
+
+            ChngArea(areaVal) {                
+                this.SelectArea = areaVal;
+            },
+
+            Chng_showPanel(key) {
+                this[`showPanel_${key}`] = !this[`showPanel_${key}`];
+            },
+        },
+    }
+</script>

@@ -1,4 +1,38 @@
-<template src="./template.html"></template>
+<template>
+    <div v-if="!isMinimized" class="simple-window" :class="{ 'active': isActive, 'maximized': isMaximized }" :style="windowStyles" @mousedown="activateWindow">
+    <div class="window-header" @mousedown="startDrag" @dblclick="toggleMaximize">
+        <span class="window-title">{{ title }}</span>
+        <div class="window-controls">
+            <button class="window-btn minimize" @click="minimize">_</button>
+            <button class="window-btn maximize" @click="toggleMaximize">{{ isMaximized ? '❐' : '□' }}</button>
+            <button class="window-btn close" @click="close">✕</button>
+        </div>
+    </div>
+    <div class="window-content">
+        <slot>
+            <component v-if="dynamicComponent" :is="dynamicComponent" :window-id="windowId"/>
+            <div v-else class="default-content">
+                <p>Это окно {{ isMaximized ? 'развернуто' : 'не развернуто' }}</p>
+                <p>Размер: {{ windowWidth }} × {{ windowHeight }}</p>
+                <hr>
+                <p>appName:: {{ appName }}</p>                
+                <p>isMinimized:: {{isMinimized}}</p>
+                <p>isMaximized:: {{isMaximized}}</p>
+                <!-- <p>contentApp:: {{ contentApp }}</p> -->
+                <p>componentPath:: {{ componentPath }}</p>
+            </div>    
+        </slot>
+    </div>
+    <div v-if="!isMaximized" class="resize-handle resize-top" @mousedown="startResize('n')"></div>
+    <div v-if="!isMaximized" class="resize-handle resize-right" @mousedown="startResize('e')"></div>
+    <div v-if="!isMaximized" class="resize-handle resize-bottom" @mousedown="startResize('s')"></div>
+    <div v-if="!isMaximized" class="resize-handle resize-left" @mousedown="startResize('w')"></div>
+    <div v-if="!isMaximized" class="resize-handle resize-top-right" @mousedown="startResize('ne')"></div>
+    <div v-if="!isMaximized" class="resize-handle resize-bottom-right" @mousedown="startResize('se')"></div>
+    <div v-if="!isMaximized" class="resize-handle resize-bottom-left" @mousedown="startResize('sw')"></div>
+    <div v-if="!isMaximized" class="resize-handle resize-top-left" @mousedown="startResize('nw')"></div>
+</div>
+</template>
 <style src="./style.css"></style>
 <script>
     import { defineAsyncComponent } from 'vue';
@@ -8,50 +42,24 @@
 
         props: {
             windowId: String,
-            title: {
-                type: String,
-                default: 'Окно'
-            },
-            appName: {
-                type: String,
-                default: 'app'
-            },
-            contentApp: {
-                type: String,
-                default: '--'
-            },
-            isMinimized: {
-                type: Boolean,
-                default: false
-            },
-            isMaximized: {
-                type: Boolean,
-                default: false
-            },
-            isActive: {
-                type: Boolean,
-                default: false
-            },
-            zIndex: {
-                type: Number,
-                default: 100
-            },
-            defWidth: {
-                type: Number,
-                default: 400
-            },
-            defHeight: {
-                type: Number,
-                default: 400
-            }            
+            title: { type: String, default: 'Окно' },
+            appName: { type: String, default: 'app' },
+            // contentApp: { type: String, default: '--' },
+            isMinimized: { type: Boolean, default: false },
+            isMaximized: { type: Boolean, default: false },
+            isActive: { type: Boolean, default: false },
+            zIndex: { type: Number, default: 100 },
+            defWidth: { type: Number, default: 400 },
+            defHeight: { type: Number, default: 400 },
+            icon: {type: String, default: '📄' },
         },
   
         emits: ['close', 'minimize', 'focus', 'toggleMaximize'],
   
         data() {
             return {
-                posX: 100,
-                posY: 100,
+                posX: this.getRandomIntInclusive(),
+                posY: this.getRandomIntInclusive(),
                 windowWidth: this.defWidth,
                 windowHeight: this.defHeight,
                 isDragging: false,
@@ -65,21 +73,21 @@
                     height: 0,
                     mouseX: 0,
                     mouseY: 0
-                }
+                },
             }
         },
   
         computed: {
             dynamicComponent() {
-                // маппинг имен компонентов
+                // маппинг имен компонентов (пока это никак не победить, ПОДУМАТЬ НАД ЭТИМ)
                 const componentMap = {
                     'OSIHelper': () => import('@/apps/system/OSIHelper/OSIHelper.vue'),
                     'OSICalculator': () => import('@/apps/system/OSICalculator/OSICalculator.vue'),
-                    'AppWiki': () => import('@/apps/learn/AppWiki/AppWiki.vue'),
+                    'OSISettings': () => import('@/apps/system/OSISettings/OSISettings.vue'),
                 };
 
-                if (this.contentApp && componentMap[this.contentApp]) {
-                    return defineAsyncComponent(componentMap[this.contentApp]);
+                if (this.appName && componentMap[this.appName]) {
+                    return defineAsyncComponent(componentMap[this.appName]);                    
                 } else {
                     return null;
                 }
@@ -119,6 +127,13 @@
         },
   
         methods: {
+            getRandomIntInclusive() {
+                let min = Math.ceil(90); // Округляем минимум вверх
+                let max = Math.floor(130); // Округляем максимум вниз
+                
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            },
+
             activateWindow() {
                 this.$emit('focus', this.windowId);
             },
@@ -238,11 +253,17 @@
                 this.isResizing = false;
             },
     
-            minimize() { this.$emit('minimize', this.windowId); },
+            minimize() {
+                this.$emit('minimize', this.windowId);
+            },
     
-            toggleMaximize() { this.$emit('toggleMaximize', this.windowId); },
+            toggleMaximize() {
+                this.$emit('toggleMaximize', this.windowId);
+            },
     
-            close() { this.$emit('close', this.windowId); }
+            close() {
+                this.$emit('close', this.windowId);
+            }
         }
     }
 </script>

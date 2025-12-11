@@ -5,7 +5,7 @@
     import { mapStores } from 'pinia';
 
     export default {
-        name: 'CalculatorApp',
+        name: 'OSICalculator',
 
         props: {
             windowId: {

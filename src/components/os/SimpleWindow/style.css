@@ -46,7 +46,11 @@
     width: 24px;
     height: 24px;
     border: 1px solid #aaa;
-    background: #f9f9f9;
+    /* background: linear-gradient(#B392F0, #B392F0, #9176c2); */
+    /* background: linear-gradient(to bottom, rgb(103, 55, 235), rgb(80, 33, 209)); */
+    background: linear-gradient(to bottom, rgba(179, 146, 240, 0.5), rgb(185, 148, 255), rgba(179, 146, 240, 0.7));
+    color: white;
+    text-shadow: 1px 1px 2px black;
     border-radius: 3px;
     cursor: pointer;  
     align-items: center;
@@ -54,7 +58,7 @@
     font-size: 12px;
     transition: all 0.2s; }
 
-.window-btn:hover { background: #e9e9e9; }
+.window-btn:hover { background: white; }
 
 .window-btn.maximize:hover { background: #e0e0e0; }
 
