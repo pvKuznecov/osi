@@ -31,7 +31,9 @@
 import DesktopArea from './components/os/DesktopArea/DesktopArea.vue'
 import TaskBar from './components/os/TaskBar/TaskBar.vue'
 import SimpleWindow from './components/os/SimpleWindow/SimpleWindow.vue'
-import { useOsStore } from './stores/os.store'
+
+import { useOSIAppsStore } from './stores/os.apps.store'
+// import { useOsStore } from './stores/os.store'
 // import { useAppsStore } from './stores/apps.store'
 
 export default {
@@ -49,7 +51,7 @@ export default {
       // useAppsStore: null
     }
   },
-  
+
   methods: {
     closeWindow(windowId) {
       if (this.osStore) {
@@ -76,8 +78,35 @@ export default {
     }
   },
   
+  // methods: {
+  //   closeWindow(windowId) {
+  //     if (this.osStore) {
+  //       this.osStore.closeWindow(windowId)
+  //     }
+  //   },
+    
+  //   minimizeWindow(windowId) {
+  //     if (this.osStore) {
+  //       this.osStore.minimizeWindow(windowId)
+  //     }
+  //   },
+    
+  //   toggleMaximizeWindow(windowId) {
+  //     if (this.osStore) {
+  //       this.osStore.toggleMaximizeWindow(windowId)
+  //     }
+  //   },
+    
+  //   activateWindow(windowId) {
+  //     if (this.osStore) {
+  //       this.osStore.activateWindow(windowId)
+  //     }
+  //   }
+  // },
+  
   created() {
-    this.osStore = useOsStore();
+    this.osStore = useOSIAppsStore();
+    // this.osStore = useOsStore();
     // this.useAppsStore = useAppsStore();
   },
   

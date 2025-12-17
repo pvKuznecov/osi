@@ -102,3 +102,17 @@ h2 {
     padding: 2px;
     border-radius: 5px;
     color: rgb(179, 146, 240); }
+
+.osisettings-elem-info-tab {
+    width: 96%;
+    margin-right: auto;
+    margin-left: auto;
+    border-radius: 5px; }
+
+.osisettings-elem-info-tab td {
+    padding: 3px 5px;
+    border: 1px solid lightgray; }
+
+.tab-header {
+    background-color: lightgray;
+    text-align: center; }
