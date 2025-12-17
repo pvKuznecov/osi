@@ -102,3 +102,7 @@
     padding: 4px 8px;
     background: rgba(0, 0, 0, 0.3);
     border-radius: 4px; }
+
+.task-bar-menu-elem span {
+    cursor: pointer;
+}

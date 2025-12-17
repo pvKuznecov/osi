@@ -4,7 +4,9 @@
         <span class="start-icon">🌀</span>
         <span class="start-text"> Меню</span>
     </div>
-    <div class="task-bar-menu-elem" v-for="app in appsList">{{app.icon}} {{app.label}}</div>
+    <div class="task-bar-menu-elem" v-for="app in appsList">
+        <span @click="launchApp(app)">{{app.icon}} {{app.label}}</span>
+    </div>
 </div>
 <div class="task-bar">
     <!-- Кнопка Menu -->

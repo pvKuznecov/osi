@@ -1,7 +1,7 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
-    import { useAppsStore } from '@/stores/apps.store';
+    import { useOSIAppsStore } from '@/stores/os.apps.store';
     import { mapStores } from 'pinia';
 
     export default {
@@ -26,7 +26,7 @@
         },
   
         computed: {
-            ...mapStores(useAppsStore),
+            ...mapStores(useOSIAppsStore),
 
             reversedHistory() {
                 return [...this.history].reverse().slice(0, 5);

@@ -1,9 +1,8 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
-    import { useAppsStore } from '@/stores/apps.store';
+    import { useOSIAppsStore } from '@/stores/os.apps.store';
     import { LangPack } from './lang';
-    // import { useOsStore } from '@/stores/os.store';
     import { mapStores } from 'pinia';
     import { OSIDATA } from '@/config/os';
     import { OSICONFIG } from '@/config/config';
@@ -30,7 +29,7 @@
         },
 
         computed: {
-            ...mapStores(useAppsStore),
+            ...mapStores(useOSIAppsStore),
 
             OSIData() {
                 return {
@@ -45,6 +44,18 @@
                 return {
                     ...OSICONFIG,
                 }
+            },
+
+            osStore() {
+                // return useOsStore();
+                return useOSIAppsStore();
+            },
+
+            storeStatistic() {
+                let result = this.osStore.getLocalStorageUsage();
+                console.log("navigator", navigator);
+
+                return result;
             }
         },
 
@@ -63,6 +74,16 @@
         },
 
         methods: {
+            GetBrowserData() {
+                return this.osStore.detectBrowser();
+            },
+            // GetStoreStatistic() {
+            //     let result = this.osStore.getLocalStorageUsage();
+            //     console.log("navigator", navigator);
+
+            //     return result;
+            // },
+
             Chk_selectedArea(inpVal) {
                 return (this.SelectArea === inpVal) ? true : false;
             },
@@ -81,6 +102,7 @@
             },
 
             StoreClear(key) {
+                console.log("StoreClear(key)", key);
                 let userAnsver = confirm(`${this.LangData.delquest}${key}?`);
                 console.log("userAnsver", userAnsver);
 
