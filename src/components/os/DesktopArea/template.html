@@ -1,5 +1,4 @@
 <div class="desktop-area" @click="activateDesktop" :style="desktopStyle">
-    <!-- Иконки на рабочем столе -->
     <div class="desktop-icons">
         <div v-for="app in apps" :key="app.name" class="desktop-icon" @dblclick="launchApp(app)">
         <!-- <div v-for="app in apps" :key="app.name" class="desktop-icon" @dblclick="launchApp(app.name, app.contentapp)"> -->
@@ -7,6 +6,6 @@
             <span class="label">{{ app.label }}</span>
         </div>
     </div>    
-    <!-- Слот для окон -->
+    <!-- Slot from windows -->
     <slot></slot>
   </div>

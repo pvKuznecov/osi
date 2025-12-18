@@ -1,8 +1,8 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
-    import { useOSIAppsStore } from '@/stores/os.apps.store';
-    // import { useOsStore } from '@/stores/os.store';
+    // import { useOSIAppsStore } from '@/stores/os.apps.store';
+    import { useOsStore } from '@/stores/os.store';
     import { appsConfig } from '@/config/applications';
 
     export default {
@@ -18,8 +18,8 @@
   
         computed: {
             osStore() {
-                // return useOsStore();
-                return useOSIAppsStore();
+                return useOsStore();
+                // return useOSIAppsStore();
             },
 
             appsList() {

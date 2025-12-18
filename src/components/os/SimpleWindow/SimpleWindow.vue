@@ -1,38 +1,4 @@
-<template>
-    <div v-if="!isMinimized" class="simple-window" :class="{ 'active': isActive, 'maximized': isMaximized }" :style="windowStyles" @mousedown="activateWindow">
-    <div class="window-header" @mousedown="startDrag" @dblclick="toggleMaximize">
-        <span class="window-title">{{ title }}</span>
-        <div class="window-controls">
-            <button class="window-btn minimize" @click="minimize">_</button>
-            <button class="window-btn maximize" @click="toggleMaximize">{{ isMaximized ? '❐' : '□' }}</button>
-            <button class="window-btn close" @click="close">✕</button>
-        </div>
-    </div>
-    <div class="window-content">
-        <slot>
-            <component v-if="dynamicComponent" :is="dynamicComponent" :window-id="windowId"/>
-            <div v-else class="default-content">
-                <p>Это окно {{ isMaximized ? 'развернуто' : 'не развернуто' }}</p>
-                <p>Размер: {{ windowWidth }} × {{ windowHeight }}</p>
-                <hr>
-                <p>appName:: {{ appName }}</p>                
-                <p>isMinimized:: {{isMinimized}}</p>
-                <p>isMaximized:: {{isMaximized}}</p>
-                <!-- <p>contentApp:: {{ contentApp }}</p> -->
-                <p>componentPath:: {{ componentPath }}</p>
-            </div>    
-        </slot>
-    </div>
-    <div v-if="!isMaximized" class="resize-handle resize-top" @mousedown="startResize('n')"></div>
-    <div v-if="!isMaximized" class="resize-handle resize-right" @mousedown="startResize('e')"></div>
-    <div v-if="!isMaximized" class="resize-handle resize-bottom" @mousedown="startResize('s')"></div>
-    <div v-if="!isMaximized" class="resize-handle resize-left" @mousedown="startResize('w')"></div>
-    <div v-if="!isMaximized" class="resize-handle resize-top-right" @mousedown="startResize('ne')"></div>
-    <div v-if="!isMaximized" class="resize-handle resize-bottom-right" @mousedown="startResize('se')"></div>
-    <div v-if="!isMaximized" class="resize-handle resize-bottom-left" @mousedown="startResize('sw')"></div>
-    <div v-if="!isMaximized" class="resize-handle resize-top-left" @mousedown="startResize('nw')"></div>
-</div>
-</template>
+<template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
     import { defineAsyncComponent } from 'vue';
@@ -44,7 +10,6 @@
             windowId: String,
             title: { type: String, default: 'Окно' },
             appName: { type: String, default: 'app' },
-            // contentApp: { type: String, default: '--' },
             isMinimized: { type: Boolean, default: false },
             isMaximized: { type: Boolean, default: false },
             isActive: { type: Boolean, default: false },

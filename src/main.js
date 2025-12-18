@@ -19,13 +19,11 @@ const pinia = createPinia()
 
 app.use(pinia)
 
-const { useOSIAppsStore } = require('./stores/os.apps.store');
-const appsStore = useOSIAppsStore();
 // Принудительно загружаем все состояния перед монтированием
-// const { useAppsStore } = require('./stores/apps.store');
-// const appsStore = useAppsStore();
+const { useAppsStore } = require('./stores/apps.store');
+const appsStore = useAppsStore();
 
-// appsStore.getStats();
+// appsStore.getStats()
 console.log('App starting, loaded states:', appsStore.getStats());
 
 app.mount('#app')

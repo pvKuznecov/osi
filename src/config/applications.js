@@ -8,7 +8,7 @@ const applications = [
         description: 'Настройки системы OSI.',   // Описание приложения
 
         defWidth: 800,
-        defHeight: 400,
+        defHeight: 450,
         isMaximized: false,  // По умолчанию НЕ открывается развернутым
         resizable: true,
 

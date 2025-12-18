@@ -1,7 +1,8 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
-    import { useOSIAppsStore } from '@/stores/os.apps.store';
+    import { useAppsStore } from '@/stores/apps.store';
+    import { LangPack } from './lang';
     import { mapStores } from 'pinia';
 
     export default {
@@ -21,12 +22,13 @@
                 result: '0',
                 history: [],
                 lastResult: null,
+                LangData: {},
                 isInitialized: false // Флаг инициализации
             }
         },
   
         computed: {
-            ...mapStores(useOSIAppsStore),
+            ...mapStores(useAppsStore),
 
             reversedHistory() {
                 return [...this.history].reverse().slice(0, 5);
@@ -267,6 +269,13 @@
                 this.initFromStore();
             });
             
+            const userLang = navigator.language || navigator.userLanguage;
+            const userLangS = userLang.split('-')[0];
+            this.UserLang = userLangS; 
+            
+            const LangPackData = LangPack;
+            this.LangData = (userLangS && LangPackData && LangPackData[userLangS]) ? LangPackData[userLangS] : LangPackData.en;
+
             // Сохраняем начальное состояние после небольшой задержки
             setTimeout(() => {
                 if (!this.isInitialized) {
@@ -279,10 +288,10 @@
         beforeUnmount() {
             window.removeEventListener('keydown', this.handleKeyPress);
             
-            // Сохраняем состояние перед размонтированием
-            if (this.isInitialized) {
-                this.saveState();
-            }
+            // // Сохраняем состояние перед размонтированием
+            // if (this.isInitialized) {
+            //     this.saveState();
+            // }
         }
     }
 </script>
