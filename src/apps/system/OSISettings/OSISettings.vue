@@ -1,9 +1,10 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
-    import { useOSIAppsStore } from '@/stores/os.apps.store';
+    import { JSHelpers } from '@/core/helpers';
+    // import { useOSIAppsStore } from '@/stores/os.apps.store';
     import { LangPack } from './lang';
-    import { mapStores } from 'pinia';
+    // import { mapStores } from 'pinia';
     import { OSIDATA } from '@/config/os';
     import { OSICONFIG } from '@/config/config';
 
@@ -29,7 +30,7 @@
         },
 
         computed: {
-            ...mapStores(useOSIAppsStore),
+            // ...mapStores(useOSIAppsStore),
 
             OSIData() {
                 return {
@@ -46,13 +47,14 @@
                 }
             },
 
-            osStore() {
-                // return useOsStore();
-                return useOSIAppsStore();
-            },
+            // osStore() {
+            //     // return useOsStore();
+            //     return useOSIAppsStore();
+            // },
 
             storeStatistic() {
-                let result = this.osStore.getLocalStorageUsage();
+                // let result = this.osStore.getLocalStorageUsage();
+                let result = JSHelpers.browser.getLocalStorageUsage();
                 console.log("navigator", navigator);
 
                 return result;
@@ -75,14 +77,8 @@
 
         methods: {
             GetBrowserData() {
-                return this.osStore.detectBrowser();
+                return JSHelpers.browser.detectBrowser();
             },
-            // GetStoreStatistic() {
-            //     let result = this.osStore.getLocalStorageUsage();
-            //     console.log("navigator", navigator);
-
-            //     return result;
-            // },
 
             Chk_selectedArea(inpVal) {
                 return (this.SelectArea === inpVal) ? true : false;
@@ -104,7 +100,7 @@
             StoreClear(key) {
                 console.log("StoreClear(key)", key);
                 let userAnsver = confirm(`${this.LangData.delquest}${key}?`);
-                console.log("userAnsver", userAnsver);
+                // console.log("userAnsver", userAnsver);
 
                 if (userAnsver) {
                     localStorage.removeItem(key);

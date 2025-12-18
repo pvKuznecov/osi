@@ -1,4 +1,4 @@
-<div v-if="!isMinimized" class="simple-window" :class="{ 'active': isActive, 'maximized': isMaximized }" :style="windowStyles" @mousedown="activateWindow">
+    <div v-if="!isMinimized" class="simple-window" :class="{ 'active': isActive, 'maximized': isMaximized }" :style="windowStyles" @mousedown="activateWindow">
     <div class="window-header" @mousedown="startDrag" @dblclick="toggleMaximize">
         <span class="window-title">{{ title }}</span>
         <div class="window-controls">
@@ -17,7 +17,6 @@
                 <p>appName:: {{ appName }}</p>                
                 <p>isMinimized:: {{isMinimized}}</p>
                 <p>isMaximized:: {{isMaximized}}</p>
-                <p>contentApp:: {{ contentApp }}</p>
                 <p>componentPath:: {{ componentPath }}</p>
             </div>    
         </slot>

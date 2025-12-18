@@ -12,7 +12,7 @@
 .osisettings-menu {
     display: block;
     width: 200px;
-    height: calc(100% - 20px);
+    /* height: calc(100% - 20px); */
     background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85));
     margin-left: 10px;
     border-radius: 5px;

@@ -1,8 +1,7 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
-    import { useOSIAppsStore } from '@/stores/os.apps.store';
-    // import { useOsStore } from '@/stores/os.store';
+    import { useOsStore } from '@/stores/os.store';
     import { appsConfig } from '@/config/applications'
 
     export default {
@@ -10,28 +9,15 @@
   
         data() {
             return {
-                apps: [
-                    // { name: 'osihelper', label: 'OSI помощник', icon: 'ℹ️', contentapp: 'OSIHelper', defWidth: 600, defHeight: 700 },
-                    // { name: 'calculator', label: 'Калькулятор', icon: '🧮', contentapp: 'OSICalculator', defWidth: 400, defHeight: 670 },
-                    // { name: 'osisettings', label: 'Настройки', icon: '⚙️', contentapp: 'OSISettings', defWidth: 800, defHeight: 400 },
-
-                    // { name: 'wiki', label: 'Wikipedia', icon: 'W', contentapp: 'AppWiki', isMaximized: true },
-                    // { name: 'notepad', label: 'Блокнот', icon: '📝', contentapp: 'Notepad' },
-                    // { name: 'explorer', label: 'Проводник', icon: '📁', contentapp: 'Explorer' },
-                    // { name: 'settings', label: 'Настройки', icon: '⚙️', contentapp: 'Settings' },
-                ]
+                apps: []
             }
         },
   
         computed: {
-            // desktopStyle() {
-            //     return {
-            //         backgroundColor: '#0078d4',
-            //         backgroundImage: 'linear-gradient(135deg, #0078d4 0%, #106ebe 100%)'
-            //     };
-            // },
             desktopStyle() {
                 return {
+                    // backgroundColor: '#0078d4',
+                    // backgroundImage: 'linear-gradient(135deg, #0078d4 0%, #106ebe 100%)'
                     backgroundImage: `url(${this.getWallpaperUrl()})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
@@ -40,8 +26,7 @@
             },
     
             osStore() {
-                // return useOsStore();
-                return useOSIAppsStore();
+                return useOsStore();
             }
         },
   
