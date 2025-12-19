@@ -16,6 +16,7 @@
                 :isActive="osStore.activeWindowId === window.id"
                 :isMaximized="window.isMaximized"
                 :zIndex="window.zIndex"
+                :resizable="window.resizable"
                 
                 @close="closeWindow"
                 @minimize="minimizeWindow"

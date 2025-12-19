@@ -13,6 +13,7 @@
             isMinimized: { type: Boolean, default: false },
             isMaximized: { type: Boolean, default: false },
             isActive: { type: Boolean, default: false },
+            resizable: { type: Boolean, default: true },
             zIndex: { type: Number, default: 100 },
             defWidth: { type: Number, default: 400 },
             defHeight: { type: Number, default: 400 },
@@ -49,6 +50,7 @@
                     'OSIHelper': () => import('@/apps/system/OSIHelper/OSIHelper.vue'),
                     'OSICalculator': () => import('@/apps/system/OSICalculator/OSICalculator.vue'),
                     'OSISettings': () => import('@/apps/system/OSISettings/OSISettings.vue'),
+                    'OSIMPlayer': () => import('@/apps/system/OSIMPlayer/OSIMPlayer.vue')
                 };
 
                 if (this.appName && componentMap[this.appName]) {

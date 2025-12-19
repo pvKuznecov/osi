@@ -1,0 +1,32 @@
+export const LangPack = {
+    en: {
+        appname: 'MPlayer',
+        add: 'Add',
+        totaltracks: 'Total tracks',
+        duration: 'Duration',
+        prevtrack: 'Previous track',
+        stopplayback: 'Stop playback',
+        pause: 'Pause',
+        play: 'Play',
+        nexttrack: 'Next track',
+        artist: 'Artist',
+        album: 'Album',
+        genre: 'Genre',
+        name: 'Name',
+    },
+    ru: {
+        appname: 'MPlayer',
+        add: 'Добавить',
+        totaltracks: 'Треков всего',
+        duration: 'Продолжительность',
+        prevtrack: 'Предыдущий трек',
+        stopplayback: 'Остановить воспроизведение',
+        pause: 'Пауза',
+        play: 'Воспроизвести',
+        nexttrack: 'Следующий трек',
+        artist: 'Исполнитель',
+        album: 'Альбом',
+        genre: 'Жанр',
+        name: 'Название'
+    },
+};

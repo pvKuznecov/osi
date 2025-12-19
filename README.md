@@ -1,6 +1,31 @@
 # osi
 
-
+<h3>Предварительная настройка проекта:</h3>
+<ul>
+    <li>
+        <h4>Установка Pinia</h4>
+        <code>npm install pinia</code>
+        <br>
+        Базовая настройка в main.js/ts:<br>
+        <code>
+        import { createApp } from 'vue'<br>
+        import { createPinia } from 'pinia'<br>
+        import App from './App.vue';<br>
+        const pinia = createPinia();<br>
+        const app = createApp(App);<br>   
+        app.use(pinia);<br>
+        app.mount('#app');<br>
+        </code>
+    </li>
+    <li>
+        <h4>Установка BootstrapVue (для Vue 3)</h4>
+        Для Vue 3 используем BootstrapVue Next:<br>
+        <code>
+            npm install bootstrap bootstrap-vue-3<br>
+            npm install bootstrap-icons
+        </code>
+    </li>
+</ul>
 <h3>Полезно:</h3>
 <ul>
     <li>Убить процессы на порту:<br><code>npx kill-port *порт*</code></li>
