@@ -1,0 +1,77 @@
+<div class="mplayer-app">
+    <div class="mplayer-mpanel">
+        <div class="mplayer-buttons-tpanel" style="text-align: right;">
+            <div class="mplayer-buttons-panel-elem">О треке</div>
+        </div>
+        <div class="mplayer-coverspace d-flex justify-content-center align-items-center">
+            <div v-if="TargetTrack" class="mplayer-cover"></div>
+            <div v-else class="mplayer-cover d-flex justify-content-center align-items-center">
+                <div style="font-size: 50px; text-shadow: 1px 1px 2px black;">🎶</div>
+            </div>
+        </div>
+        <div class="mplayer-tracknamespace">
+            - - -
+        </div>
+        <div class="mplayer-buttons-bpanel d-flex justify-content-center align-items-center">
+            <button class="btn btn-outline-secondary me-3" title="Предыдущий трек">
+                <i class="bi bi-skip-start-fill fs-6"></i>
+            </button>
+            <button class="btn btn-outline-secondary me-3" title="Остановить воспроизведение">
+                <i class="bi bi-stop-fill fs-6"></i>
+            </button>
+            <button class="btn btn-primary btn-lg rounded-circle me-3" :class="{ 'btn-success': isPlaying }" style="width: 50px; height: 50px;" :title="isPlaying ? LangData.pause : LangData.play">
+                <i class="fs-6" :class="isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill'"></i>
+            </button>            
+            <button class="btn btn-outline-secondary" :title="LangData.nexttrack">
+                <i class="bi bi-skip-end-fill fs-6"></i>
+            </button>            
+        </div>
+    </div>
+    <div class="mplayer-ppanel">
+        <div v-if="PlayLists.length > 0" class="mplayer-buttons-tpanel d-flex justify-content-center align-items-center"></div>
+        <div v-else class="mplayer-buttons-tpanel d-flex justify-content-center align-items-center">
+            <div class="mplayer-buttons-panel-elem">+ {{LangData.add}}</div>
+        </div>
+        <div class="mplayer-playlist d-flex">
+            <table class="mplayer-playlist-tab table table-responsive">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th v-if="ShowConfig.playlist.artist">{{LangData.artist}}</th>
+                        <th v-if="ShowConfig.playlist.album">{{LangData.album}}</th>
+                        <th>{{LangData.name}}</th>
+                        <th v-if="ShowConfig.playlist.duration">{{LangData.duration}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>[№]</td>
+                        <td v-if="ShowConfig.playlist.artist">[{{LangData.artist}}]</td>
+                        <td v-if="ShowConfig.playlist.album">{{LangData.album}}</td>
+                        <td>{{LangData.name}}</td>
+                        <td v-if="ShowConfig.playlist.duration">{{LangData.duration}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="mplayer-buttons-bpanel" style="text-align: right;">
+            <span class="mplayer-buttons-panel-ielem">{{LangData.totaltracks}}: {{PlayLists.length}}</span>
+            <span class="mplayer-buttons-panel-ielem">{{LangData.duration}}: {{durationAll}}</span>
+        </div>
+    </div>
+</div>
+
+
+<!-- Диски
+<i class="bi bi-vinyl"></i>
+<i class="bi bi-vinyl-fill"></i>
+<i class="bi bi-disc"></i>
+<i class="bi bi-disc-fill"></i>
+<i class="bi bi-record-circle"></i>
+<i class="bi bi-record-circle-fill"></i>
+
+<br>
+Проигрыватели
+<i class="bi bi-boombox"></i>
+<i class="bi bi-cassette"></i>
+<i class="bi bi-cassette-fill"></i> -->

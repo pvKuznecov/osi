@@ -13,7 +13,6 @@ const applications = [
         resizable: true,
 
         componentPath: '@/apps/system/OSISettings/OSISettings.vue', // Путь к компоненту Vue
-        // componentImport: () => import('@/apps/system/OSISettings/OSISettings.vue'),
         
         showOnDesktop: true,    // Отображать на рабочем столе
         showInStartMenu: true,  // Отображать в меню "Пуск"
@@ -33,7 +32,6 @@ const applications = [
         resizable: true,
 
         componentPath: '@/apps/system/OSIHelper/OSIHelper.vue', // Путь к компоненту Vue
-        // componentImport: () => import('@/apps/system/OSIHelper/OSIHelper.vue'),
         
         showOnDesktop: true,    // Отображать на рабочем столе
         showInStartMenu: true,  // Отображать в меню "Пуск"
@@ -53,13 +51,31 @@ const applications = [
         resizable: false,
         
         componentPath: '@/apps/system/OSICalculator/OSICalculator.vue', // Путь к компоненту Vue
-        // componentImport: () => import('@/apps/system/OSICalculator/OSICalculator.vue'),
         
         showOnDesktop: true,    // Отображать на рабочем столе
         showInStartMenu: true,  // Отображать в меню "Пуск"
 
         category: 'utilities',  // Категория для группировки (опционально)
     },
+    {
+        id: 'osimplayer',
+        name: 'OSIMPlayer',
+        label: 'MPlayer',
+        icon: '🎶',
+        description: 'Простейший музыкальный плеер.',   // Описание приложения
+
+        defWidth: 800,
+        defHeight: 400,
+        isMaximized: false,  // По умолчанию НЕ открывается развернутым
+        resizable: false,
+
+        componentPath: '@/apps/system/OSIMPlayer/OSIMPlayer.vue', // Путь к компоненту Vue
+        
+        showOnDesktop: true,    // Отображать на рабочем столе
+        showInStartMenu: true,  // Отображать в меню "Пуск"
+        
+        category: 'utilities',  // Категория для группировки (опционально)
+    }
 ];
 
 // const enrichedApplications = applications;
