@@ -48,24 +48,31 @@
     margin-right: auto;
     background-color: rgba(255, 255, 255, 0.2);
     color: white;
-    font-size: small; }
+    font-size: small;
+    overflow: hidden;
+    overflow-y: auto; }
 
 .table-responsive {
     margin-bottom: 0;
 }
-/* .table { width: 99%;} */
+/* .table { height: 300px !important; } */
 .mplayer-playlist-tab .table {
     display: block;
     /* width: 98%;
     height: 98%; */
+    height: 300px;
     overflow: hidden;
     overflow-y: auto;
     border-radius: 5px; }
 
+.mplayer-playlist-tab thead {
+    position: sticky;
+    top: 0; }
+
 .mplayer-coverspace {
     display: block;
     width: calc(100% - 10px);
-    min-height: 200px;
+    min-height: 180px;
     border-radius: 5px;
     background-color: rgba(255, 255, 255, 0.2);
     margin-left: 10px; }
@@ -73,8 +80,9 @@
 .mplayer-tracknamespace {
     display: block;
     width: calc(100% - 10px);
-    min-height: 50px;
-    margin-top: 10px;
+    height: 30px;
+    margin-top: 5px;
+    margin-left: 10px;
     color: white;
     font-size: small;
     text-align: center; }
@@ -82,19 +90,40 @@
 .mplayer-cover {
     display: block;
     width: 190px;
-    height: 190px;
+    height: 170px;
     background-color: white;
     border-radius: 5px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
-/* =-=-=-=-=-=-=- */
-.btn {
-  transition: all 0.3s ease;
-}
+.mplayer-tracktimeline {
+    display: block;
+    width: calc(100% - 10px);
+    margin-left: 10px;
+    margin-bottom: 5px; }
 
-/* @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-} */
+.mplayer-trackrangetime {
+    width: 98%;
+    margin-left: auto;
+    margin-right: auto; }
+
+.cust-file-upload {
+    display: inline-block;
+    float: right;
+    cursor: pointer; }
+
+.cust-file-upload:hover {
+    color: rgb(125, 199, 255);
+    text-shadow: 1px 1px 1px rgb(60, 151, 221); }
+
+.cust-file-upload input[type="file"] { display: none; }
+
+.btn {
+    transition: all 0.3s ease;
+    padding: 1px 10px; }
+
+.isactivetrack td { background-color: rgb(219, 255, 146); }
+
+.ispushbtn {
+    color: rgb(60, 151, 221);
+}

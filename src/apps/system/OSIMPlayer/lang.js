@@ -13,6 +13,8 @@ export const LangPack = {
         album: 'Album',
         genre: 'Genre',
         name: 'Name',
+        min: 'Min.',
+        chooseanother: 'Choose another',
     },
     ru: {
         appname: 'MPlayer',
@@ -27,6 +29,8 @@ export const LangPack = {
         artist: 'Исполнитель',
         album: 'Альбом',
         genre: 'Жанр',
-        name: 'Название'
+        name: 'Название',
+        min: 'Mин.',
+        chooseanother: 'Выбрать другое',
     },
 };
