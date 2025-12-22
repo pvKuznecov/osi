@@ -9,28 +9,69 @@
                 <div style="font-size: 50px; text-shadow: 1px 1px 2px black;">🎶</div>
             </div>
         </div>
-        <div class="mplayer-tracknamespace">
-            - - -
+        <div class="mplayer-tracknamespace d-flex justify-content-center align-items-center">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <i v-if="currentTrack">{{currentTrack.common.artist + ' - ' + currentTrack.common.title}}</i>
+                            <i v-else>- - -</i>
+                        </td>                        
+                    </tr>
+                    <tr>
+                        <td>
+                            <i>{{(TrackTime && TrackTime.current !== 0) ? ShowerTime(TrackTime.current) : '00:00'}}</i> / <i>{{(TrackTime && TrackTime.duration !== 0) ? ShowerTime(TrackTime.duration) : '00:00'}}</i>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="mplayer-tracktimeline">
+            <audio id="main_audio" controls :src="(currentTrack) ? currentTrack.common.url : ''" style="display: none;" :volume="VolumeLvl" @timeupdate="onTimeUpdate" />
+            <input id="main_tracktime" type="range" class="mplayer-trackrangetime" min="0" :max="TrackTime.duration" value="0" @change="Chng_TrackRangeTime()">
         </div>
         <div class="mplayer-buttons-bpanel d-flex justify-content-center align-items-center">
-            <button class="btn btn-outline-secondary me-3" title="Предыдущий трек">
-                <i class="bi bi-skip-start-fill fs-6"></i>
+            <button class="btn btn-outline-secondary rounded-circle me-2" title="Предыдущий трек">
+                <i class="bi bi-skip-start-fill fs-3"></i>
             </button>
-            <button class="btn btn-outline-secondary me-3" title="Остановить воспроизведение">
-                <i class="bi bi-stop-fill fs-6"></i>
+            <button class="btn btn-outline-secondary rounded-circle me-2" title="Остановить воспроизведение">
+                <i class="bi bi-stop-fill fs-3"></i>
             </button>
-            <button class="btn btn-primary btn-lg rounded-circle me-3" :class="{ 'btn-success': isPlaying }" style="width: 50px; height: 50px;" :title="isPlaying ? LangData.pause : LangData.play">
-                <i class="fs-6" :class="isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill'"></i>
-            </button>            
-            <button class="btn btn-outline-secondary" :title="LangData.nexttrack">
-                <i class="bi bi-skip-end-fill fs-6"></i>
-            </button>            
+            
+            <button v-if="isPlaying" class="btn btn-primary btn-lg rounded-circle me-2" style="width: 45px; height: 45px;" :title="LangData.pause" @click="PlayerAction_Pause()">
+                <i class="fs-3 bi bi-pause-fill"></i>
+            </button>
+            <button v-else class="btn btn-primary btn-lg rounded-circle me-2" style="width: 45px; height: 45px;" :title="LangData.play" @click="PlayerAction_Play()">
+                <i class="fs-3 bi bi-play-fill"></i>
+            </button>
+
+            <button class="btn btn-outline-secondary rounded-circle" :title="LangData.nexttrack">
+                <i class="bi bi-skip-end-fill fs-3"></i>
+            </button>
+        </div>
+        <div class="mplayer-buttons-tpanel d-flex justify-content-center align-items-center mt-2">
+            <button class="btn btn-outline-secondary me-1" @click="Chng_SilentMode()">
+                <i class="bi bi-volume-mute fs-6" :class="(SilentMode) ? 'ispushbtn' : ''"></i>
+            </button>
+            <button class="btn btn-outline-secondary me-1" @click="VolumeMinus()">
+                <i class="bi bi-volume-down fs-6"></i>
+            </button>
+            <i class="me-2">V: {{(VolumeLvl > 0) ? (VolumeLvl * 100) : '00'}}%</i>
+            <button class="btn btn-outline-secondary me-1" @click="VolimePlus()">
+                <i class="bi bi-volume-up fs-6"></i>
+            </button>
+            <button class="btn btn-outline-secondary me-1">
+                <i class="bi bi-shuffle fs-6"></i>
+            </button>
         </div>
     </div>
     <div class="mplayer-ppanel">
-        <div v-if="PlayLists.length > 0" class="mplayer-buttons-tpanel d-flex justify-content-center align-items-center"></div>
-        <div v-else class="mplayer-buttons-tpanel d-flex justify-content-center align-items-center">
-            <div class="mplayer-buttons-panel-elem">+ {{LangData.add}}</div>
+        <div class="mplayer-buttons-tpanel d-flex justify-content-center align-items-center">
+            <label for="input_music_file" class="cust-file-upload">
+                <i v-if="PlayList && PlayList.length > 0">+ {{LangData.chooseanother}}</i>
+                <i v-else>+ {{LangData.add}}</i>
+                <input type="file" id="input_music_file" webkitdirectory directory multiple @change="handleFileSelect">
+            </label>
         </div>
         <div class="mplayer-playlist d-flex">
             <table class="mplayer-playlist-tab table table-responsive">
@@ -40,23 +81,23 @@
                         <th v-if="ShowConfig.playlist.artist">{{LangData.artist}}</th>
                         <th v-if="ShowConfig.playlist.album">{{LangData.album}}</th>
                         <th>{{LangData.name}}</th>
-                        <th v-if="ShowConfig.playlist.duration">{{LangData.duration}}</th>
+                        <th v-if="ShowConfig.playlist.duration">{{LangData.min}}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>[№]</td>
-                        <td v-if="ShowConfig.playlist.artist">[{{LangData.artist}}]</td>
-                        <td v-if="ShowConfig.playlist.album">{{LangData.album}}</td>
-                        <td>{{LangData.name}}</td>
-                        <td v-if="ShowConfig.playlist.duration">{{LangData.duration}}</td>
+                    <tr v-for="(track, index) in PlayList" :key="track.id" :class="{isactivetrack: currentTrack && currentTrack.common.id === track.common.id}">
+                        <td>{{++index}}</td>
+                        <td v-if="ShowConfig.playlist.artist">{{track.common.artist ? track.common.artist : '--'}}</td>
+                        <td v-if="ShowConfig.playlist.album">{{track.common.album ? track.common.album : '--'}}</td>
+                        <td>{{track.common.title ? track.common.title : 'unknown'}}</td>
+                        <td v-if="ShowConfig.playlist.duration">{{ track.common.duration ? formatDuration(track.common.duration) : '--:--' }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
         <div class="mplayer-buttons-bpanel" style="text-align: right;">
-            <span class="mplayer-buttons-panel-ielem">{{LangData.totaltracks}}: {{PlayLists.length}}</span>
-            <span class="mplayer-buttons-panel-ielem">{{LangData.duration}}: {{durationAll}}</span>
+            <span class="mplayer-buttons-panel-ielem">{{LangData.totaltracks}}: {{PlayList.length}}</span>
+            <span class="mplayer-buttons-panel-ielem">{{LangData.duration}}: {{(durationAll && durationAll > 0) ? formatDuration(durationAll) : '--:--'}}</span>
         </div>
     </div>
 </div>

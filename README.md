@@ -25,6 +25,11 @@
             npm install bootstrap-icons
         </code>
     </li>
+    <li>
+        <h4>Установка пакета music-metadata</h4>
+        <i>(Нужен для компонента OSIMPlayer)</i><br>
+        <code>npm install music-metadata</code>
+    </li>
 </ul>
 <h3>Полезно:</h3>
 <ul>
