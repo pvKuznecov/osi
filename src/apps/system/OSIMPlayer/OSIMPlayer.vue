@@ -4,6 +4,7 @@
     // import { resolve } from 'core-js/fn/promise';
     import { LangPack } from './lang';
     import { parseBlob } from 'music-metadata';
+    import debounce from 'lodash/debounce'; // или реализовать свой
 
     export default {
         name: 'OSIMPlayer',
@@ -42,6 +43,10 @@
                 urlsData: new Map(),
                 TrackTime: { current: 0, duration: 0},
                 SilentMode: false,
+                ShuffleMode: false,
+                currentCoverUrl: null,
+                prevCoverUrl: null,
+                CoverMode: true,
             }
         },
 
@@ -50,14 +55,24 @@
 
             const userLang = navigator.language || navigator.userLanguage;
             const userLangS = userLang.split('-')[0];
+            
             this.UserLang = userLangS; 
             
             const LangPackData = LangPack;
+
             this.LangData = (userLangS && LangPackData && LangPackData[userLangS]) ? LangPackData[userLangS] : LangPackData.en;
         },
 
         beforeUnmount() {
             this.PlayerAction_Pause();
+
+            // Освобождаем все ObjectURL
+            if (this.currentCoverUrl) {
+                URL.revokeObjectURL(this.currentCoverUrl);
+            }
+
+            this.urlsData.forEach(url => URL.revokeObjectURL(url));
+            this.urlsData.clear();
         },
 
         computed: {
@@ -67,21 +82,24 @@
 
                 if (preplist && preplist.length > 0 && curindex) {
                     let tr = preplist[curindex];
-                    console.log("tr", tr);
                     return tr;
                 } else {
                     return null;
                 }
             },
+
+            currentTrack_time() {
+                return this.ShowerTime(this.TrackTime.current);
+            },
         },
 
         watch: {
-            // PlayList: {
-            //     handler(newPlayList) {
-
-            //     },
-            //     immediate: true,
-            // },
+            currentTrack: {
+                handler() {
+                    this.updateCoverUrl();
+                },
+                immediate: true
+            },
         },
 
         methods: {
@@ -162,19 +180,17 @@
                         let parseData = await parseBlob(blob);
                         let trackDKey = `${afile_name}-${afile_size}`;
 
-                        // afile.common = parseData.common;
-                        // afile.common.id = trackDKey;
                         afile.common = {
                             ...parseData.common,
                             id: trackDKey,                            
                         };
 
-                        afile.common.url = this.getObjectURL(afile);
-                        
+                        afile.common.url = this.getObjectURL(afile);                        
 
                         if (!this.audioDurations[trackDKey]) {
                             try {
                                 let tduration = await this.getAudioDurationSimple(afile);
+
                                 this.audioDurations[trackDKey] = tduration;
                                 afile.common.duration = tduration;
                                 this.durationAll += tduration;
@@ -241,12 +257,19 @@
 
             PlayerAction_Play() {
                 const AudioElement = document.querySelector('#main_audio');
-                const preplist = this.PlayList;
-
-                if (AudioElement && preplist && preplist.length > 0) {
-                    AudioElement.play();
-                    this.isPlaying = true;
-                }                
+                
+                if (AudioElement) {
+                AudioElement.play()
+                    .then(() => {
+                        this.isPlaying = true;
+                    })
+                    .catch(error => {
+                        console.error('Ошибка воспроизведения:', error);
+                        
+                        this.isPlaying = false;
+                        this.showError('Не удалось воспроизвести трек');
+                    });
+                }
             },
             PlayerAction_Pause() {
                 const AudioElement = document.querySelector('#main_audio');
@@ -257,9 +280,59 @@
                     this.isPlaying = false;
                 }
             },
+            PlayerAction_Stop() {
+                const AudioElement = document.querySelector('#main_audio');
+                const preplist = this.PlayList;
+
+                if (AudioElement && preplist && preplist.length > 0) {
+                    this.PlayerAction_Pause();
+                    
+                    setTimeout(() => {
+                        this.TrackTime.current = 0;
+                    }, 300);
+                }                
+            },
+            PlayerAction_PrevTrack() {
+                const curindex = this.currentIndex;
+                const preplist = this.PlayList;                
+
+                if (preplist && preplist.length > 0) {
+                    this.PlayerAction_Pause();
+
+                    if (!this.ShuffleMode) {
+                        this.currentIndex = (curindex == 0) ? (preplist.length - 1) : (curindex - 1);
+                    } else {
+                        this.currentIndex = this.Get_randomInteger(0, (preplist.length - 1));
+                    }
+
+                    setTimeout(() => {
+                        this.PlayerAction_Play();
+                    }, 500);
+                }
+            },
+            PlayerAction_NextTrack() {
+                const curindex = this.currentIndex;
+                const preplist = this.PlayList;
+
+                if (preplist && preplist.length > 0) {
+                    this.PlayerAction_Pause();
+
+                    if (!this.ShuffleMode) {
+                        this.currentIndex = (curindex == (preplist.length - 1)) ? 0 : curindex + 1;
+                    } else {
+                        this.currentIndex = this.Get_randomInteger(0, (preplist.length - 1));
+                    }
+
+                    setTimeout(() => {
+                        this.PlayerAction_Play();
+                    }, 500);
+                    
+                }
+            },
 
             getObjectURL(track) {
                 const key = track.common.id;
+
                 if (!this.urlsData.has(key)) {
                     this.urlsData.set(key, URL.createObjectURL(track));
                 }
@@ -270,7 +343,6 @@
                 const AudioElement = document.querySelector('#main_audio');
                 const TrackTimeElement = document.querySelector('#main_tracktime');
 
-                // this.TrackTime.current = (TrackTimeElement) ? TrackTimeElement.value : 0;
                 AudioElement.currentTime = TrackTimeElement.value;
             },
 
@@ -286,19 +358,19 @@
                 }
             },
 
-            onTimeUpdate(event) {
+            onTimeUpdate: debounce(function(event) {
                 const audio = event.target;
-                // Получаем текущую позицию воспроизведения и общую продолжительность
+
                 this.TrackTime.current = audio.currentTime;
                 this.TrackTime.duration = audio.duration || 0;
+                
+                // Обновляем слайдер
+                const trackTimeElement = document.querySelector('#main_tracktime');
 
-                if (this.TrackTime.current == this.TrackTime.duration) {
-                    this.PlayerAction_Pause();
+                if (trackTimeElement) {
+                    trackTimeElement.value = this.TrackTime.current;
                 }
-      
-                let TrackTimeElement = document.querySelector('#main_tracktime');
-                TrackTimeElement.value = this.TrackTime.current;
-            },
+            }, 100),
 
             Chng_SilentMode() {
                 const Silent = this.SilentMode;
@@ -311,6 +383,44 @@
                 }
 
                 this.SilentMode = !Silent;
+            },
+
+            Get_randomInteger(min, max) {
+                let rand = min + Math.random() * (max + 1 - min);
+                
+                return Math.floor(rand);
+            },
+
+            Chng_ShuffleMode() { this.ShuffleMode = !this.ShuffleMode; },
+
+            SelectTrack(inpIndex) {
+                if (inpIndex !== this.currentIndex) {
+                    this.PlayerAction_Pause();
+                    this.currentIndex = inpIndex;
+
+                    setTimeout(() => {                    
+                        this.PlayerAction_Play();
+                    }, 500);
+                }
+            },
+
+            Chng_CoverMode(modeIndex) { this.CoverMode = (modeIndex === 0) ? false : true; },
+
+            updateCoverUrl() {
+                // Освобождаем предыдущий URL
+                if (this.prevCoverUrl) {
+                    URL.revokeObjectURL(this.prevCoverUrl);
+                }
+                
+                if (this.currentTrack?.common?.picture?.[0]) {
+                    const cover = this.currentTrack.common.picture[0];
+                    const blob = new Blob([cover.data], { type: cover.format });
+                    
+                    this.currentCoverUrl = URL.createObjectURL(blob);
+                    this.prevCoverUrl = this.currentCoverUrl;
+                } else {
+                    this.currentCoverUrl = null;
+                }
             },
         }
     }

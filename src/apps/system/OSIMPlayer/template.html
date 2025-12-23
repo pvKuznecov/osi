@@ -1,51 +1,96 @@
 <div class="mplayer-app">
     <div class="mplayer-mpanel">
-        <div class="mplayer-buttons-tpanel" style="text-align: right;">
-            <div class="mplayer-buttons-panel-elem">О треке</div>
+        <div class="mplayer-buttons-tpanel d-flex justify-content-center align-items-center">
+            <div class="mplayer-buttons-panel-elem" :class="(CoverMode) ? 'ispushbtn' : ''" @click="Chng_CoverMode(1)">{{LangData.cover}}</div>
+            <div class="mplayer-buttons-panel-elem" :class="(!CoverMode) ? 'ispushbtn' : ''" @click="Chng_CoverMode(0)">{{LangData.abouttrack}}</div>
         </div>
-        <div class="mplayer-coverspace d-flex justify-content-center align-items-center">
+        
+        <div v-if="(!CoverMode && currentTrack)" class="mplayer-coverspace d-flex justify-content-center">
+            <table v-if="currentTrack" class="mplayer-trackinfo-tab">
+                <tbody>
+                    <tr>
+                        <td>{{LangData.artist}}:</td>
+                        <td><i>{{currentTrack.common.artist || '???'}}</i></td>
+                    </tr>
+                    <tr>
+                        <td>{{LangData.name}}:</td>
+                        <td><i>{{currentTrack.common.title || '???'}}</i></td>
+                    </tr>
+                    <tr>
+                        <td>{{LangData.album}}:</td>
+                        <td><i>{{currentTrack.common.album || '???'}}</i></td>
+                    </tr>                    
+                    <tr>
+                        <td>{{LangData.min}}:</td>
+                        <td><i>{{formatDuration(currentTrack.common.duration)}}</i></td>
+                    </tr>
+                    <tr>
+                        <td>{{LangData.year}}:</td>
+                        <td>{{currentTrack.common.year || '???'}}</td>
+                    </tr>
+                    <tr>
+                        <td>{{LangData.genre}}:</td>
+                        <td>{{currentTrack.common.genre}}</td>
+                    </tr>
+                    <tr>
+                        <td>{{LangData.trackinalbum}}:</td>
+                        <td><i>{{currentTrack.common.track.no ? currentTrack.common.track.no : '??'}}</i> / <i>{{currentTrack.common.track.of ? currentTrack.common.track.of : '??'}}</i></td>
+                    </tr>
+                    <tr>
+                        <td>CD №:</td>
+                        <td><i>{{currentTrack.common.disk.no ? currentTrack.common.disk.no : '??'}}</i> / <i>{{currentTrack.common.disk.of ? currentTrack.common.disk.of : '??'}}</i></td>
+                    </tr>
+                    <tr>
+                        <td>{{LangData.rating}}:</td>
+                        <td><i>{{currentTrack.common.rating ? (currentTrack.common.rating * 10) : '??'}}</i>/<i>10</i></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            {{LangData.lyrics}}:<br>
+                            <div class="d-flex justify-content-center align-items-center">
+                                {{currentTrack.common.lyrics || '- - -'}}
+                            </div>                            
+                        </td>
+                    </tr>
+                </tbody>
+            </table>    
+        </div>
+        <div v-else class="mplayer-coverspace d-flex justify-content-center align-items-center">
             <div v-if="TargetTrack" class="mplayer-cover"></div>
-            <div v-else class="mplayer-cover d-flex justify-content-center align-items-center">
-                <div style="font-size: 50px; text-shadow: 1px 1px 2px black;">🎶</div>
+            <div v-else class="mplayer-cover d-flex justify-content-center align-items-center" :style="{backgroundImage: `url(${currentCoverUrl ? currentCoverUrl : ''})` }">
+                <div v-show="!currentCoverUrl" style="font-size: 50px; text-shadow: 1px 1px 2px black;">🎶</div>
             </div>
         </div>
         <div class="mplayer-tracknamespace d-flex justify-content-center align-items-center">
             <table>
                 <tbody>
                     <tr>
-                        <td>
-                            <i v-if="currentTrack">{{currentTrack.common.artist + ' - ' + currentTrack.common.title}}</i>
-                            <i v-else>- - -</i>
-                        </td>                        
+                        <td><i>{{(currentTrack) ? (currentTrack.common.artist + ' - ' + currentTrack.common.title) : '- - -'}}</i></td>
                     </tr>
                     <tr>
-                        <td>
-                            <i>{{(TrackTime && TrackTime.current !== 0) ? ShowerTime(TrackTime.current) : '00:00'}}</i> / <i>{{(TrackTime && TrackTime.duration !== 0) ? ShowerTime(TrackTime.duration) : '00:00'}}</i>
-                        </td>
+                        <td><i>{{currentTrack_time}}</i> / <i>{{(TrackTime && TrackTime.duration !== 0) ? ShowerTime(TrackTime.duration) : '00:00'}}</i></td>
                     </tr>
                 </tbody>
             </table>
         </div>
         <div class="mplayer-tracktimeline">
-            <audio id="main_audio" controls :src="(currentTrack) ? currentTrack.common.url : ''" style="display: none;" :volume="VolumeLvl" @timeupdate="onTimeUpdate" />
+            <audio id="main_audio" controls @ended="PlayerAction_NextTrack()" :src="(currentTrack) ? currentTrack.common.url : ''" style="display: none;" :volume="VolumeLvl" @timeupdate="onTimeUpdate" />
             <input id="main_tracktime" type="range" class="mplayer-trackrangetime" min="0" :max="TrackTime.duration" value="0" @change="Chng_TrackRangeTime()">
         </div>
         <div class="mplayer-buttons-bpanel d-flex justify-content-center align-items-center">
-            <button class="btn btn-outline-secondary rounded-circle me-2" title="Предыдущий трек">
+            <button class="btn btn-outline-secondary rounded-circle me-2" title="Предыдущий трек" @click="PlayerAction_PrevTrack()">
                 <i class="bi bi-skip-start-fill fs-3"></i>
             </button>
-            <button class="btn btn-outline-secondary rounded-circle me-2" title="Остановить воспроизведение">
+            <button class="btn btn-outline-secondary rounded-circle me-2" title="Остановить воспроизведение" @click="PlayerAction_Stop()">
                 <i class="bi bi-stop-fill fs-3"></i>
-            </button>
-            
+            </button>            
             <button v-if="isPlaying" class="btn btn-primary btn-lg rounded-circle me-2" style="width: 45px; height: 45px;" :title="LangData.pause" @click="PlayerAction_Pause()">
                 <i class="fs-3 bi bi-pause-fill"></i>
             </button>
             <button v-else class="btn btn-primary btn-lg rounded-circle me-2" style="width: 45px; height: 45px;" :title="LangData.play" @click="PlayerAction_Play()">
                 <i class="fs-3 bi bi-play-fill"></i>
             </button>
-
-            <button class="btn btn-outline-secondary rounded-circle" :title="LangData.nexttrack">
+            <button class="btn btn-outline-secondary rounded-circle" :title="LangData.nexttrack" @click="PlayerAction_NextTrack()">
                 <i class="bi bi-skip-end-fill fs-3"></i>
             </button>
         </div>
@@ -56,12 +101,12 @@
             <button class="btn btn-outline-secondary me-1" @click="VolumeMinus()">
                 <i class="bi bi-volume-down fs-6"></i>
             </button>
-            <i class="me-2">V: {{(VolumeLvl > 0) ? (VolumeLvl * 100) : '00'}}%</i>
+            <i class="me-2">{{(VolumeLvl > 0) ? (VolumeLvl * 100) : '00'}}%</i>
             <button class="btn btn-outline-secondary me-1" @click="VolimePlus()">
                 <i class="bi bi-volume-up fs-6"></i>
             </button>
-            <button class="btn btn-outline-secondary me-1">
-                <i class="bi bi-shuffle fs-6"></i>
+            <button class="btn btn-outline-secondary me-1" @click="Chng_ShuffleMode()">
+                <i class="bi bi-shuffle fs-6" :class="(ShuffleMode) ? 'ispushbtn' : ''"></i>
             </button>
         </div>
     </div>
@@ -85,8 +130,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(track, index) in PlayList" :key="track.id" :class="{isactivetrack: currentTrack && currentTrack.common.id === track.common.id}">
-                        <td>{{++index}}</td>
+                    <tr v-for="(track, index) in PlayList" :key="track.id" :class="{isactivetrack: currentTrack && currentTrack.common.id === track.common.id}" @dblclick="SelectTrack(index)">
+                        <td>{{index + 1}}</td>
                         <td v-if="ShowConfig.playlist.artist">{{track.common.artist ? track.common.artist : '--'}}</td>
                         <td v-if="ShowConfig.playlist.album">{{track.common.album ? track.common.album : '--'}}</td>
                         <td>{{track.common.title ? track.common.title : 'unknown'}}</td>
@@ -101,18 +146,3 @@
         </div>
     </div>
 </div>
-
-
-<!-- Диски
-<i class="bi bi-vinyl"></i>
-<i class="bi bi-vinyl-fill"></i>
-<i class="bi bi-disc"></i>
-<i class="bi bi-disc-fill"></i>
-<i class="bi bi-record-circle"></i>
-<i class="bi bi-record-circle-fill"></i>
-
-<br>
-Проигрыватели
-<i class="bi bi-boombox"></i>
-<i class="bi bi-cassette"></i>
-<i class="bi bi-cassette-fill"></i> -->

@@ -17,6 +17,7 @@
                 :isMaximized="window.isMaximized"
                 :zIndex="window.zIndex"
                 :resizable="window.resizable"
+                :canMinimize="window.canMinimize"
                 
                 @close="closeWindow"
                 @minimize="minimizeWindow"

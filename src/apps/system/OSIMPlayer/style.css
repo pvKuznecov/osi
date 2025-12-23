@@ -6,17 +6,16 @@
 .mplayer-mpanel {
     display: inline-block;
     width: 300px;
-    background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85));
-}
+    background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85)); }
+
 .mplayer-ppanel {
     display: inline-block;
     width: calc(100% - 300px);
-    background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85));
-}
+    background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85)); }
 
 .mplayer-buttons-tpanel,
 .mplayer-buttons-bpanel {
-    /* width: 100%; */
+    width: 100%;
     height: 30px;
     color: white;
     padding: 5px;
@@ -52,14 +51,10 @@
     overflow: hidden;
     overflow-y: auto; }
 
-.table-responsive {
-    margin-bottom: 0;
-}
-/* .table { height: 300px !important; } */
+.table-responsive { margin-bottom: 0; }
+
 .mplayer-playlist-tab .table {
     display: block;
-    /* width: 98%;
-    height: 98%; */
     height: 300px;
     overflow: hidden;
     overflow-y: auto;
@@ -69,13 +64,22 @@
     position: sticky;
     top: 0; }
 
+.mplayer-playlist-tab tbody tr:hover {
+    cursor: pointer;
+    transition: background-color 0.2s ease; }
+
 .mplayer-coverspace {
     display: block;
     width: calc(100% - 10px);
-    min-height: 180px;
+    height: 180px;
     border-radius: 5px;
     background-color: rgba(255, 255, 255, 0.2);
-    margin-left: 10px; }
+    margin-left: 10px;
+    padding: 5px;
+    overflow: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(146, 248, 255) rgba(255, 255, 255, 0); }
 
 .mplayer-tracknamespace {
     display: block;
@@ -94,7 +98,9 @@
     background-color: white;
     border-radius: 5px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-}
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat; }
 
 .mplayer-tracktimeline {
     display: block;
@@ -109,7 +115,6 @@
 
 .cust-file-upload {
     display: inline-block;
-    float: right;
     cursor: pointer; }
 
 .cust-file-upload:hover {
@@ -122,8 +127,40 @@
     transition: all 0.3s ease;
     padding: 1px 10px; }
 
-.isactivetrack td { background-color: rgb(219, 255, 146); }
+.isactivetrack td { background-color: rgb(172, 229, 247); }
 
-.ispushbtn {
-    color: rgb(60, 151, 221);
+.ispushbtn { color: rgb(60, 151, 221); }
+
+.mplayer-trackinfo-tab {
+    display: block;
+    color: white;
+    font-size: small; }
+
+.mplayer-trackinfo-tab tr {
+    padding-bottom: 2px;
+    border-bottom: 1px solid rgba(211, 211, 211, 0.1);
 }
+
+.btn-outline-secondary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+
+.mplayer-app::-webkit-scrollbar-track {
+    background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85));
+    border-radius: 5px; }
+
+.mplayer-playlist::-webkit-scrollbar {
+    width: 10px;
+    height: 8px; }
+
+.mplayer-playlist::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, rgba(60, 151, 221, 0.8), rgba(125, 199, 255, 0.8));
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease; }
+
+.mplayer-playlist::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, rgba(60, 151, 221, 1), rgba(125, 199, 255, 1));
+    box-shadow: 0 0 5px rgba(125, 199, 255, 0.5); }
+
+.mplayer-playlist::-webkit-scrollbar-thumb:active { background: linear-gradient(135deg, rgb(40, 130, 200), rgb(100, 180, 240)); }
