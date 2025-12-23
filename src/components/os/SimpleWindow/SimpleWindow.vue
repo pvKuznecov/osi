@@ -18,6 +18,7 @@
             defWidth: { type: Number, default: 400 },
             defHeight: { type: Number, default: 400 },
             icon: {type: String, default: '📄' },
+            canMinimize: {type: Boolean, default: true},
         },
   
         emits: ['close', 'minimize', 'focus', 'toggleMaximize'],

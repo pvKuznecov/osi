@@ -11,6 +11,7 @@ const applications = [
         defHeight: 450,
         isMaximized: false,  // По умолчанию НЕ открывается развернутым
         resizable: true,
+        canMinimize: true,
 
         componentPath: '@/apps/system/OSISettings/OSISettings.vue', // Путь к компоненту Vue
         
@@ -30,6 +31,7 @@ const applications = [
         defHeight: 700,
         isMaximized: false,  // По умолчанию НЕ открывается развернутым
         resizable: true,
+        canMinimize: true,
 
         componentPath: '@/apps/system/OSIHelper/OSIHelper.vue', // Путь к компоненту Vue
         
@@ -49,6 +51,7 @@ const applications = [
         defHeight: 670,
         isMaximized: false,  // По умолчанию НЕ открывается развернутым
         resizable: false,
+        canMinimize: true,
         
         componentPath: '@/apps/system/OSICalculator/OSICalculator.vue', // Путь к компоненту Vue
         
@@ -68,6 +71,7 @@ const applications = [
         defHeight: 400,
         isMaximized: false,  // По умолчанию НЕ открывается развернутым
         resizable: false,
+        canMinimize: false,
 
         componentPath: '@/apps/system/OSIMPlayer/OSIMPlayer.vue', // Путь к компоненту Vue
         
