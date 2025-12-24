@@ -151,10 +151,10 @@
         </div>
         <div class="mplayer-buttons-bpanel" style="text-align: right;">
             <div v-if="trackSelector && trackSelector.length > 0" class="mplayer-buttons-panel-ielem" style="display: inline-block;">
-                <label class="me-1" for="trackSelector_action">Выбрано({{trackSelector.length}}):</label>
+                <label class="me-1" for="trackSelector_action">{{LangData('selected')}}({{trackSelector.length}}):</label>
                 <select class="me-1" id="trackSelector_action" name="myOptions">
                     <option value="N" selected>--</option>
-                    <option value="DEL">Удалить</option>
+                    <option value="DEL">{{LangData('delete')}}</option>
                 </select>
                 <button class="trackSelector-confirm-btn" @click="Mk_trackSelectorAction()"><i>ok</i></button>
             </div>

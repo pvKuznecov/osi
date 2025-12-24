@@ -24,6 +24,8 @@ export const LangPack = {
         specifyfolder: 'Specify folder',
         isvalidplaylisttxt: 'The data loaded correctly, the playlist is ready for playback.',
         isnotvalidplaylisttxt: 'The playlist data did not load, playback is not possible.',
+        delete: 'Delete',
+        selected: 'Selected',
     },
     ru: {
         appname: 'MPlayer',
@@ -50,5 +52,7 @@ export const LangPack = {
         specifyfolder: 'Указать папку',
         isvalidplaylisttxt: 'Данные загружены корректно, плейлист подготовлен к работе.',
         isnotvalidplaylisttxt: 'Данные плейлиста не загружены, воспроизведение невозможно.',
+        delete: 'Удалить',
+        selected: 'Выбрано',
     },
 };
