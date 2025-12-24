@@ -1,24 +1,22 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
-    // import { resolve } from 'core-js/fn/promise';
+    import { useAppsStore } from '@/stores/apps.store';
     import { LangPack } from './lang';
+    import { mapStores } from 'pinia';
     import { parseBlob } from 'music-metadata';
-    import debounce from 'lodash/debounce'; // или реализовать свой
+    import debounce from 'lodash/debounce';
 
     export default {
         name: 'OSIMPlayer',
 
         props: {
-            windowId: {
-                type: String,
-                required: true
-            },
+            windowId: { type: String, required: true },
         },
 
         data() {
             return {
-                LangData: {},
+                lang_data: {},
                 PlayList: [],
                 isPlaying: false,
                 durationAll: 0,
@@ -27,7 +25,6 @@
                     playlist: {
                         artist: true,
                         album: true,
-                        genre: true,
                         duration: true,
                     }
                 },
@@ -47,35 +44,15 @@
                 currentCoverUrl: null,
                 prevCoverUrl: null,
                 CoverMode: true,
+                IsValidPlayList: false,
+                isInitialized: false,
+                trackSelector: [],
             }
         },
-
-        mounted() {
-            console.log('MPlayer app mounted with windowId:', this.windowId);
-
-            const userLang = navigator.language || navigator.userLanguage;
-            const userLangS = userLang.split('-')[0];
-            
-            this.UserLang = userLangS; 
-            
-            const LangPackData = LangPack;
-
-            this.LangData = (userLangS && LangPackData && LangPackData[userLangS]) ? LangPackData[userLangS] : LangPackData.en;
-        },
-
-        beforeUnmount() {
-            this.PlayerAction_Pause();
-
-            // Освобождаем все ObjectURL
-            if (this.currentCoverUrl) {
-                URL.revokeObjectURL(this.currentCoverUrl);
-            }
-
-            this.urlsData.forEach(url => URL.revokeObjectURL(url));
-            this.urlsData.clear();
-        },
-
+        
         computed: {
+            ...mapStores(useAppsStore),
+
             currentTrack() {
                 const curindex = this.currentIndex + '';
                 const preplist = this.PlayList;
@@ -100,9 +77,83 @@
                 },
                 immediate: true
             },
+
+            trackSelector() {
+                console.log("trackSelector", this.trackSelector);
+            },
+
+            // при изменении любого из следующих параметров (при пройденой инициализации) - вызываем фун-ю сохранения состояния
+            // PlayList() { if (this.isInitialized) { this.saveState(); } },   //плейлист
+            // ShowConfig() { if (this.isInitialized) { this.saveState(); } },   //конфиг отображения
+            VolumeLvl() { if (this.isInitialized) { this.saveState(); } },   //уровень громкости
+            SilentMode() { if (this.isInitialized) { this.saveState(); } },   //режим без звука
+            ShuffleMode() { if (this.isInitialized) { this.saveState(); } },   //режим случайного воспроизведения
         },
 
         methods: {
+            LangData(key) {
+                return this.lang_data[key] || '';
+            },
+            // Инициализация из store
+            initFromStore() {
+                if (!this.windowId || !this.appsStore) {
+                    console.error('OSIMPlayer: windowId or appsStore is missing');
+                    return;
+                }
+            
+                const savedState = this.appsStore.getWindowState(this.windowId);
+                console.log('OSIMPlayer loaded state:', savedState);
+            
+                if (savedState && savedState.appType === 'mplayer') {
+                    this.durationAll = savedState.durationAll || 0;
+                    this.ShowConfig = savedState.ShowConfig || { playlist: { artist: true, album: true, genre: true, duration: true } };
+                    this.totalFiles = savedState.totalFiles || 0;
+                    this.curFilesSize = savedState.curFilesSize || 0;
+                    this.audioDurations = savedState.audioDurations || {};
+                    this.VolumeLvl = savedState.VolumeLvl || 0.5;
+                    this.VolumeLvl_save = savedState.VolumeLvl_save || 0.5;
+                    this.SilentMode = savedState.SilentMode || false;
+                    this.ShuffleMode = savedState.ShuffleMode || false;
+                    this.PlayList = savedState.PlayList || [];
+                }
+                
+                this.isInitialized = true;
+                console.log('OSIMPlayer initialized');
+            },
+
+            saveState() {
+                if (!this.windowId || !this.appsStore || !this.isInitialized) return;
+
+                let newPlayList = this.PlayList.map(function(elem) {
+                    elem.common = {
+                        album: elem.common.album || null,
+                        artist: elem.common.artist || null,
+                        id: elem.common.id || null,
+                        title: elem.common.title || null,
+                    };
+                    
+                    return elem;
+                });
+                
+                const state = {
+                    appType: 'mplayer',
+                    durationAll: this.durationAll,
+                    ShowConfig: this.ShowConfig,
+                    totalFiles: this.totalFiles,
+                    curFilesSize: this.curFilesSize,
+                    audioDurations: this.audioDurations,
+                    VolumeLvl: this.VolumeLvl,
+                    VolumeLvl_save: this.VolumeLvl_save,
+                    SilentMode: this.SilentMode,
+                    ShuffleMode: this.ShuffleMode,
+                    PlayList: newPlayList,
+                    timestamp: Date.now()
+                };
+                
+                console.log('OSIMPlayer saving state:', state);
+                this.appsStore.saveWindowState(this.windowId, state);
+            },
+
             // Сброс input (открывает возможность повторно загружать те-же файлы)
             resetInput(inputElement) { inputElement.value = ''; },
 
@@ -210,9 +261,17 @@
 
                 if (validFiles.length > 0) {
                     this.PlayList = validFiles;
+                    this.IsValidPlayList = true;
                 } else {
                     alert('Не было выбрано ни одного аудиофайла!');
                 }
+
+                setTimeout(() => {
+                    if (!this.isInitialized) {
+                        this.initFromStore();
+                    }
+                    this.saveState();
+                }, 100);
             },
 
             // проверка "на аудиофайл"
@@ -422,6 +481,72 @@
                     this.currentCoverUrl = null;
                 }
             },
-        }
+
+            Mk_trackSelectorAction() {
+                const actSelector = document.querySelector('#trackSelector_action');
+                let newList = [];
+
+                switch (actSelector.value) {
+                    case 'DEL':
+                        newList = this.PlayList.filter(elem => !this.trackSelector.includes(elem.common.id));
+                        
+                        this.PlayerAction_Pause();
+                        
+                        setTimeout(() => {                    
+                            this.PlayList = newList;
+                            this.trackSelector = [];
+                            this.SelectTrack(0);
+                            this.saveState();
+                            this.PlayerAction_Play();
+                        }, 500);
+
+                        break;
+                    default:
+                        break;
+                }
+            },
+
+            ChngVal_ShowCOnfig(inpKey) {
+                this.ShowConfig.playlist[inpKey] = !this.ShowConfig.playlist[inpKey];
+            },
+        },
+
+        mounted() {
+            console.log('OSIMPlayer app mounted with windowId:', this.windowId);
+
+            // Инициализируем данные из store после монтирования
+            this.$nextTick(() => {
+                this.initFromStore();
+            });
+
+            const userLang = navigator.language || navigator.userLanguage;
+            const userLangS = userLang.split('-')[0];
+            
+            this.UserLang = userLangS; 
+            
+            const LangPackData = LangPack;
+
+            this.lang_data = (userLangS && LangPackData && LangPackData[userLangS]) ? LangPackData[userLangS] : LangPackData.en;
+
+            // Сохраняем начальное состояние после небольшой задержки
+            setTimeout(() => {
+                if (!this.isInitialized) {
+                    this.initFromStore();
+                }
+                this.saveState();
+            }, 100);
+        },
+
+        beforeUnmount() {
+            this.PlayerAction_Pause();
+
+            // Освобождаем все ObjectURL
+            if (this.currentCoverUrl) {
+                URL.revokeObjectURL(this.currentCoverUrl);
+            }
+
+            this.urlsData.forEach(url => URL.revokeObjectURL(url));
+            this.urlsData.clear();
+        },
     }
 </script>

@@ -164,3 +164,38 @@
     box-shadow: 0 0 5px rgba(125, 199, 255, 0.5); }
 
 .mplayer-playlist::-webkit-scrollbar-thumb:active { background: linear-gradient(135deg, rgb(40, 130, 200), rgb(100, 180, 240)); }
+
+.valid-indicator {
+    /* display: inline-block; */
+    position: absolute;
+    float: left;
+    left: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50px;
+    border: 1px solid lightcoral;
+    background-color: red; }
+.isvalid-indicator {
+    border: 1px solid lightgreen;
+    background-color: green; }
+
+.valid-indicator:hover { opacity: .9; }
+
+#trackSelector_action {
+    border-radius: 3px;
+    /* background-color: rgba(255, 255, 255, 0.1); */
+    color: gray;
+}
+
+.trackSelector-confirm-btn {
+    padding: 0 3px;
+    font-size: 12px;
+    background: linear-gradient(lightgreen, green);
+    color: white;
+    text-shadow: 1px 1px 2px rgb(0, 0, 0);
+    border-radius: 5px;
+    cursor: pointer; }
+
+.trackSelector-confirm-btn:hover { opacity: .9; }
+
+.opasity { opacity: .5;}
