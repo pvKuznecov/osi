@@ -21,6 +21,9 @@ export const LangPack = {
         lyrics: 'Lyrics',
         cover: 'Cover',
         abouttrack: 'About track',
+        specifyfolder: 'Specify folder',
+        isvalidplaylisttxt: 'The data loaded correctly, the playlist is ready for playback.',
+        isnotvalidplaylisttxt: 'The playlist data did not load, playback is not possible.',
     },
     ru: {
         appname: 'MPlayer',
@@ -44,5 +47,8 @@ export const LangPack = {
         lyrics: 'Текст песни',
         cover: 'Обложка',
         abouttrack: 'О треке',
+        specifyfolder: 'Указать папку',
+        isvalidplaylisttxt: 'Данные загружены корректно, плейлист подготовлен к работе.',
+        isnotvalidplaylisttxt: 'Данные плейлиста не загружены, воспроизведение невозможно.',
     },
 };

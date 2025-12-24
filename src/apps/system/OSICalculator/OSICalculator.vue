@@ -9,10 +9,7 @@
         name: 'OSICalculator',
 
         props: {
-            windowId: {
-                type: String,
-                required: true
-            },
+            windowId: { type: String, required: true },
         },
   
         data() {
@@ -62,12 +59,12 @@
             // Инициализация из store
             initFromStore() {
                 if (!this.windowId || !this.appsStore) {
-                    console.error('CalculatorApp: windowId or appsStore is missing');
+                    console.error('OSICalculator: windowId or appsStore is missing');
                     return;
                 }
             
                 const savedState = this.appsStore.getWindowState(this.windowId);
-                console.log('CalculatorApp loaded state:', savedState);
+                console.log('OSICalculator loaded state:', savedState);
             
                 if (savedState && savedState.appType === 'calculator') {
                     this.expression = savedState.expression || '';
@@ -77,7 +74,7 @@
                 }
                 
                 this.isInitialized = true;
-                console.log('CalculatorApp initialized');
+                console.log('OSICalculator initialized');
             },
 
             // Сохраняем текущее состояние в store
@@ -93,7 +90,7 @@
                     timestamp: Date.now()
                 };
                 
-                console.log('CalculatorApp saving state:', state);
+                console.log('OSICalculator saving state:', state);
                 this.appsStore.saveWindowState(this.windowId, state);
             },
 
@@ -259,7 +256,7 @@
         },
   
         mounted() {
-            console.log('CalculatorApp mounted with windowId:', this.windowId);
+            console.log('OSICalculator mounted with windowId:', this.windowId);
     
             // Добавляем поддержку клавиатуры
             window.addEventListener('keydown', this.handleKeyPress);
@@ -271,9 +268,11 @@
             
             const userLang = navigator.language || navigator.userLanguage;
             const userLangS = userLang.split('-')[0];
+
             this.UserLang = userLangS; 
             
             const LangPackData = LangPack;
+
             this.LangData = (userLangS && LangPackData && LangPackData[userLangS]) ? LangPackData[userLangS] : LangPackData.en;
 
             // Сохраняем начальное состояние после небольшой задержки
