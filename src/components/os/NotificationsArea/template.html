@@ -1,0 +1,16 @@
+<div class="notifs-area">
+    <div v-for="notif in notifs" class="notifs-elem d-flex">
+        <div class="notifs-elem-logoarea">
+            <div class="notifs-elem-icon">{{Get_appIcon(false)}}</div>
+            <span class="notifs-elem-label">{{Get_appLabel(false)}}</span>
+        </div>        
+        <div class="notifs-elem-contentarea">
+            <div class="notifs-elem-header d-flex justify-content-center align-items-center">
+                header
+            </div>
+            <div class="notifs-elem-content">
+                Info text
+            </div>
+        </div>
+    </div>
+</div>

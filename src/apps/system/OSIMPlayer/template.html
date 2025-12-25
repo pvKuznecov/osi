@@ -144,6 +144,7 @@
                         <td>{{ShowConfig.playlist.artist ? (track.common.artist ? track.common.artist : '--') : ''}}</td>
                         <td>{{ShowConfig.playlist.album ? (track.common.album ? track.common.album : '--') : ''}}</td>
                         <td>{{track.common.title ? track.common.title : 'unknown'}}</td>
+                        <!-- <td>{{ShowConfig.playlist.duration ? track.common.duration : '0000000'}}</td> -->
                         <td>{{ShowConfig.playlist.duration ? (track.common.duration ? formatDuration(track.common.duration) : '--:--') : ''}}</td>
                     </tr>
                 </tbody>

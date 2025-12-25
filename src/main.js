@@ -18,8 +18,8 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import './styles/global.css'
 import App from './App.vue'
 
-const app = createApp(App)
-const pinia = createPinia()
+const app = createApp(App);
+const pinia = createPinia();
 
 app.use(pinia)
 app.use(BootstrapVue3)
