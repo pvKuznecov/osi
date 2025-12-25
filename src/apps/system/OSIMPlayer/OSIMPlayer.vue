@@ -96,6 +96,7 @@
             },
             // Инициализация из store
             initFromStore() {
+                console.log('START:: initFromStore');
                 if (!this.windowId || !this.appsStore) {
                     console.error('OSIMPlayer: windowId or appsStore is missing');
                     return;
@@ -121,19 +122,36 @@
                 console.log('OSIMPlayer initialized');
             },
 
-            saveState() {
+            async saveState() {
+                console.log('START:: saveState');
                 if (!this.windowId || !this.appsStore || !this.isInitialized) return;
 
-                let newPlayList = this.PlayList.map(function(elem) {
-                    elem.common = {
-                        album: elem.common.album || null,
-                        artist: elem.common.artist || null,
-                        id: elem.common.id || null,
-                        title: elem.common.title || null,
-                    };
+                // let newPlayList = this.PlayList;
+                // newPlayList.map(function(elem) {
+                //     elem.common = {
+                //         album: elem.common.album || null,
+                //         artist: elem.common.artist || null,
+                //         id: elem.common.id || null,
+                //         title: elem.common.title || null,
+                //         duration: elem.duration || null,
+                //     };
                     
-                    return elem;
-                });
+                //     return elem;
+                // });
+                const playlistMetadata = this.PlayList.map(track => ({
+                    name: track.name,
+                    size: track.size,
+                    type: track.type,
+                    lastModified: track.lastModified,
+                    webkitRelativePath: track.webkitRelativePath,
+                    common: {
+                        album: track.common?.album || null,
+                        artist: track.common?.artist || null,
+                        id: track.common?.id || null,
+                        title: track.common?.title || null,
+                        duration: track.common?.duration || null,
+                    }
+                    }));
                 
                 const state = {
                     appType: 'mplayer',
@@ -146,7 +164,9 @@
                     VolumeLvl_save: this.VolumeLvl_save,
                     SilentMode: this.SilentMode,
                     ShuffleMode: this.ShuffleMode,
-                    PlayList: newPlayList,
+                    // PlayList: newPlayList,
+                    // PlayList: this.PlayList,
+                    PlayList: playlistMetadata,
                     timestamp: Date.now()
                 };
                 
@@ -197,6 +217,7 @@
             },
             
             async handleFileSelect(event) {
+                console.log('START:: handleFileSelect');
                 const files = Array.from(event.target.files);
                 const audioFiles = files.filter(file => this.isAudio(file));
 
@@ -249,6 +270,8 @@
                                 console.warn(`Не удалось получить длительность для ${afile.name}:`, error);
                                 this.audioDurations[trackDKey] = 0;
                             }
+                        } else {
+                            afile.common.duration = this.audioDurations[trackDKey];
                         }
 
                         validFiles.push(afile);
@@ -267,11 +290,8 @@
                 }
 
                 setTimeout(() => {
-                    if (!this.isInitialized) {
-                        this.initFromStore();
-                    }
                     this.saveState();
-                }, 100);
+                }, 300);
             },
 
             // проверка "на аудиофайл"
@@ -530,9 +550,9 @@
 
             // Сохраняем начальное состояние после небольшой задержки
             setTimeout(() => {
-                if (!this.isInitialized) {
-                    this.initFromStore();
-                }
+                // if (!this.isInitialized) {
+                //     this.initFromStore();
+                // }
                 this.saveState();
             }, 100);
         },

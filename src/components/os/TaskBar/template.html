@@ -10,13 +10,13 @@
 </div>
 <div class="task-bar">
     <!-- Кнопка Menu -->
-    <button class="start-button" @click="toggleStartMenu">
+    <button class="start-button d-flex justify-content-center align-items-center" @click="toggleStartMenu">
         <span class="start-icon">🌀</span>
         <span class="start-text">Меню</span>
     </button>    
     <!-- Открытые приложения -->
-    <div class="taskbar-apps">
-        <button v-for="window in osStore.windows" :key="window.id" class="taskbar-app" :class="{ 'active': osStore.activeWindowId === window.id }" @click="toggleWindow(window.id)">
+    <div class="taskbar-apps d-flex align-items-center">
+        <button v-for="window in osStore.windows" :key="window.id" class="taskbar-app d-flex justify-content-center align-items-center" :class="{ 'active': osStore.activeWindowId === window.id }" @click="toggleWindow(window.id)">
             <span class="app-icon">{{ window.icon || '📄' }}</span>
             <span class="app-title">{{ window.title }}</span>
         </button>
