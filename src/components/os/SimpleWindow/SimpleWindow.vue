@@ -51,7 +51,8 @@
                     'OSIHelper': () => import('@/apps/system/OSIHelper/OSIHelper.vue'),
                     'OSICalculator': () => import('@/apps/system/OSICalculator/OSICalculator.vue'),
                     'OSISettings': () => import('@/apps/system/OSISettings/OSISettings.vue'),
-                    'OSIMPlayer': () => import('@/apps/system/OSIMPlayer/OSIMPlayer.vue')
+                    'OSIMPlayer': () => import('@/apps/system/OSIMPlayer/OSIMPlayer.vue'),
+                    'OSICalendar': () => import('@/apps/system/OSICalendar/OSICalendar.vue'),
                 };
 
                 if (this.appName && componentMap[this.appName]) {

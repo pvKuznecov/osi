@@ -1,0 +1,71 @@
+<div class="calendar-app">
+    <div class="calendar-top-panel"></div>
+    <div class="calendar-workarea">
+        <div class="calendar-mainmenuarea" :style="(FullMenuMode) ? 'width: 300px;' : ''">
+            <button class="calendar-btn-chngmenu btn row" @click="Chng_fullMenuMode()">
+                <i class="bi bi-list col-1"></i>
+                <span v-if="FullMenuMode" class="col-10">Мой календарь</span>
+            </button>
+            <div v-if="FullMenuMode" class="calendar-mainmenuarea-info col-11">
+                <span>Текущая дата: </span>
+                <i>{{Get_formatingDate(Get_currentDate())}}</i>
+            </div>
+            <div v-if="FullMenuMode" class="calendar-mainmenuarea-info col-11">
+                <span>Текущее время: </span>
+                <i>??:??</i>
+            </div>
+            <div v-if="FullMenuMode" class="calendar-mainmenuarea-info col-11">
+                <div class="calendar-table-tcell-header current-day d-flex justify-content-center align-items-center">
+                    {{display_selectedDate() + ' (' + Get_weekDay(SelectedDate) + ')'}}
+                </div>
+                <div class="calendar-table-tcell-content border p-1">
+                    Запланировано на день:
+                    <div v-for="planElem in SelectedDate_plan" class="planelem d-flex justify-content-center align-items-center">
+                        <div class="planelem-timearea">{{planElem.time || 'Весь день'}}</div>
+                        <div class="planelem-titlearea">{{planElem.title || '- -'}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="calendar-tablearea" :style="(!FullMenuMode) ? 'width: calc(100% - 70px);' : ''">
+            <div class="calendar-table-month">
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="7">
+                                <span class="calendar-table-monthheader">{{Get_monthStr(SelectedDate)}}</span>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="calendar-table-th">{{LangData('mon')}}</th>
+                            <th class="calendar-table-th">{{LangData('tue')}}</th>
+                            <th class="calendar-table-th">{{LangData('wed')}}</th>
+                            <th class="calendar-table-th">{{LangData('thu')}}</th>
+                            <th class="calendar-table-th">{{LangData('fri')}}</th>
+                            <th class="calendar-table-th">{{LangData('sat')}}</th>
+                            <th class="calendar-table-th">{{LangData('sun')}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="week in calendarWeeks">
+                            <td v-for="day in week.days">
+                            <div class="calendar-table-tcell" :class="{'current-day-block': day.isCurrentDay}">
+                                <div class="calendar-table-tcell-header d-flex justify-content-center align-items-center" :class="{'current-day': day.isCurrentDay, 'selected-day': day.isSelectedDay, 'other-month': !day.isCurrentMonth }">
+                                    - {{day.dayOfMonth}} -
+                                </div>
+                                <div class="calendar-table-tcell-content">
+                                    {{day.isCurrentMonth}}
+                                    {{day.isCurrentDay}}
+                                </div>
+                            </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="calendar-bottom-panel d-flex justify-content-center align-items-center">
+        
+    </div>
+</div>
