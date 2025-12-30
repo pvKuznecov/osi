@@ -41,6 +41,25 @@ const applications = [
         category: 'system',  // Категория для группировки (опционально)
     },
     {
+        id: 'osicalendar',
+        name: 'OSICalendar',
+        label: 'Календарь',
+        icon: '📅',
+        description: 'Системный календарь.',
+        
+        isMaximized: true,  // По умолчанию НЕ открывается развернутым
+        resizable: true,
+        canMinimize: true,
+
+        componentPath: '@/apps/system/OSICalendar/OSICalendar.vue', // Путь к компоненту Vue
+        
+        showOnDesktop: true,    // Отображать на рабочем столе
+        showInStartMenu: true,  // Отображать в меню "Пуск"
+
+        category: 'utilities',  // Категория для группировки (опционально)
+
+    },
+    {
         id: 'osicalculator',
         name: 'OSICalculator',
         label: 'Калькулятор',
