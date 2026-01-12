@@ -13,3 +13,16 @@ body {
     background: #f0f0f0; }
 
 #app { height: 100%; }
+
+.webos { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+.text-ico-tech,
+.text-ico-info,
+.text-ico-purpure {
+    --bs-text-opacity: 1;
+    color: white;
+    border-radius: 50px; }
+
+.text-ico-tech { background: linear-gradient(to bottom, rgb(235, 235, 235), rgb(122, 122, 122)); }
+.text-ico-info { background: linear-gradient(to bottom, rgb(55, 154, 235), rgb(33, 65, 209)); }
+.text-ico-purpure { background: linear-gradient(to bottom, rgb(103, 55, 235), rgb(80, 33, 209)); }

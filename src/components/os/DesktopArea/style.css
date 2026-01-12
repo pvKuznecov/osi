@@ -27,7 +27,8 @@
 
 .desktop-icon .icon {
     font-size: 32px;
-    margin-bottom: 8px; }
+    margin-bottom: 5px;
+    padding: 0 8px; }
 
 .desktop-icon .label {
     color: white;

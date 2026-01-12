@@ -5,7 +5,7 @@
         <span class="start-text"> Меню</span>
     </div>
     <div class="task-bar-menu-elem" v-for="app in appsList">
-        <span @click="launchApp(app)">{{app.icon}} {{app.label}}</span>
+        <div class="app-icon" :class="!app.icon ? app.iconclass : ''" @click="launchApp(app)"></div> <span @click="launchApp(app)">{{app.label}}</span>
     </div>
 </div>
 <div class="task-bar">
@@ -17,7 +17,7 @@
     <!-- Открытые приложения -->
     <div class="taskbar-apps d-flex align-items-center">
         <button v-for="window in osStore.windows" :key="window.id" class="taskbar-app d-flex justify-content-center align-items-center" :class="{ 'active': osStore.activeWindowId === window.id }" @click="toggleWindow(window.id)">
-            <span class="app-icon">{{ window.icon || '📄' }}</span>
+            <div class="app-icon" :class="!window.icon ? window.iconclass : ''">{{ window.icon}}</div>
             <span class="app-title">{{ window.title }}</span>
         </button>
     </div>    
