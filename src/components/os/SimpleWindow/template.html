@@ -4,7 +4,7 @@
         <div class="window-controls">
             <button v-if="canMinimize" class="window-btn minimize" @click="minimize">_</button>
             <button v-if="resizable" class="window-btn maximize" @click="toggleMaximize">{{ isMaximized ? '❐' : '□' }}</button>
-            <button class="window-btn close" @click="close">✕</button>
+            <button class="window-btn close bi bi-x-lg" @click="close"></button>
         </div>
     </div>
     <div class="window-content">

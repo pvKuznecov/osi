@@ -4,7 +4,8 @@ const applications = [
         id: 'osisettings',
         name: 'OSISettings',
         label: 'Настройки',
-        icon: '⚙️',
+        icon: '',
+        iconclass: 'bi-gear-fill text-ico-tech',
         description: 'Настройки системы OSI.',   // Описание приложения
 
         defWidth: 800,
@@ -24,7 +25,8 @@ const applications = [
         id: 'osihelper',
         name: 'OSIHelper',
         label: 'OSI помощник',
-        icon: 'ℹ️',
+        icon: '',
+        iconclass: 'bi-info-square-fill text-ico-info',
         description: 'Справочная система и помощь по OSI.',   // Описание приложения
         
         defWidth: 600,
@@ -44,7 +46,8 @@ const applications = [
         id: 'osicalendar',
         name: 'OSICalendar',
         label: 'Календарь',
-        icon: '📅',
+        icon: '',
+        iconclass: 'bi-calendar2-date text-ico-purpure',
         description: 'Системный календарь.',
         
         isMaximized: true,  // По умолчанию НЕ открывается развернутым
@@ -63,7 +66,8 @@ const applications = [
         id: 'osicalculator',
         name: 'OSICalculator',
         label: 'Калькулятор',
-        icon: '🧮',
+        icon: '',
+        iconclass: 'bi-calculator-fill text-ico-purpure',
         description: 'Простой калькулятор для базовых вычислений.',   // Описание приложения
 
         defWidth: 400,
@@ -83,7 +87,8 @@ const applications = [
         id: 'osimplayer',
         name: 'OSIMPlayer',
         label: 'MPlayer',
-        icon: '🎶',
+        icon: '',
+        iconclass: 'bi-cassette-fill text-ico-purpure',
         description: 'Простейший музыкальный плеер.',   // Описание приложения
 
         defWidth: 850,

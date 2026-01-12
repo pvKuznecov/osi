@@ -19,7 +19,6 @@
         computed: {
             osStore() {
                 return useOsStore();
-                // return useOSIAppsStore();
             },
 
             appsList() {

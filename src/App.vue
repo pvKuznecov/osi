@@ -9,7 +9,7 @@
         
                 :contentApp="window.contentApp"
                 :icon="window.icon"
-
+                :iconclass="window.iconclass"
                 :defWidth="window.defWidth"
                 :defHeight="window.defHeight"
                 :isMinimized="window.isMinimized"
@@ -28,9 +28,10 @@
         <TaskBar />
     </div>
 </template>
-<style scoped>
+<!-- <style scoped>
     .webos { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-</style>
+</style> -->
+<style src="./styles/global.css"></style>
 <script>
     import DesktopArea from './components/os/DesktopArea/DesktopArea.vue';
     import TaskBar from './components/os/TaskBar/TaskBar.vue';
