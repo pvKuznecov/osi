@@ -41,6 +41,9 @@
                     <div v-if="showPanel_deskimg">
                         <button class="osisettings-btn" @click="Chng_showPanel('deskimg')">{{LangData.collapse}}</button>
                     </div> -->
+                    <div class="wp-elem-min" v-for="wp in wpList">
+                        <div class="wp-elem-min-i">{{wp.name}}</div>
+                    </div>
                 </li>
             </ul>
         </div>

@@ -32,7 +32,7 @@
   
         methods: {
             getWallpaperUrl() {
-                return require('@/assets/wallpapers/nwall.jpg');
+                return require('@/assets/wallpapers/abacus.jpg');
             },
             
             activateDesktop() {

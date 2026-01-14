@@ -11,6 +11,7 @@
         data() {
             return {
                 currentTime: '',
+                currentDate: '',
                 timer: null,
                 showMenu: false,
             };
@@ -30,6 +31,8 @@
         methods: {
             updateTime() {
                 const now = new Date();
+
+                this.currentDate = now.toLocaleDateString();
                 this.currentTime = now.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
             },
     

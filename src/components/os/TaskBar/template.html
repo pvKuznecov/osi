@@ -1,7 +1,7 @@
 <div v-if="showMenu" class="task-bar-overplace" @click="toggleStartMenu"></div>
 <div v-if="showMenu" class="task-bar-menu">
     <div class="task-bar-menu-header">
-        <span class="start-icon">🌀</span>
+        <span class="start-icon bi bi-house-fill"></span>
         <span class="start-text"> Меню</span>
     </div>
     <div class="task-bar-menu-elem" v-for="app in appsList">
@@ -11,7 +11,7 @@
 <div class="task-bar">
     <!-- Кнопка Menu -->
     <button class="start-button d-flex justify-content-center align-items-center" @click="toggleStartMenu">
-        <span class="start-icon">🌀</span>
+        <span class="start-icon bi bi-house-fill"></span>
         <span class="start-text">Меню</span>
     </button>    
     <!-- Открытые приложения -->
@@ -20,9 +20,15 @@
             <div class="app-icon" :class="!window.icon ? window.iconclass : ''">{{ window.icon}}</div>
             <span class="app-title">{{ window.title }}</span>
         </button>
-    </div>    
+    </div>
+    <div>
+        <i class="bi bi-grid-3x3-gap-fill"></i>
+    </div>
     <!-- Системный трей -->
     <div class="system-tray">
-        <div class="tray-time">{{ currentTime }}</div>
+        <div class="tray-time d-flex justify-content-center align-items-center">
+            {{ currentTime }}<br>
+            {{ currentDate }}
+        </div>
     </div>
 </div>

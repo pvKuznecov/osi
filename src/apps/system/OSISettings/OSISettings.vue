@@ -1,7 +1,7 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
-    import { JSHelpers } from '@/core/helpers';
+    import { JSH } from '@/core/helpers';
     // import { useOSIAppsStore } from '@/stores/os.apps.store';
     import { LangPack } from './lang';
     // import { mapStores } from 'pinia';
@@ -26,6 +26,7 @@
                 UserLang: '',
                 LangData: {},
                 showPanel_deskimg: false,
+                wpList: JSH.system.getImageList(),
             }
         },
 
@@ -54,7 +55,7 @@
 
             storeStatistic() {
                 // let result = this.osStore.getLocalStorageUsage();
-                let result = JSHelpers.browser.getLocalStorageUsage();
+                let result = JSH.browser.getLocalStorageUsage();
                 console.log("navigator", navigator);
 
                 return result;
@@ -77,7 +78,7 @@
 
         methods: {
             GetBrowserData() {
-                return JSHelpers.browser.detectBrowser();
+                return JSH.browser.detectBrowser();
             },
 
             Chk_selectedArea(inpVal) {
