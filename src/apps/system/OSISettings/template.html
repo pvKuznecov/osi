@@ -36,11 +36,11 @@
             <h2>{{LangData.design}}</h2>
             <ul>
                 <li>
-                    <h3>{{LangData.desktopbgimg}}:</h3>
-                    <!-- <button v-if="!showPanel_deskimg" class="osisettings-btn" @click="Chng_showPanel('deskimg')">{{LangData.select}}</button>
-                    <div v-if="showPanel_deskimg">
-                        <button class="osisettings-btn" @click="Chng_showPanel('deskimg')">{{LangData.collapse}}</button>
-                    </div> -->
+                    <h3>{{ LangData.desktopbgimg }}:</h3>
+                    <div v-for="wp in wpList" class="wp-elem-min" @click="ChangeWPImage(wp.name)">
+                        <img :src="wp.path" :alt="wp.name" />
+                        <div class="wp-elem-min-title">{{ wp.name }}</div>
+                    </div>
                 </li>
             </ul>
         </div>

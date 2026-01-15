@@ -1,4 +1,4 @@
-export const JSHelpers = {
+export const JSH = {
     browser: {
         detectBrowser: () => {
             const ua = navigator.userAgent;
@@ -70,5 +70,28 @@ export const JSHelpers = {
                 return null;
             }
         }
-    },    
+    },
+    system: {
+        getImageList: () => {
+            const imagesContext = require.context(
+                '@/assets/wallpapers/', // путь
+                false, // включать подпапки?
+                /\.(png|jpe?g|gif|webp|svg)$/i // регулярка для фильтрации
+            );
+  
+            return imagesContext.keys().map((key) => {
+                console.log('key', key);
+                // Получаем только имя файла без пути и расширения
+                const fileName = key.replace(/^.*[\\/]/, '').replace(/\.[^/.]+$/, '');
+                // Полный путь для require
+                const imagePath = imagesContext(key);
+    
+                return {
+                    name: fileName,
+                    path: imagePath,
+                    fullPath: key
+                };
+            });
+        },
+    },
 }

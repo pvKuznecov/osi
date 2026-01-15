@@ -9,16 +9,22 @@
   
         data() {
             return {
-                apps: []
+                apps: [],
+                bgWallpapper: null,
             }
+        },
+
+        provide() {
+            return {
+                changeWallpaper: this.changeWallpaper
+            };
         },
   
         computed: {
             desktopStyle() {
+                const defaultImg = `url(${this.getWallpaperUrl()})`;
                 return {
-                    // backgroundColor: '#0078d4',
-                    // backgroundImage: 'linear-gradient(135deg, #0078d4 0%, #106ebe 100%)'
-                    backgroundImage: `url(${this.getWallpaperUrl()})`,
+                    backgroundImage: this.bgWallpapper || defaultImg,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat'
@@ -32,7 +38,7 @@
   
         methods: {
             getWallpaperUrl() {
-                return require('@/assets/wallpapers/nwall.jpg');
+                return require('@/assets/wallpapers/abacus.jpg');
             },
             
             activateDesktop() {
@@ -64,7 +70,28 @@
                         defHeight: appData.defHeight || 600
                     });
                 }
-            }
+            },
+
+            changeWallpaper(inpName) {
+                try {
+                    // require() возвращает модуль, нужно использовать .default
+                    const imageModule = require(`@/assets/wallpapers/${inpName}.jpg`);
+                    const imagePath = imageModule.default || imageModule;
+                    console.log('imagePath', imagePath);
+                
+                    const block = document.getElementById('desktop-area');
+                    
+                    if (block) {
+                        // block.style.backgroundImage = `url("${imagePath}")`;
+                        this.bgWallpapper = `url("${imagePath}")`;
+                        console.log('Фон обновлён:', imagePath);
+                    } else {
+                        console.error('Элемент desktop-area не найден');
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки изображения:', error);
+                }
+            },
         },
 
         mounted() {
