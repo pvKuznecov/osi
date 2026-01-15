@@ -20,6 +20,8 @@
             },
         },
 
+        inject: ['changeWallpaper'],
+
         data() {
             return {
                 SelectArea: 'description',
@@ -114,6 +116,10 @@
 
             Chng_showPanel(key) {
                 this[`showPanel_${key}`] = !this[`showPanel_${key}`];
+            },
+
+            ChangeWPImage(inpName) {
+               this.changeWallpaper(inpName);
             },
         },
     }

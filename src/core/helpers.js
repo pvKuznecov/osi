@@ -80,6 +80,7 @@ export const JSH = {
             );
   
             return imagesContext.keys().map((key) => {
+                console.log('key', key);
                 // Получаем только имя файла без пути и расширения
                 const fileName = key.replace(/^.*[\\/]/, '').replace(/\.[^/.]+$/, '');
                 // Полный путь для require
