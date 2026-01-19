@@ -58,7 +58,7 @@ export const usersTable = {
                 delete NUser.id;
 
                 NUser.createdAt = new Date();
-                NUser.updateAt = new Date();
+                NUser.updatedAt = new Date();
 
                 return await DB.users.add(NUser);
             }
@@ -141,7 +141,7 @@ export const settingsTable = {
             if (existing) {
                 await DB.settings.update(existing.id, {
                     value: value,
-                    updateAt: new Date(),
+                    updatedAt: new Date(),
                 });
                 return existing.id;
             } else {
