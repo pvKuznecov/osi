@@ -35,6 +35,15 @@
         <!-- accounts area -->
         <div v-if="SelectArea === 'accounts'" class="osisettings-elem-info">
             <h2>{{LangData.accounts}}</h2>
+            <div v-for="u in users">
+                <ul>
+                    <li>ID: {{u.id}}</li>
+                    <li>Login: {{u.login}}</li>
+                    <li>Config: {{u.config}}</li>
+                    <li>CreatedAt: {{u.createdAt}}</li>
+                    <li>UpdatedAt: {{u.updatedAt}}</li>
+                </ul>
+            </div>
         </div>
 
         <!-- design area -->

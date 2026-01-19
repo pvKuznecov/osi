@@ -2,6 +2,7 @@
 <style src="./style.css"></style>
 <script>
     import { JSH } from '@/core/helpers';
+    import { usersTable } from '@/idb/db';
     // import { useOSIAppsStore } from '@/stores/os.apps.store';
     import { LangPack } from './lang';
     // import { mapStores } from 'pinia';
@@ -24,6 +25,8 @@
 
         data() {
             return {
+                users: [],
+                usersCount: 0,
                 SelectArea: 'description',
                 UserLang: '',
                 LangData: {},
@@ -64,8 +67,9 @@
             }
         },
 
-        mounted() {
+        async mounted() {
             console.log(`${ComponentName} mounted with windowId:`, this.windowId);
+            await this.loadUsers();
 
             const userLang = navigator.language || navigator.userLanguage;
             const userLangS = userLang.split('-')[0];
@@ -79,6 +83,19 @@
         },
 
         methods: {
+            async loadUsers() {
+                this.loading = true;
+                try {
+                    this.users = await usersTable.getAll();
+                    this.usersCount = await usersTable.count();
+                } catch (error) {
+                    console.error('Ошибка загрузки пользователей:', error);
+                    this.$toast.error('Не удалось загрузить пользователей');
+                } finally {
+                    this.loading = false;
+                }
+            },
+
             GetBrowserData() {
                 return JSH.browser.detectBrowser();
             },
