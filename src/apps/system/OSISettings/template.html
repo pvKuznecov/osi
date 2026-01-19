@@ -8,7 +8,9 @@
         </ul>
     </div>
     <div class="osisettings-content">
-        <img src="@/assets/img/logo.png" alt="OSI" class="osilogo">
+        <!-- <img src="@/assets/img/logo.png" alt="OSI" class="osilogo"> -->
+        
+        <!-- description area -->
         <div v-if="SelectArea === 'description'" class="osisettings-elem-info">
             <div>
                 <h2>{{LangData.description}}</h2>
@@ -29,21 +31,27 @@
             </div>
         </div>
 
+
+        <!-- accounts area -->
         <div v-if="SelectArea === 'accounts'" class="osisettings-elem-info">
             <h2>{{LangData.accounts}}</h2>
         </div>
+
+        <!-- design area -->
         <div v-if="SelectArea === 'design'" class="osisettings-elem-info">
             <h2>{{LangData.design}}</h2>
             <ul>
                 <li>
                     <h3>{{ LangData.desktopbgimg }}:</h3>
-                    <div v-for="wp in wpList" class="wp-elem-min" @click="ChangeWPImage(wp.name)">
+                    <div v-for="wp in wpList" class="wp-elem-min" @click="ChangeWPImage(wp.nameExt)">
                         <img :src="wp.path" :alt="wp.name" />
                         <div class="wp-elem-min-title">{{ wp.name }}</div>
                     </div>
                 </li>
             </ul>
         </div>
+
+        <!-- memory managment area -->
         <div v-if="SelectArea === 'memmanagment'" class="osisettings-elem-info">
             <h2>{{ LangData.memmanagment }}</h2>
             <h3 style="padding-left: 10px; margin-top: 10px;">localStorage:</h3>

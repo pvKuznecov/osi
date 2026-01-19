@@ -16,13 +16,15 @@
 
         provide() {
             return {
-                changeWallpaper: this.changeWallpaper
+                changeWallpaper: this.changeWallpaper,
             };
         },
   
         computed: {
             desktopStyle() {
-                const defaultImg = `url(${this.getWallpaperUrl()})`;
+                const defaultImg = `url(${require('@/assets/wallpapers/abacus.jpg')})`;
+                // const defaultImg = `url(${this.getWallpaperUrl()})`;
+                
                 return {
                     backgroundImage: this.bgWallpapper || defaultImg,
                     backgroundSize: 'cover',
@@ -75,7 +77,7 @@
             changeWallpaper(inpName) {
                 try {
                     // require() возвращает модуль, нужно использовать .default
-                    const imageModule = require(`@/assets/wallpapers/${inpName}.jpg`);
+                    const imageModule = require(`@/assets/wallpapers/${inpName}`);
                     const imagePath = imageModule.default || imageModule;
                     console.log('imagePath', imagePath);
                 

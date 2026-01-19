@@ -15,6 +15,9 @@ import { BootstrapVue3 } from 'bootstrap-vue-3'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue-3/dist/bootstrap-vue-3.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
+
+import { initDatabase } from './idb/db'
+
 import './styles/global.css'
 import App from './App.vue'
 
@@ -31,4 +34,13 @@ const appsStore = useAppsStore();
 // appsStore.getStats()
 console.log('App starting, loaded states:', appsStore.getStats());
 
-app.mount('#app')
+async function dbstart() {
+    try {
+        await initDatabase();
+    } catch (error) {
+        console.error('Failed to initialize application:', error);
+    }
+}
+dbstart();
+
+app.mount('#app');
