@@ -12,6 +12,9 @@ export const LangPack = {
         select: 'Select',
         date: 'Date',
         collapse: 'Collapse',
+        created: 'Created',
+        changed: 'Changed',
+        login: 'Login',
     },
     ru: {
         description: 'Описание',
@@ -26,5 +29,8 @@ export const LangPack = {
         select: 'Выбрать',
         date: 'Дата',
         collapse: 'Свернуть',
+        created: 'Создано',
+        changed: 'Изменено',
+        login: 'Логин',
     },
 };

@@ -1,0 +1,35 @@
+<div class="autorization-area">
+    <div v-if="creating">
+        <span class="login-elem-button" @click="showForm_addUser()">Отмена</span>
+    </div>
+    <table v-if="!creating">
+        <tbody>
+            <tr>
+                <td>
+                    <h1>OSI</h1>
+                </td>
+            </tr>
+            <tr>
+                <td>Для начала работы выберите учетную запись.</td>
+            </tr>
+            <br><br>
+            <tr>
+                <td class="d-flex justify-content-center align-items-center">
+                    <div v-for="u in users" class="login-elem d-flex justify-content-center align-items-center">
+                        <div class="login-elem-ava"></div>
+                        <div class="login-elem-info">
+                            {{u.login}}
+                            <br><br>
+                            <span class="login-elem-button" @click="selectUser(u.id)">{{LangData.choose}}</span>
+                        </div>                        
+                    </div>
+                    <div class="login-elem d-flex justify-content-center align-items-center">
+                        <div class="login-elem-info">
+                            <span class="login-elem-button" @click="showForm_addUser()">+ {{LangData.createanewone}}</span>
+                        </div>                        
+                    </div>                    
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
