@@ -14,7 +14,7 @@ const applications = [
         resizable: true,
         canMinimize: true,
 
-        componentPath: '@/apps/system/OSISettings/OSISettings.vue', // Путь к компоненту Vue
+        // componentPath: '@/apps/system/OSISettings/OSISettings.vue', // Путь к компоненту Vue
         
         showOnDesktop: true,    // Отображать на рабочем столе
         showInStartMenu: true,  // Отображать в меню "Пуск"
@@ -35,7 +35,7 @@ const applications = [
         resizable: true,
         canMinimize: true,
 
-        componentPath: '@/apps/system/OSIHelper/OSIHelper.vue', // Путь к компоненту Vue
+        // componentPath: '@/apps/system/OSIHelper/OSIHelper.vue', // Путь к компоненту Vue
         
         showOnDesktop: true,    // Отображать на рабочем столе
         showInStartMenu: true,  // Отображать в меню "Пуск"
@@ -54,7 +54,7 @@ const applications = [
         resizable: true,
         canMinimize: true,
 
-        componentPath: '@/apps/system/OSICalendar/OSICalendar.vue', // Путь к компоненту Vue
+        // componentPath: '@/apps/system/OSICalendar/OSICalendar.vue', // Путь к компоненту Vue
         
         showOnDesktop: true,    // Отображать на рабочем столе
         showInStartMenu: true,  // Отображать в меню "Пуск"
@@ -76,7 +76,7 @@ const applications = [
         resizable: false,
         canMinimize: true,
         
-        componentPath: '@/apps/system/OSICalculator/OSICalculator.vue', // Путь к компоненту Vue
+        // componentPath: '@/apps/system/OSICalculator/OSICalculator.vue', // Путь к компоненту Vue
         
         showOnDesktop: true,    // Отображать на рабочем столе
         showInStartMenu: true,  // Отображать в меню "Пуск"
@@ -97,7 +97,7 @@ const applications = [
         resizable: false,
         canMinimize: false,
 
-        componentPath: '@/apps/system/OSIMPlayer/OSIMPlayer.vue', // Путь к компоненту Vue
+        // componentPath: '@/apps/system/OSIMPlayer/OSIMPlayer.vue', // Путь к компоненту Vue
         
         showOnDesktop: true,    // Отображать на рабочем столе
         showInStartMenu: true,  // Отображать в меню "Пуск"
@@ -118,7 +118,7 @@ const enrichedApplications = applications.map(app => ({
     // Автоматически создаем функцию импорта компонента
     asyncImport: createAsyncImport(app.componentPath),
     // Извлекаем имя компонента из пути (для отладки)
-    componentName: app.componentPath.split('/').pop().replace('.vue', '')
+    // componentName: app.componentPath.split('/').pop().replace('.vue', '')
 }));
 
 // Вспомогательные функции

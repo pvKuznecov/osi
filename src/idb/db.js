@@ -208,7 +208,9 @@ export async function initDatabase() {
                 password: '',
                 apps: [],
                 data: {},
-                config: {},
+                config: {
+                    avatar: 'robot.jpg',
+                },
                 systemconfig: {},
             });
 
@@ -219,6 +221,7 @@ export async function initDatabase() {
         // инициализация базовых настроек 
         const defaultSettings = [
             ['theme', 'dark'],
+            ['avatarDefault', 'cat'],
         ];
 
         for (const [key, value] of defaultSettings) {
