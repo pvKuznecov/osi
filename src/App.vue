@@ -1,5 +1,6 @@
 <template>
-    <div class="webos">
+    <AutorizationArea v-if="!isAutorized" @selectUser="selectUser" />
+    <div v-if="isAutorized" class="webos">
         <DesktopArea>
             <SimpleWindow v-for="window in osStore.windows"
                 :key="window.id"
@@ -22,7 +23,7 @@
                 @close="closeWindow"
                 @minimize="minimizeWindow"
                 @toggleMaximize="toggleMaximizeWindow"
-                @focus="activateWindow"
+                @focus="activateWindow"                
             />
         </DesktopArea>
         <TaskBar />
@@ -33,6 +34,7 @@
 </style> -->
 <style src="./styles/global.css"></style>
 <script>
+    import AutorizationArea from './components/os/AutorizationArea/AutorizationArea.vue';
     import DesktopArea from './components/os/DesktopArea/DesktopArea.vue';
     import TaskBar from './components/os/TaskBar/TaskBar.vue';
     import SimpleWindow from './components/os/SimpleWindow/SimpleWindow.vue';
@@ -43,6 +45,7 @@
         name: 'App',
   
         components: {
+            AutorizationArea,
             DesktopArea,
             TaskBar,
             SimpleWindow
@@ -50,6 +53,7 @@
   
         data() {
             return {
+                isAutorized: false,
                 osStore: null,
                 appsStore: null,
                 // useAppsStore: null
@@ -90,6 +94,11 @@
                 if (this.osStore) {
                     this.osStore.activateWindow(windowId);
                 }
+            },
+
+            selectUser(userId) {
+                console.log('userId', userId);
+                this.isAutorized = true;
             }
         },
   

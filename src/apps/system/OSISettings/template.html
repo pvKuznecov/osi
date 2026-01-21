@@ -38,10 +38,10 @@
             <div v-for="u in users">
                 <ul>
                     <li>ID: {{u.id}}</li>
-                    <li>Login: {{u.login}}</li>
-                    <li>Config: {{u.config}}</li>
-                    <li>CreatedAt: {{u.createdAt}}</li>
-                    <li>UpdatedAt: {{u.updatedAt}}</li>
+                    <li>{{LangData.login}}: {{u.login}}</li>
+                    <li>{{LangData.created}}: {{u.createdAt.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}} {{u.createdAt.toLocaleDateString()}}</li>
+                    <li>{{LangData.changed}}: {{u.updatedAt.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}} {{u.updatedAt.toLocaleDateString()}}</li>
+                    <!-- <li>{{u}}</li> -->
                 </ul>
             </div>
         </div>
