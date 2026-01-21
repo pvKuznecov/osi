@@ -96,5 +96,30 @@ export const JSH = {
                 };
             });
         },
+
+        getAvatarsList: () => {
+            const imagesContext = require.context(
+                '@/assets/avatars/', // путь
+                false, // включать подпапки?
+                /\.(png|jpe?g|gif|webp|svg)$/i // регулярка для фильтрации
+            );
+  
+            return imagesContext.keys().map((key) => {
+                console.log('key', key);
+                // Получаем только имя файла без пути и расширения
+                const fileName = key.replace(/^.*[\\/]/, '').replace(/\.[^/.]+$/, '');
+                // Получаем имя файла и расширения (без пути)
+                const fileNameWithExtension = key.replace(/^.*[\\\\/]/, '');
+                // Полный путь для require
+                const imagePath = imagesContext(key);
+    
+                return {
+                    name: fileName,
+                    nameExt: fileNameWithExtension,
+                    path: imagePath,
+                    fullPath: key
+                };
+            });
+        },
     },
 }

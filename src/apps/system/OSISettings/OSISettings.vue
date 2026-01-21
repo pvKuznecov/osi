@@ -84,15 +84,12 @@
 
         methods: {
             async loadUsers() {
-                this.loading = true;
                 try {
                     this.users = await usersTable.getAll();
                     this.usersCount = await usersTable.count();
                 } catch (error) {
                     console.error('Ошибка загрузки пользователей:', error);
                     this.$toast.error('Не удалось загрузить пользователей');
-                } finally {
-                    this.loading = false;
                 }
             },
 

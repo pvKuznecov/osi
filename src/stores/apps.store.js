@@ -3,6 +3,7 @@ import { reactive, watch } from 'vue';
 // import { reactive, watch, toRefs } from 'vue';
 
 export const useAppsStore = defineStore('apps', () => {
+    const LOCALSTORAGE_KEY = "osi_app_store";
     const state = reactive({
         windowStates: {}
     });
@@ -12,8 +13,6 @@ export const useAppsStore = defineStore('apps', () => {
     // Сохраняем timeout ID в отдельной переменной
     let saveTimeout = null;
 
-    const LOCALSTORAGE_KEY = "osi_app_store";
-    
     const loadFromStorage = () => {
         try {
             const saved = localStorage.getItem(LOCALSTORAGE_KEY);
