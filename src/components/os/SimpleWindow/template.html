@@ -9,7 +9,7 @@
     </div>
     <div class="window-content">
         <slot>
-            <component v-if="dynamicComponent" :is="dynamicComponent" :window-id="windowId"/>
+            <component v-if="dynamicComponent" :is="dynamicComponent" :window-id="windowId" :USERID="USERID"/>
             <div v-else class="default-content">
                 <p>Это окно {{ isMaximized ? 'развернуто' : 'не развернуто' }}</p>
                 <p>Размер: {{ windowWidth }} × {{ windowHeight }}</p>

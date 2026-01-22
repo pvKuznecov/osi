@@ -15,10 +15,8 @@
         name: ComponentName,
 
         props: {
-            windowId: {
-                type: String,
-                required: true
-            },
+            windowId: {type: String, required: true},
+            USERID: {type: Number, default: 0}
         },
 
         inject: ['changeWallpaper'],
@@ -32,11 +30,15 @@
                 LangData: {},
                 showPanel_deskimg: false,
                 wpList: JSH.system.getImageList(),
+                USER: null,
             }
         },
 
         computed: {
             // ...mapStores(useOSIAppsStore),
+            // USER() {
+            //     return this.findUser();
+            // },
 
             OSIData() {
                 return {
@@ -71,6 +73,8 @@
             console.log(`${ComponentName} mounted with windowId:`, this.windowId);
             await this.loadUsers();
 
+            this.findUser();
+
             const userLang = navigator.language || navigator.userLanguage;
             const userLangS = userLang.split('-')[0];
             this.UserLang = userLangS; 
@@ -90,6 +94,15 @@
                 } catch (error) {
                     console.error('Ошибка загрузки пользователей:', error);
                     this.$toast.error('Не удалось загрузить пользователей');
+                }
+            },
+
+            async findUser() {
+                try {
+                    this.USER = await usersTable.getbyId(this.USERID);
+                } catch (error) {
+                    console.error('Ошибка поиска пользователя:', error);
+                    this.$toast.error('Не удалось загрузить данные пользователя');
                 }
             },
 
@@ -134,6 +147,19 @@
 
             ChangeWPImage(inpName) {
                this.changeWallpaper(inpName);
+            },
+
+            getAvatarUrl(avatarName) {
+                const res = `url(${require('@/assets/avatars/' + avatarName)})`;
+                return res;
+            },
+
+            avatarStyle(avatarName) {
+                return {
+                    backgroundImage: this.getAvatarUrl(avatarName),
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                };
             },
         },
     }
