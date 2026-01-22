@@ -19,6 +19,8 @@
                 :zIndex="window.zIndex"
                 :resizable="window.resizable"
                 :canMinimize="window.canMinimize"
+
+                :USERID="USERID"
                 
                 @close="closeWindow"
                 @minimize="minimizeWindow"
@@ -56,6 +58,7 @@
                 isAutorized: false,
                 osStore: null,
                 appsStore: null,
+                USERID: null,
                 // useAppsStore: null
             }
         },
@@ -98,6 +101,7 @@
 
             selectUser(userId) {
                 console.log('userId', userId);
+                this.USERID = userId;
                 this.isAutorized = true;
             }
         },
