@@ -31,7 +31,6 @@
             </div>
         </div>
 
-
         <!-- accounts area -->
         <div v-if="SelectArea === 'accounts'" class="osisettings-elem-info">
             <h2>{{LangData.accounts}}</h2>
@@ -39,11 +38,14 @@
             <div class="account-elem d-flex justify-content-center align-items-center">
                 <div class="account-elem-avatar" :style="avatarStyle(USER.config.avatar)"></div>
                 <ul style="display: inline-block;">
+                    <li>{{LangData.user}}: {{USER.name}}</li>
                     <li>{{LangData.login}}: {{USER.login}}</li>
-                    <li>ID: {{USER.id}}</li>
                     <li>{{LangData.created}}: {{USER.createdAt.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}} {{USER.createdAt.toLocaleDateString()}}</li>
                     <li>{{LangData.changed}}: {{USER.updatedAt.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}} {{USER.updatedAt.toLocaleDateString()}}</li>
                 </ul>
+            </div>
+            <div class="d-flex justify-content-center align-items-center">
+                <span class="osisettings-btn-warning" @click="ReloadPage()">Выйти из учетной записи</span>
             </div>
             <hr>
             <h3>Все учетные записи на устройстве:</h3>
@@ -70,7 +72,6 @@
                     </div>
                 </li>
             </ul>
-            {{USER}}
         </div>
 
         <!-- memory managment area -->

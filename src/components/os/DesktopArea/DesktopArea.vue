@@ -8,9 +8,7 @@
     export default {
         name: "DesktopArea",
 
-        props: {
-            USERID: {type: Number, default: 0},
-        },
+        props: { USERID: {type: Number, default: 0} },
   
         data() {
             return {
@@ -27,24 +25,8 @@
             };
         },
   
-        computed: {
-            // desktopStyle() {
-            //     const userImg = (this.USER) ? this.USER.systemconfig.desktopWallpaper : false;
-            //     const defaultImg = `url(${require('@/assets/wallpapers/abacus.jpg')})`;
-            //     // const defaultImg = `url(${this.getWallpaperUrl()})`;
-            //     console.log('userImg', userImg);
-                
-            //     return {
-            //         backgroundImage: userImg || defaultImg,
-            //         backgroundSize: 'cover',
-            //         backgroundPosition: 'center',
-            //         backgroundRepeat: 'no-repeat'
-            //     }
-            // },
-    
-            osStore() {
-                return useOsStore();
-            }
+        computed: {    
+            osStore() { return useOsStore(); },
         },
   
         methods: {
@@ -95,48 +77,26 @@
             async changeWallpaper(inpName) {
                 try {
                     const nUser = this.USER;
-                    console.log('nUser', nUser);
+
                     nUser.systemconfig.desktopWallpaper = inpName;
-                    console.log('nUser 1', nUser);
 
                     this.USER = await usersTable.save(nUser);
-                    // console.log('operRes', operRes);
                     this.reReqUserConfig();
+
                     return this.USER;
                 } catch(error) {
                     console.error('Ошибка изменения изображения:', error);
+
                     return {};
                 }
             },
 
-            // changeWallpaper(inpName) {
-            //     try {
-            //         // require() возвращает модуль, нужно использовать .default
-            //         const imageModule = require(`@/assets/wallpapers/${inpName}`);
-            //         const imagePath = imageModule.default || imageModule;
-            //         console.log('imagePath', imagePath);
-                
-            //         const block = document.getElementById('desktop-area');
-                    
-            //         if (block) {
-            //             // block.style.backgroundImage = `url("${imagePath}")`;
-            //             this.bgWallpapper = `url("${imagePath}")`;
-            //             console.log('Фон обновлён:', imagePath);
-            //         } else {
-            //             console.error('Элемент desktop-area не найден');
-            //         }
-            //     } catch (error) {
-            //         console.error('Ошибка загрузки изображения:', error);
-            //     }
-            // },
-
             reReqUserConfig() {
                 this.findUser();
+                
                 setTimeout(() => {
                     const userImg = (this.USER) ? `url(${require('@/assets/wallpapers/' + this.USER.systemconfig.desktopWallpaper)})` : false;
                     const defaultImg = `url(${require('@/assets/wallpapers/abacus.jpg')})`;
-                    // const defaultImg = `url(${this.getWallpaperUrl()})`;
-                    console.log('userImg', userImg);
                         
                     this.desktopStyle = {
                         backgroundImage: userImg || defaultImg,

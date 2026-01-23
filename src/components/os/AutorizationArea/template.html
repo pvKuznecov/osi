@@ -95,6 +95,10 @@
             </table>
         </div>
         <div class="d-flex justify-content-center align-items-center mt-3 newuser-inputelem">
+            <label for="newUser_name">Name:</label>
+            <input type="text" id="newUser_name" v-model="defaultUser.name" placeholder="Ваше имя" maxlength="20">
+        </div>
+        <div class="d-flex justify-content-center align-items-center mt-3 newuser-inputelem">
             <label for="newUser_login">Login:</label>
             <input type="text" id="newUser_login" v-model="defaultUser.login" placeholder="Ваш логин" maxlength="15">
         </div>

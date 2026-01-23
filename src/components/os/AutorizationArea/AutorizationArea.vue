@@ -6,6 +6,7 @@
     import { LangPack } from './lang';
 
     const EmptyUser = {
+        name: 'User',
         login: '',
         password: '',
         avatar: 'cat.jpg',
@@ -96,6 +97,7 @@
             async saveUser() {
                 if (this.defaultUser.login && this.defaultUser.login !== '') {
                     const NUserData = {
+                        name: this.defaultUser.name || 'User',
                         login: this.defaultUser.login,
                         password: this.defaultUser.password || '',
                         config: {
@@ -110,7 +112,7 @@
                         
                         this.loadUsers();
                         this.showForm_addUser();
-                        this.defaultUser = {login: '', password: '', avatar: 'cat.jpg'};
+                        this.defaultUser = EmptyUser;
                     } catch (error) {
                         console.error('Ошибка создания пользователя:', error);
                         this.operationNewUserResult = 'Ошибка при создании учетной записи.'

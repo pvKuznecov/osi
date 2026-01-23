@@ -15,6 +15,7 @@ export const LangPack = {
         created: 'Created',
         changed: 'Changed',
         login: 'Login',
+        user: 'User',
     },
     ru: {
         description: 'Описание',
@@ -32,5 +33,6 @@ export const LangPack = {
         created: 'Создано',
         changed: 'Изменено',
         login: 'Логин',
+        user: 'Пользователь',
     },
 };

@@ -1,6 +1,7 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
+    import { usersTable } from '@/idb/db';
     import { useAppsStore } from '@/stores/apps.store';
     import { LangPack } from './lang';
     import { mapStores } from 'pinia';
@@ -10,6 +11,7 @@
 
         props: {
             windowId: { type: String, required: true },
+            USERID: {type: Number, default: 0},
             selectedYear: { type: Number, default: null},
             selectedMonth: { type: Number, default: null},
             selectedDay: { type: Number, default: null},
@@ -23,6 +25,7 @@
                 Today: new Date(),
                 SelectedDate: new Date(),
                 SelectedDate_plan: [{}, {}],
+                USER: null,
             }
         },
         
@@ -109,6 +112,15 @@
         },
 
         methods: {
+            async findUser() {
+                try {
+                    this.USER = await usersTable.getbyId(this.USERID);
+                } catch (error) {
+                    console.error('Ошибка поиска пользователя:', error);
+                    this.$toast.error('Не удалось загрузить данные пользователя');
+                }
+            },
+
             display_selectedDate() {
                 return this.display_day + '-' + this.display_month + '-' + this.display_year;
             },
@@ -199,6 +211,8 @@
 
         mounted() {
             console.log('OSICalendar app mounted with windowId:', this.windowId);
+            
+            this.findUser();
 
             // Инициализируем данные из store после монтирования
             this.$nextTick(() => {

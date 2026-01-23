@@ -2,21 +2,22 @@ import Dexie from "dexie";
 
 // конфигураторы БД
 const db_name = 'OSIDB';
-const db_version = 2;
+const db_version = 1;
 
 // инициализация БД
 const DB = new Dexie(db_name);
 
 // описание схемы БД
 DB.version(db_version).stores({
-    users: '++id, login, password, apps, data, config, systemСonfig, createdAt, updatedAt',
+    users: '++id, name, login, password, apps, data, config, systemСonfig, createdAt, updatedAt',
     settings: '++id, key, value, updatedAt',
 });
 
 // -=-=-=-=-=-=-Описание классов моделей-=-=-=-=-=-=-
 export class User {
     constructor(data = {}) {
-        this.login = data.login || '';
+        this.login = data.login || 'user';
+        this.name = data.name || 'User';
         this.password = data.password || '';    //ПРОДУМАТЬ РЕАЛЬНУЮ СХЕМУ ЗАЩИТЫ
         this.apps = data.apps || [];
         this.data = data.data || {};
