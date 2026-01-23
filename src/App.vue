@@ -1,7 +1,7 @@
 <template>
     <AutorizationArea v-if="!isAutorized" @selectUser="selectUser" />
     <div v-if="isAutorized" class="webos">
-        <DesktopArea>
+        <DesktopArea :USERID="USERID">
             <SimpleWindow v-for="window in osStore.windows"
                 :key="window.id"
                 :windowId="window.id"
@@ -59,6 +59,7 @@
                 osStore: null,
                 appsStore: null,
                 USERID: null,
+                USER: {},
                 // useAppsStore: null
             }
         },

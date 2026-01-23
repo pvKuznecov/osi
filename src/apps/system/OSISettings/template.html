@@ -35,24 +35,27 @@
         <!-- accounts area -->
         <div v-if="SelectArea === 'accounts'" class="osisettings-elem-info">
             <h2>{{LangData.accounts}}</h2>
+            <h3>Текущая учетная запись:</h3>
             <div class="account-elem d-flex justify-content-center align-items-center">
                 <div class="account-elem-avatar" :style="avatarStyle(USER.config.avatar)"></div>
                 <ul style="display: inline-block;">
-                    <li>ID: {{USER.id}}</li>
                     <li>{{LangData.login}}: {{USER.login}}</li>
+                    <li>ID: {{USER.id}}</li>
                     <li>{{LangData.created}}: {{USER.createdAt.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}} {{USER.createdAt.toLocaleDateString()}}</li>
                     <li>{{LangData.changed}}: {{USER.updatedAt.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}} {{USER.updatedAt.toLocaleDateString()}}</li>
                 </ul>
             </div>
             <hr>
-            <div v-for="u in users">
-                <ul>
-                    <li>ID: {{u.id}}</li>
-                    <li>{{LangData.login}}: {{u.login}}</li>
-                    <li>{{LangData.created}}: {{u.createdAt.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}} {{u.createdAt.toLocaleDateString()}}</li>
-                    <li>{{LangData.changed}}: {{u.updatedAt.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}} {{u.updatedAt.toLocaleDateString()}}</li>
-                </ul>
+            <h3>Все учетные записи на устройстве:</h3>
+            <div class="accaunts-list row">
+                <div v-for="u in users" class="account-elem-min d-flex justify-content-center align-items-center">
+                    <div class="account-elem-avatar-min" :style="avatarStyle(u.config.avatar)"></div>
+                    <div style="display: inline-block;">
+                        <b>{{u.login}}</b>
+                    </div>
+                </div>
             </div>
+            
         </div>
 
         <!-- design area -->
@@ -62,11 +65,12 @@
                 <li>
                     <h3>{{ LangData.desktopbgimg }}:</h3>
                     <div v-for="wp in wpList" class="wp-elem-min" @click="ChangeWPImage(wp.nameExt)">
-                        <img :src="wp.path" :alt="wp.name" />
+                        <img :src="wp.path" :alt="wp.name" :class="(USER.systemconfig.desktopWallpaper == wp.nameExt) ? 'selected-wp' : ''" />
                         <div class="wp-elem-min-title">{{ wp.name }}</div>
                     </div>
                 </li>
             </ul>
+            {{USER}}
         </div>
 
         <!-- memory managment area -->

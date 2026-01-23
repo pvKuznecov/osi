@@ -3,12 +3,10 @@
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
+    overflow-y: auto;
     background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85));
     color: white;
-    font-size: 14px;
-    overflow: hidden;
-    overflow-y: auto;
-}
+    font-size: 14px; }
 
 .autorization-area table {
     width: 96%;
@@ -28,13 +26,13 @@
     border-radius: 5px;
     margin: 10px;
     box-shadow: 0 6px 20px rgba(249, 250, 250, 0.25); }
+
 .login-elem:hover { box-shadow: 0 6px 20px rgba(0, 120, 212, 0.25); }
 
 .login-elem-info {
     width: calc(100% - 100px);
     margin-right: 10px;
-    overflow: hidden;
-}
+    overflow: hidden; }
 
 .login-elem-button {
     padding: 3px 5px;
@@ -42,14 +40,11 @@
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
-    /* margin-bottom: 10px; */
     opacity: .9; }
+
 .login-elem-button:hover { opacity: 1; }
 
-.login-elem-newbutton {
-    margin-top: 10px;
-    /* margin-bottom: 10px; */
-}
+.login-elem-newbutton { margin-top: 10px; }
 
 .button-createnewuser {
     padding: 5px 10px;
@@ -59,6 +54,7 @@
     cursor: pointer;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
     opacity: .9; }
+
 .button-createnewuser:hover { opacity: 1; }
 
 .intro-area,
@@ -75,23 +71,17 @@
     border-radius: 5px;
     padding: 10px;
     box-shadow: 0 6px 20px rgba(43, 226, 113, 0.25);
-    font-size: medium;
-}
+    font-size: medium; }
 
-.newuser-inputelem {
-    width: 600px;
-}
+.newuser-inputelem { width: 600px; }
 
 .newuser-inputelem input {
     width: 250px;
     border-radius: 5px;
     margin-left: 5px;
-    padding: 3px 5px;
-}
+    padding: 3px 5px; }
 
-.newuser-inputelem label {
-    width: 80px;
-}
+.newuser-inputelem label { width: 80px; }
 
 .login-elem-ava {
     display: inline-block;
@@ -99,23 +89,16 @@
     height: 120px;
     margin-left: 10px;
     margin-right: 10px;
-    /* margin-top: 10px;
-    margin-bottom: 10px; */
     background-color: aliceblue;
-    border-radius: 5px;
-}
+    border-radius: 5px; }
 
 .login-elem-miniava {
     display: inline-block;
     width: 80px;
     height: 80px;
-    /* margin-left: 10px; */
     margin-right: 10px;
-    /* margin-top: 10px;
-    margin-bottom: 10px; */
     background-color: aliceblue;
-    border-radius: 5px;
-}
+    border-radius: 5px; }
 
 .login-elem-microava {
     display: inline-block;
@@ -134,12 +117,12 @@
     right: 10px;
     width: 18px;
     height: 18px;
-    /* border: 1px solid white; */
     border-radius: 5px;
     font-size: 12px;
     cursor: pointer;
     margin-left: 1px;
     opacity: .9; }
+
 .user-del-minbtn:hover {
     opacity: 1;
     color: red; }
@@ -152,8 +135,6 @@
     margin-top: 10px;
     margin-bottom: 20px;
     border: 2px solid rgb(226, 28, 28);
-    /* border-radius: 5px; */
-    /* box-shadow: 0 6px 20px rgba(226, 28, 28, 0.25); */
     padding: 5px 10px; }
 
 .warning-text-area h3 { color: rgb(226, 28, 28); }
@@ -183,21 +164,12 @@
 
 .load-animation {
     display: inline-block; /* важно для корректного вращения */
-    /* width: 28px;
-    height: 28px; */
     font-size: 64px;
     color: rgb(43, 226, 113);
-    /* border-radius: 50px; */
-    /* box-shadow: 0 6px 20px rgba(43, 226, 113, 0.25); */
     animation: rotate 5s linear infinite;
-    transform-origin: center; /* центр вращения */
-}
+    transform-origin: center; }
 
 @keyframes rotate {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

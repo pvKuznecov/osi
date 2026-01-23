@@ -2,7 +2,7 @@ import Dexie from "dexie";
 
 // конфигураторы БД
 const db_name = 'OSIDB';
-const db_version = 1;
+const db_version = 2;
 
 // инициализация БД
 const DB = new Dexie(db_name);
@@ -20,8 +20,8 @@ export class User {
         this.password = data.password || '';    //ПРОДУМАТЬ РЕАЛЬНУЮ СХЕМУ ЗАЩИТЫ
         this.apps = data.apps || [];
         this.data = data.data || {};
-        this.config = data.config || {};
-        this.systemconfig = data.systemconfig || {};
+        this.config = data.config || {avatar: "cat.jpg"};
+        this.systemconfig = data.systemconfig || {desktopWallpaper: "nwall.jpg"};
         this.createdAt = data.createdAt || new Date();
         this.updatedAt = data.updatedAt || new Date();
 
@@ -44,15 +44,41 @@ export class Setting {
 // -=-=-=-=-=-=-Основные операции CRUD-=-=-=-=-=-=-
 export const usersTable = {
     // обновление|сохранение учетной записи
+    // async save(userData) {
+    //     try {
+    //         const NUser = new User(userData);
+
+    //         if (NUser.id) {
+    //             NUser.updatedAt = new Date();
+    //             await DB.users.update(NUser.id, NUser);
+
+    //             return NUser.id;
+    //         } else {
+    //             // зачищаем id в NUser (автоматически сгенерирует)
+    //             delete NUser.id;
+
+    //             NUser.createdAt = new Date();
+    //             NUser.updatedAt = new Date();
+
+    //             return await DB.users.add(NUser);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error operation (users; save):', error);            
+    //         throw new Error(`Failed to save user: ${error.message}`);
+    //     }
+    // },
     async save(userData) {
         try {
             const NUser = new User(userData);
 
             if (NUser.id) {
-                NUser.updatedAt = new Date();
-                await DB.users.update(NUser.id, NUser);
+                // Преобразуем объект User в простой объект для IndexedDB
+                const userForDB = this.prepareUserForDB(NUser);
+                
+                userForDB.updatedAt = new Date();
+                await DB.users.update(userForDB.id, userForDB);
 
-                return NUser.id;
+                return NUser;
             } else {
                 // зачищаем id в NUser (автоматически сгенерирует)
                 delete NUser.id;
@@ -66,6 +92,27 @@ export const usersTable = {
             console.error('Error operation (users; save):', error);            
             throw new Error(`Failed to save user: ${error.message}`);
         }
+    },
+
+    prepareUserForDB(user) {
+        // Создаем простой объект, который можно сохранить в IndexedDB
+        return {
+            id: user.id,
+            login: user.login,
+            password: user.password,
+            config: user.config ? { ...user.config } : {avatar: "cat.jpg"},
+            systemconfig: user.systemconfig ? { ...user.systemconfig } : {desktopWallpaper: "nwall.jpg"},
+            // config: user.config ? {
+            //     avatar: user.config.avatar || "cat.jpg",
+            
+            // } : {avatar: "cat.jpg"},
+            // systemconfig: user.systemconfig ? {
+            //     desktopWallpaper: user.systemconfig.desktopWallpaper || "nwall.jpg",
+            
+            // } : {desktopWallpaper: "nwall.jpg"},
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
+        };
     },
 
     // поиск учетной записи по id
@@ -211,7 +258,9 @@ export async function initDatabase() {
                 config: {
                     avatar: 'robot.jpg',
                 },
-                systemconfig: {},
+                systemconfig: {
+                    desktopWallpaper: "nwall.jpg"
+                },
             });
 
             await usersTable.save(defaultUser);

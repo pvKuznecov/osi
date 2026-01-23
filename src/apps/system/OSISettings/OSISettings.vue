@@ -147,6 +147,7 @@
 
             ChangeWPImage(inpName) {
                this.changeWallpaper(inpName);
+               this.findUser();
             },
 
             getAvatarUrl(avatarName) {
