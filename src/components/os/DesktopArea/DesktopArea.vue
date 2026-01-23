@@ -1,16 +1,21 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
+    import { usersTable } from '@/idb/db';
     import { useOsStore } from '@/stores/os.store';
     import { appsConfig } from '@/config/applications'
 
     export default {
         name: "DesktopArea",
+
+        props: { USERID: {type: Number, default: 0} },
   
         data() {
             return {
                 apps: [],
                 bgWallpapper: null,
+                USER: null,
+                desktopStyle: {},
             }
         },
 
@@ -20,25 +25,20 @@
             };
         },
   
-        computed: {
-            desktopStyle() {
-                const defaultImg = `url(${require('@/assets/wallpapers/abacus.jpg')})`;
-                // const defaultImg = `url(${this.getWallpaperUrl()})`;
-                
-                return {
-                    backgroundImage: this.bgWallpapper || defaultImg,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat'
-                }
-            },
-    
-            osStore() {
-                return useOsStore();
-            }
+        computed: {    
+            osStore() { return useOsStore(); },
         },
   
         methods: {
+            async findUser() {
+                try {
+                    this.USER = await usersTable.getbyId(this.USERID);
+                } catch (error) {
+                    console.error('Ошибка поиска пользователя:', error);
+                    this.$toast.error('Не удалось загрузить данные пользователя');
+                }
+            },
+
             getWallpaperUrl() {
                 return require('@/assets/wallpapers/abacus.jpg');
             },
@@ -74,30 +74,44 @@
                 }
             },
 
-            changeWallpaper(inpName) {
+            async changeWallpaper(inpName) {
                 try {
-                    // require() возвращает модуль, нужно использовать .default
-                    const imageModule = require(`@/assets/wallpapers/${inpName}`);
-                    const imagePath = imageModule.default || imageModule;
-                    console.log('imagePath', imagePath);
-                
-                    const block = document.getElementById('desktop-area');
-                    
-                    if (block) {
-                        // block.style.backgroundImage = `url("${imagePath}")`;
-                        this.bgWallpapper = `url("${imagePath}")`;
-                        console.log('Фон обновлён:', imagePath);
-                    } else {
-                        console.error('Элемент desktop-area не найден');
-                    }
-                } catch (error) {
-                    console.error('Ошибка загрузки изображения:', error);
+                    const nUser = this.USER;
+
+                    nUser.systemconfig.desktopWallpaper = inpName;
+
+                    this.USER = await usersTable.save(nUser);
+                    this.reReqUserConfig();
+
+                    return this.USER;
+                } catch(error) {
+                    console.error('Ошибка изменения изображения:', error);
+
+                    return {};
                 }
+            },
+
+            reReqUserConfig() {
+                this.findUser();
+                
+                setTimeout(() => {
+                    const userImg = (this.USER) ? `url(${require('@/assets/wallpapers/' + this.USER.systemconfig.desktopWallpaper)})` : false;
+                    const defaultImg = `url(${require('@/assets/wallpapers/abacus.jpg')})`;
+                        
+                    this.desktopStyle = {
+                        backgroundImage: userImg || defaultImg,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat'
+                    };
+                }, 300);            
             },
         },
 
-        mounted() {
+        mounted() {            
             this.apps = appsConfig.getDesktopApps();
+
+            this.reReqUserConfig();
         }
     }
 </script>

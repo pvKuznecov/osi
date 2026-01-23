@@ -3,11 +3,11 @@
 <script>
     import { JSH } from '@/core/helpers';
     import { usersTable } from '@/idb/db';
-    // import { useOSIAppsStore } from '@/stores/os.apps.store';
-    import { LangPack } from './lang';
-    // import { mapStores } from 'pinia';
     import { OSIDATA } from '@/config/os';
     import { OSICONFIG } from '@/config/config';
+    import { LangPack } from './lang';
+    // import { useOSIAppsStore } from '@/stores/os.apps.store';
+    // import { mapStores } from 'pinia';
 
     const ComponentName = 'OSISettings';
 
@@ -87,6 +87,10 @@
         },
 
         methods: {
+            ReloadPage() {
+                window.location.reload();
+            },
+
             async loadUsers() {
                 try {
                     this.users = await usersTable.getAll();
@@ -147,6 +151,7 @@
 
             ChangeWPImage(inpName) {
                this.changeWallpaper(inpName);
+               this.findUser();
             },
 
             getAvatarUrl(avatarName) {

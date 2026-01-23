@@ -5,10 +5,8 @@
         name: "OSIHelper",
 
         props: {
-            windowId: {
-                type: String,
-                required: true
-            },
+            windowId: {type: String, required: true},
+            USERID: {type: Number, default: 0}
         },
     }
 </script>

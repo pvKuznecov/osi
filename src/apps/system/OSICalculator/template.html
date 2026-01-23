@@ -32,7 +32,7 @@
         <h3>{{LangData.history}}</h3>
         <ul>
             <li v-for="(item, index) in reversedHistory" :key="index" @click="useHistoryItem(item)">
-                {{ item.expression }} = {{ item.result }}
+                {{item.expression}} = {{item.result}}
             </li>
         </ul>
         <button v-if="history.length > 0" class="clear-history" @click="clearHistory">{{LangData.clearhistory}}</button>

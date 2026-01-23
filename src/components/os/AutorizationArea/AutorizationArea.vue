@@ -4,6 +4,13 @@
     import { usersTable } from '@/idb/db';
     import { JSH } from '@/core/helpers';
     import { LangPack } from './lang';
+
+    const EmptyUser = {
+        name: 'User',
+        login: '',
+        password: '',
+        avatar: 'cat.jpg',
+    };
     
     export default {
         name: 'AutorizationArea',
@@ -15,11 +22,7 @@
                 creating: false,
                 deletion: false,
                 avatarsList: JSH.system.getAvatarsList(),
-                defaultUser: {
-                    login: '',
-                    password: '',
-                    avatar: 'cat.jpg',
-                },
+                defaultUser: EmptyUser,
                 deletingUser: null,
                 operationNewUserResult: null,
                 operationDelUserResult: null,
@@ -74,15 +77,12 @@
             selectUser(userData) {
                 // todo: придумать адекватную схему защиты учетной записи, пока это скорее затычка
                 if (userData && this.isNeedPass && this.introPass === userData.password) {
-                    // this.introErrorTxt = null;
                     this.$emit('selectUser', userData.id);
                 } else if (!this.isNeedPass) {
-                    // this.introErrorTxt = null;
                     this.$emit('selectUser', userData.id);
                 } else {
                     this.introErrorTxt = 'Ошибка! Указан не корректный пароль!';
-                }
-                
+                }                
             },
 
             async loadUsers() {
@@ -97,6 +97,7 @@
             async saveUser() {
                 if (this.defaultUser.login && this.defaultUser.login !== '') {
                     const NUserData = {
+                        name: this.defaultUser.name || 'User',
                         login: this.defaultUser.login,
                         password: this.defaultUser.password || '',
                         config: {
@@ -108,10 +109,10 @@
                     try {
                         const operResult = await usersTable.save(NUserData);
                         console.log('operResult', operResult);
-                        // this.operationNewUserResult = 'ok'
+                        
                         this.loadUsers();
                         this.showForm_addUser();
-                        this.defaultUser = {login: '', password: '', avatar: 'cat.jpg'};
+                        this.defaultUser = EmptyUser;
                     } catch (error) {
                         console.error('Ошибка создания пользователя:', error);
                         this.operationNewUserResult = 'Ошибка при создании учетной записи.'
@@ -143,7 +144,7 @@
                         console.log('operResult', operResult);
 
                         this.loadUsers();
-                        this.defaultUser = {login: '', password: '', avatar: 'cat.jpg'};
+                        this.defaultUser = EmptyUser;
                         this.deletion = false;
                         this.deletingUser = null;
                         this.inpPass = '';
@@ -155,9 +156,7 @@
                     this.operationDelUserResult = 'Ошибка при удалении учетной записи: указан некорректный пароль.'
                 } else {
                     this.operationDelUserResult = 'Неизвестная ошибка при удалении учетной записи.'
-                }
-                
-                             
+                }            
             },
 
             showForm_addUser() {
@@ -168,7 +167,7 @@
 
             showForm_delUser(userData = false) {
                 this.operationDelUserResult = null;
-                
+
                 if (userData) {
                     this.deletingUser = userData;
                     this.creating = false;
@@ -185,19 +184,16 @@
             },
 
             avatarStyle(avatarName) {
-                return {
+                const AvatarTemp = {
                     backgroundImage: this.getAvatarUrl(avatarName),
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    // width: '50px',
-                    // height: '50px',
-                    // borderRadius: '50%' // для круглых аватарок
                 };
+
+                return AvatarTemp;
             },
 
-            selectedNewAvatar(avatarName) {
-                this.defaultUser.avatar = avatarName;
-            },
+            selectedNewAvatar(avatarName) { this.defaultUser.avatar = avatarName; },
         },
 
         async mounted() {
@@ -205,6 +201,7 @@
 
             const userLang = navigator.language || navigator.userLanguage;
             const userLangS = userLang.split('-')[0];
+            
             this.UserLang = userLangS; 
             
             const LangPackData = LangPack;
