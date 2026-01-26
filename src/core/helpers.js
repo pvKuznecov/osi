@@ -71,6 +71,16 @@ export const JSH = {
             }
         }
     },
+    lang: {
+        en: {
+            cattype_utilities: 'Utilities',
+            cattype_system: 'System',
+        },
+        ru: {
+            cattype_utilities: 'Утилиты',
+            cattype_system: 'Система',
+        },
+    },
     system: {
         getImageList: () => {
             const imagesContext = require.context(

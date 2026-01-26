@@ -113,3 +113,20 @@
     font-size: 14px;
     padding: 2px 4px;
     cursor: pointer; }
+
+.app-cat-area { margin-top: 10px; padding-bottom: 5px; }
+.app-cat-area:not(:last-child) { border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+
+.account-elem-minavatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 5px;
+    margin-right: 10px; }
+
+.app-category-name {
+    padding-left: 5px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.appmanager-minico { cursor: pointer; }

@@ -1,11 +1,16 @@
 <div v-if="showMenu" class="task-bar-overplace" @click="toggleStartMenu"></div>
 <div v-if="showMenu" class="task-bar-menu">
-    <div class="task-bar-menu-header">
-        <span class="start-icon bi bi-house-fill"></span>
-        <span class="start-text"> Меню</span>
+    <div class="task-bar-menu-header d-flex align-items-center">
+        <span v-if="USER && USER.config?.avatar" class="account-elem-minavatar" :style="avatarStyle(USER.config.avatar)"></span>
+        <span v-if="USER && USER.name">{{USER.name}}</span>
+        <span v-if="!USER" class="start-icon bi bi-house-fill"></span>
+        <span v-if="!USER" class="start-text">Меню</span>
     </div>
-    <div class="task-bar-menu-elem" v-for="app in appsList">
-        <div class="app-icon" :class="!app.icon ? app.iconclass : ''" @click="launchApp(app)"></div> <span @click="launchApp(app)">{{app.label}}</span>
+    <div v-for="cat in Object.keys(sortByType_appsList)" class="app-cat-area">
+        <i class="app-category-name">{{GLangData['cattype_' + cat]}}:</i>
+        <div class="task-bar-menu-elem" v-for="app in sortByType_appsList[cat]">
+            <div class="app-icon" :class="!app.icon ? app.iconclass : ''" @click="launchApp_byMenu(app)"></div> <span @click="launchApp_byMenu(app)">{{app.label}}</span>
+        </div>
     </div>
 </div>
 <div class="task-bar">
@@ -21,8 +26,9 @@
             <span class="app-title">{{ window.title }}</span>
         </button>
     </div>
+
     <div>
-        <i class="bi bi-grid-3x3-gap-fill"></i>
+        <i class="bi bi-grid-3x3-gap-fill appmanager-minico" :title="`Запущено приложений: ${osStore.windows.length}.`" @click="launchApp(appManager_data)"></i>
     </div>
     <!-- Системный трей -->
     <div class="system-tray">
