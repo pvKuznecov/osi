@@ -28,7 +28,7 @@
                 @focus="activateWindow"                
             />
         </DesktopArea>
-        <TaskBar />
+        <TaskBar :USERID="USERID" />
     </div>
 </template>
 <!-- <style scoped>

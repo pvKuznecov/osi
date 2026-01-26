@@ -54,6 +54,7 @@
                     'OSISettings': () => import('@/apps/system/OSISettings/OSISettings.vue'),
                     'OSIMPlayer': () => import('@/apps/system/OSIMPlayer/OSIMPlayer.vue'),
                     'OSICalendar': () => import('@/apps/system/OSICalendar/OSICalendar.vue'),
+                    'OSIAppManager': () => import('@/apps/system/OSIAppManager/OSIAppManager.vue'),
                 };
 
                 if (this.appName && componentMap[this.appName]) {

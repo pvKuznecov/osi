@@ -103,7 +103,28 @@ const applications = [
         showInStartMenu: true,  // Отображать в меню "Пуск"
         
         category: 'utilities',  // Категория для группировки (опционально)
-    }
+    },
+    {
+        id: 'osiappmanager',
+        name: 'OSIAppManager',
+        label: 'AppManager',
+        icon: '',
+        iconclass: 'bi-grid-3x3-gap-fill text-ico-tech',
+        description: 'Менеджер приложений OSI.',   // Описание приложения
+
+        defWidth: 850,
+        defHeight: 400,
+        isMaximized: true,  // По умолчанию НЕ открывается развернутым
+        resizable: false,
+        canMinimize: false,
+
+        // componentPath: '@/apps/system/OSIMPlayer/OSIMPlayer.vue', // Путь к компоненту Vue
+        
+        showOnDesktop: false,    // Отображать на рабочем столе
+        showInStartMenu: true,  // Отображать в меню "Пуск"
+        
+        category: 'system',  // Категория для группировки (опционально)
+    },
 ];
 
 // const enrichedApplications = applications;
