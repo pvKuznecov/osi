@@ -39,7 +39,6 @@
         computed: {
             isNeedPass() {
                 const sUser = this.selectedUser;
-                console.log('sUser', sUser);
 
                 return (sUser && sUser.password !== '') ? true : false;
             },
@@ -104,7 +103,6 @@
                             avatar: this.defaultUser.avatar
                         }
                     };
-                    console.log('NUserData', NUserData);
 
                     try {
                         const operResult = await usersTable.save(NUserData);

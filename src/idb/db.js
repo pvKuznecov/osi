@@ -1,11 +1,36 @@
 import Dexie from "dexie";
 
+import { appsConfig } from "@/config/applications";
+
 // конфигураторы БД
 const db_name = 'OSIDB';
 const db_version = 1;
 
 // инициализация БД
 const DB = new Dexie(db_name);
+
+// const defaultApps = await appsConfig.getAllApps();
+// Функция для получения упрощенных объектов приложений
+async function getDefaultApps() {
+    const apps = await appsConfig.getAllApps();
+    
+    // Преобразуем каждый объект приложения в упрощенную версию
+    return apps.map(app => ({
+        id: app.id,
+        label: app.label,
+        description: app.description || '',
+        category: app.category || 'Другое',
+        icon: app.icon || '',
+        iconclass: app.iconclass || '',
+        showOnDesktop: app.showOnDesktop !== undefined ? app.showOnDesktop : true,
+        showInStartMenu: app.showInStartMenu !== undefined ? app.showInStartMenu : true,
+        // Сохраняем только базовые данные, удаляем функции и компоненты
+        path: app.path || '',
+        component: app.component ? app.component.name || 'Component' : 'Component',
+        // Добавляем только примитивные типы данных
+        data: app.data && typeof app.data === 'object' ? JSON.parse(JSON.stringify(app.data)) : {}
+    }));
+}
 
 // описание схемы БД
 DB.version(db_version).stores({
@@ -45,37 +70,16 @@ export class Setting {
 // -=-=-=-=-=-=-Основные операции CRUD-=-=-=-=-=-=-
 export const usersTable = {
     // обновление|сохранение учетной записи
-    // async save(userData) {
-    //     try {
-    //         const NUser = new User(userData);
-
-    //         if (NUser.id) {
-    //             NUser.updatedAt = new Date();
-    //             await DB.users.update(NUser.id, NUser);
-
-    //             return NUser.id;
-    //         } else {
-    //             // зачищаем id в NUser (автоматически сгенерирует)
-    //             delete NUser.id;
-
-    //             NUser.createdAt = new Date();
-    //             NUser.updatedAt = new Date();
-
-    //             return await DB.users.add(NUser);
-    //         }
-    //     } catch (error) {
-    //         console.error('Error operation (users; save):', error);            
-    //         throw new Error(`Failed to save user: ${error.message}`);
-    //     }
-    // },
     async save(userData) {
         try {
             const NUser = new User(userData);
+            console.log('NUser', NUser);
 
             if (NUser.id) {
                 // Преобразуем объект User в простой объект для IndexedDB
                 const userForDB = this.prepareUserForDB(NUser);
-                
+                console.log('userForDB', userForDB);
+
                 userForDB.updatedAt = new Date();
                 await DB.users.update(userForDB.id, userForDB);
 
@@ -84,8 +88,11 @@ export const usersTable = {
                 // зачищаем id в NUser (автоматически сгенерирует)
                 delete NUser.id;
 
+                NUser.apps = await getDefaultApps();
                 NUser.createdAt = new Date();
                 NUser.updatedAt = new Date();
+
+                console.log('NUser-2', NUser);
 
                 return await DB.users.add(NUser);
             }
@@ -96,23 +103,37 @@ export const usersTable = {
     },
 
     prepareUserForDB(user) {
+        // Убеждаемся, что apps содержит только клонируемые данные
+        const safeApps = user.apps ? user.apps.map(app => {
+            // Создаем безопасную копию без функций
+            const safeApp = { ...app };
+            
+            // Удаляем любые несериализуемые свойства
+            Object.keys(safeApp).forEach(key => {
+                const val = safeApp[key];
+                if (typeof val === 'function' || 
+                    (val && typeof val === 'object' && val.constructor && 
+                     val.constructor.name === 'Promise')) {
+                    delete safeApp[key];
+                }
+            });
+            
+            return safeApp;
+        }) : [];
+        console.log('safeApps', safeApps);
+
         // Создаем простой объект, который можно сохранить в IndexedDB
         return {
             id: user.id,
             login: user.login,
+            name: user.name,
             password: user.password,
+            apps: safeApps,
+            data: user.data ? JSON.parse(JSON.stringify(user.data)) : {},
             config: user.config ? { ...user.config } : {avatar: "cat.jpg"},
             systemconfig: user.systemconfig ? { ...user.systemconfig } : {desktopWallpaper: "nwall.jpg"},
-            // config: user.config ? {
-            //     avatar: user.config.avatar || "cat.jpg",
-            
-            // } : {avatar: "cat.jpg"},
-            // systemconfig: user.systemconfig ? {
-            //     desktopWallpaper: user.systemconfig.desktopWallpaper || "nwall.jpg",
-            
-            // } : {desktopWallpaper: "nwall.jpg"},
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt
+            createdAt: user.createdAt instanceof Date ? user.createdAt : new Date(user.createdAt),
+            updatedAt: user.updatedAt instanceof Date ? user.updatedAt : new Date(user.updatedAt)
         };
     },
 
@@ -143,6 +164,91 @@ export const usersTable = {
         } catch (error) {
             console.error('Error operation (users; getAll):', error);
             throw new Error(`Failed to get all users`);
+        }
+    },
+
+    // получить массив apps учетной записи
+    async getApps(id) {
+        try {
+            const USER = await DB.users.get(id);
+            if (USER && USER.apps) {
+                return USER.apps;
+            } else {
+                console.error('Error operation (users; getApps).');
+            }
+        } catch (error) {
+            console.error('Error operation (users; getApps):', error);            
+            throw new Error(`Failed to get user by id ${id}: ${error.message}`);
+        }
+    },
+
+    // получить config пользователя по id
+    async getConfig(id) {
+        try {
+            const USER = await DB.users.get(id);
+            if (USER && USER.config) {
+                return USER.config;
+            } else {
+                console.error('Error operation (users; getConfig).');
+            }
+        } catch (error) {
+            console.error('Error operation (users; getConfig):', error);            
+            throw new Error(`Failed to get user by id ${id}: ${error.message}`);
+        }
+    },
+
+    // получить systemconfig пользователя по id
+    async getSConfig(id) {
+        try {
+            const USER = await DB.users.get(id);
+            if (USER && USER.systemconfig) {
+                return USER.systemconfig;
+            } else {
+                console.error('Error operation (users; getSConfig).');
+            }
+        } catch (error) {
+            console.error('Error operation (users; getSConfig):', error);            
+            throw new Error(`Failed to get user by id ${id}: ${error.message}`);
+        }
+    },
+
+    // обновление конфигуратора приложений в учетной записи
+    async updateAppSetting(userId, appId, key, value) {
+        try {
+            // Получаем пользователя
+            const user = await DB.users.get(userId);
+            
+            if (!user) {
+                throw new Error(`Пользователь с ID ${userId} не найден`);
+            }
+            
+            // Находим приложение в массиве apps
+            const appIndex = user.apps.findIndex(app => app.id === appId);
+            if (appIndex === -1) {
+                throw new Error(`Приложение с ID ${appId} не найдено у пользователя ${userId}`);
+            }
+            
+            // Обновляем значение ключа
+            // Используем $set для реактивного обновления, если это необходимо
+            const updatedApps = [...user.apps];
+            
+            updatedApps[appIndex] = {
+                ...updatedApps[appIndex],
+                [key]: value
+            };
+            
+            // Сохраняем обновленный массив приложений
+            await DB.users.update(userId, {
+                apps: updatedApps,
+                updatedAt: new Date()
+            });
+            
+            // console.log(`Обновлено: пользователь ${userId}, приложение ${appId}, ${key} = ${value}`);
+            return { success: true, userId, appId, key, value };
+            
+        } catch (error) {
+            console.error('Error operation (users; updateAppSetting):', error);
+            throw new Error(`Failed to update app setting: ${error.message}`);
         }
     },
 
@@ -250,11 +356,14 @@ export async function initDatabase() {
         const userCount = await usersTable.count();
 
         if (userCount === 0) {
+            // Загружаем apps асинхронно
+            const defaultAppsList = await getDefaultApps();
+
             // создание базового пользователя
             const defaultUser = new User({
                 login: 'user',
                 password: '',
-                apps: [],
+                apps: defaultAppsList,
                 data: {},
                 config: {
                     avatar: 'robot.jpg',

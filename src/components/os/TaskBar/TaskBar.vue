@@ -20,22 +20,24 @@
                 currentDate: '',
                 timer: null,
                 showMenu: false,
+                USERApps: [],
                 USER: null,
                 GLangData: {},
             };
         },
 
         async mounted() {
-            const GlobalLangPack = JSH.lang;
-            const userLang = navigator.language || navigator.userLanguage;
-            const userLangS = userLang.split('-')[0];
-            this.UserLang = userLangS; 
+            this.reloadBar();
+            // const GlobalLangPack = JSH.lang;
+            // const userLang = navigator.language || navigator.userLanguage;
+            // const userLangS = userLang.split('-')[0];
+            // this.UserLang = userLangS; 
             
-            this.GLangData = (userLangS && GlobalLangPack && GlobalLangPack[userLangS]) ? GlobalLangPack[userLangS] : GlobalLangPack.en;
+            // this.GLangData = (userLangS && GlobalLangPack && GlobalLangPack[userLangS]) ? GlobalLangPack[userLangS] : GlobalLangPack.en;
 
-            this.findUser();
-            this.updateTime();
-            this.timer = setInterval(this.updateTime, 1000);
+            // this.findUser();
+            // this.updateTime();
+            // this.timer = setInterval(this.updateTime, 1000);
         },
   
         computed: {
@@ -62,7 +64,10 @@
 
             sortByType_appsList() {
                 const resultObj = {};
-                const apps = this.appsList;
+                // const apps = this.appsList;
+                const apps = this.USERApps.filter(function(val) {
+                    return val.showInStartMenu;
+                });
                 
                 apps.forEach(element => {
                     const category = element.category;
@@ -80,6 +85,26 @@
         },
   
         methods: {
+            async reloadBar() {
+                const GlobalLangPack = JSH.lang;
+                const userLang = navigator.language || navigator.userLanguage;
+                const userLangS = userLang.split('-')[0];
+                this.UserLang = userLangS; 
+                
+                this.GLangData = (userLangS && GlobalLangPack && GlobalLangPack[userLangS]) ? GlobalLangPack[userLangS] : GlobalLangPack.en;
+
+                await this.findUser();
+
+                const defAppsList = appsConfig.getAllApps();
+                const findUserApps = await usersTable.getApps(this.USERID);                
+
+                this.apps = defAppsList;
+                this.USERApps = (findUserApps) ? findUserApps : defAppsList;
+
+                this.updateTime();
+                this.timer = setInterval(this.updateTime, 1000);
+            },
+
             async findUser() {
                 try {                    
                     this.USER = await usersTable.getbyId(this.USERID);
