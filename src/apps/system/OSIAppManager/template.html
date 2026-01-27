@@ -4,57 +4,52 @@
             <label for="search_input">Поиск:</label>
             <input id="search_input" type="text" v-model="searchInputTxt">
         </div>
-
-        <div class="appslist-area">
-            <!-- Показываем все категории при пустом поиске -->
-            <template v-if="searchInputTxt.length === 0">
-                <div v-for="cat in Object.keys(sortedAppsByCategory)" :key="cat">
-                    <h3>{{cat}}</h3>
-                    <div class="row">
-                        <div v-for="app in sortedAppsByCategory[cat]" :key="app.id" class="appslist-elem col-4 d-flex">
-                            <div v-if="app && !app.icon && app.iconclass" class="appslist-elem-ico d-flex justify-content-center align-items-center" :class="app.iconclass || ''" :style="app.iconclass ? 'color: white' : ''"></div>
-                            <div class="appslist-elem-info">
-                                <div class="appslist-elem-showDesk d-flex justify-content-center align-items-center">
-                                    <i class="bi bi-display-fill me-1"></i>
-                                    <input type="checkbox" name="" :id="app.id + '_showOnDesktop'" :checked="app.showOnDesktop">
-                                </div>
-                                <div class="appslist-elem-showStart d-flex justify-content-center align-items-center">
-                                    <i class="bi bi-house-fill me-1"></i>
-                                    <input type="checkbox" name="" :id="app.id + '_showInStartMenu'" :checked="app.showInStartMenu">
-                                </div>
-                                <i class="appslist-elem-category">{{app.category}}</i>
-                                <h3>{{app.label}}</h3>
-                                <i>{{app.description}}</i>
+        <div v-if="searchInputTxt.length ===0" class="appslist-area">
+            <div v-for="cat in Object.keys(sortedAppsByCategory)" :key="cat">
+                <h3>{{cat}}</h3>
+                <div class="row">
+                    <div v-for="app in sortedAppsByCategory[cat]" :key="app.id" class="appslist-elem col-4 d-flex">
+                        <div class="appslist-elem-ico d-flex justify-content-center align-items-center" :class="app.iconclass || ''" :style="app.iconclass ? 'color: white' : ''"></div>
+                        <div class="appslist-elem-info">
+                            <div class="appslist-elem-showDesk d-flex justify-content-center align-items-center">
+                                <i class="bi bi-display-fill me-1"></i>
+                                <input type="checkbox" name="" :id="app.id + '_showOnDesktop'" :checked="app.showOnDesktop">
                             </div>
-                        </div>
-                    </div>                
-                </div>
-            </template>
-            <!-- Показываем только отфильтрованные результаты при поиске -->
-            <template v-else>
-                <div v-if="hasSearchResults">
-                    <h3>Результаты поиска</h3>
-                    <div class="row">
-                        <div v-for="app in filteredApps" :key="app.id" class="appslist-elem col-4 d-flex">
-                            <div v-if="app && !app.icon && app.iconclass" class="appslist-elem-ico d-flex justify-content-center align-items-center" :class="app.iconclass || ''" :style="app.iconclass ? 'color: white' : ''"></div>
-                            <div class="appslist-elem-info">
-                                <div class="appslist-elem-showDesk d-flex justify-content-center align-items-center">
-                                    <i class="bi bi-display-fill me-1"></i>
-                                    <input type="checkbox" name="" :id="app.id + '_showOnDesktop'" :checked="app.showOnDesktop">
-                                </div>
-                                <div class="appslist-elem-showStart d-flex justify-content-center align-items-center">
-                                    <i class="bi bi-house-fill me-1"></i>
-                                    <input type="checkbox" name="" :id="app.id + '_showInStartMenu'" :checked="app.showInStartMenu">
-                                </div>
-                                <i class="appslist-elem-category">{{app.category}}</i>
-                                <h3>{{app.label}}</h3>
-                                <i>{{app.description}}</i>
+                            <div class="appslist-elem-showStart d-flex justify-content-center align-items-center">
+                                <i class="bi bi-house-fill me-1"></i>
+                                <input type="checkbox" name="" :id="app.id + '_showInStartMenu'" :checked="app.showInStartMenu">
                             </div>
+                            <i class="appslist-elem-category">{{app.category}}</i>
+                            <h3>{{app.label}}</h3>
+                            <i>{{app.description}}</i>
                         </div>
                     </div>
                 </div>
-                <div v-else class="no-results">Ничего не найдено по запросу "{{searchInputTxt}}"</div>
-            </template>
+            </div>
+        </div>
+        <div v-else class="appslist-area">
+            <div v-if="hasSearchResults">
+                <h3>Результаты поиска</h3>
+                <div class="row">
+                    <div v-for="app in filteredApps" :key="app.id" class="appslist-elem col-4 d-flex">
+                        <div class="appslist-elem-ico d-flex justify-content-center align-items-center" :class="app.iconclass || ''" :style="app.iconclass ? 'color: white' : ''"></div>
+                        <div class="appslist-elem-info">
+                            <div class="appslist-elem-showDesk d-flex justify-content-center align-items-center">
+                                <i class="bi bi-display-fill me-1"></i>
+                                <input type="checkbox" name="" :id="app.id + '_showOnDesktop'" :checked="app.showOnDesktop">
+                            </div>
+                            <div class="appslist-elem-showStart d-flex justify-content-center align-items-center">
+                                <i class="bi bi-house-fill me-1"></i>
+                                <input type="checkbox" name="" :id="app.id + '_showInStartMenu'" :checked="app.showInStartMenu">
+                            </div>
+                            <i class="appslist-elem-category">{{app.category}}</i>
+                            <h3>{{app.label}}</h3>
+                            <i>{{app.description}}</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-else class="no-results">Ничего не найдено по запросу "{{searchInputTxt}}"</div>
         </div>
     </div>
 </div>

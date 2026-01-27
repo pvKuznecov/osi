@@ -45,29 +45,6 @@ export class Setting {
 // -=-=-=-=-=-=-Основные операции CRUD-=-=-=-=-=-=-
 export const usersTable = {
     // обновление|сохранение учетной записи
-    // async save(userData) {
-    //     try {
-    //         const NUser = new User(userData);
-
-    //         if (NUser.id) {
-    //             NUser.updatedAt = new Date();
-    //             await DB.users.update(NUser.id, NUser);
-
-    //             return NUser.id;
-    //         } else {
-    //             // зачищаем id в NUser (автоматически сгенерирует)
-    //             delete NUser.id;
-
-    //             NUser.createdAt = new Date();
-    //             NUser.updatedAt = new Date();
-
-    //             return await DB.users.add(NUser);
-    //         }
-    //     } catch (error) {
-    //         console.error('Error operation (users; save):', error);            
-    //         throw new Error(`Failed to save user: ${error.message}`);
-    //     }
-    // },
     async save(userData) {
         try {
             const NUser = new User(userData);

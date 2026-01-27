@@ -61,9 +61,7 @@
             hasSearchResults() { return this.filteredApps.length > 0; },
 
             // Есть ли поисковый запрос
-            isSearching() {
-                return this.searchInputTxt.trim().length > 0;
-            }
+            isSearching() { return this.searchInputTxt.trim().length > 0; },
         }
     }
 </script>
