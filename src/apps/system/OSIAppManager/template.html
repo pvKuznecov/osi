@@ -4,6 +4,12 @@
             <label for="search_input">Поиск:</label>
             <input id="search_input" type="text" v-model="searchInputTxt">
         </div>
+        
+        <div v-if="isNeedReload" class="warning-text-area">
+            <h3>Для того, чтобы изменения вступили в силу, необходимо перезагрузить систему.</h3>
+        </div>
+        <div v-else></div>
+
         <div v-if="searchInputTxt.length ===0" class="appslist-area">
             <div v-for="cat in Object.keys(sortedAppsByCategory)" :key="cat">
                 <h3>{{cat}}</h3>
@@ -11,13 +17,13 @@
                     <div v-for="app in sortedAppsByCategory[cat]" :key="app.id" class="appslist-elem col-4 d-flex">
                         <div class="appslist-elem-ico d-flex justify-content-center align-items-center" :class="app.iconclass || ''" :style="app.iconclass ? 'color: white' : ''"></div>
                         <div class="appslist-elem-info">
-                            <div class="appslist-elem-showDesk d-flex justify-content-center align-items-center">
+                            <div class="appslist-elem-showDesk d-flex justify-content-center align-items-center" title="Отображать на рабочем столе.">
                                 <i class="bi bi-display-fill me-1"></i>
-                                <input type="checkbox" name="" :id="app.id + '_showOnDesktop'" :checked="app.showOnDesktop">
+                                <input type="checkbox" name="" :id="app.id + '_showOnDesktop'" v-model="app.showOnDesktop" :checked="app.showOnDesktop" @change="Chng_showOnDesktop(app)">
                             </div>
-                            <div class="appslist-elem-showStart d-flex justify-content-center align-items-center">
+                            <div class="appslist-elem-showStart d-flex justify-content-center align-items-center" title="Отображать в меню запуска.">
                                 <i class="bi bi-house-fill me-1"></i>
-                                <input type="checkbox" name="" :id="app.id + '_showInStartMenu'" :checked="app.showInStartMenu">
+                                <input type="checkbox" name="" :id="app.id + '_showInStartMenu'" :checked="app.showInStartMenu" v-model="app.showInStartMenu" @change="Chng_showInStartMenu(app)">
                             </div>
                             <i class="appslist-elem-category">{{app.category}}</i>
                             <h3>{{app.label}}</h3>
@@ -36,11 +42,11 @@
                         <div class="appslist-elem-info">
                             <div class="appslist-elem-showDesk d-flex justify-content-center align-items-center">
                                 <i class="bi bi-display-fill me-1"></i>
-                                <input type="checkbox" name="" :id="app.id + '_showOnDesktop'" :checked="app.showOnDesktop">
+                                <input type="checkbox" name="" :id="app.id + '_showOnDesktop'" v-model="app.showOnDesktop" :checked="app.showOnDesktop" @change="Chng_showOnDesktop(app)">
                             </div>
                             <div class="appslist-elem-showStart d-flex justify-content-center align-items-center">
                                 <i class="bi bi-house-fill me-1"></i>
-                                <input type="checkbox" name="" :id="app.id + '_showInStartMenu'" :checked="app.showInStartMenu">
+                                <input type="checkbox" name="" :id="app.id + '_showInStartMenu'" :checked="app.showInStartMenu" v-model="app.showInStartMenu" @change="Chng_showInStartMenu(app)">
                             </div>
                             <i class="appslist-elem-category">{{app.category}}</i>
                             <h3>{{app.label}}</h3>

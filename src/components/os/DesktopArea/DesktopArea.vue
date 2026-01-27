@@ -14,6 +14,7 @@
             return {
                 apps: [],
                 bgWallpapper: null,
+                USERApps: [],
                 USER: null,
                 desktopStyle: {},
             }
@@ -22,14 +23,39 @@
         provide() {
             return {
                 changeWallpaper: this.changeWallpaper,
+                reloadDesk: this.reloadDesk,
             };
         },
   
         computed: {    
             osStore() { return useOsStore(); },
+
+            deskApps() {
+                const allApps = this.apps;
+                const usersApps = this.USERApps.filter(function(val) {
+                    return val.showOnDesktop;
+                });
+                const usersAppsId = usersApps.map(app => app.id);
+
+                return allApps.filter(function(elem) {
+                    return usersAppsId.includes(elem.id);
+                });
+            },
         },
   
         methods: {
+            async reloadDesk() {
+                this.reReqUserConfig();
+                
+                const defAppsList = appsConfig.getAllApps();
+                const findUserApps = await usersTable.getApps(this.USERID);
+
+                await this.findUser();
+
+                this.apps = defAppsList;
+                this.USERApps = (findUserApps) ? findUserApps : defAppsList;
+            },
+
             async findUser() {
                 try {
                     this.USER = await usersTable.getbyId(this.USERID);
@@ -108,10 +134,22 @@
             },
         },
 
-        mounted() {            
-            this.apps = appsConfig.getDesktopApps();
+        // mounted() {            
+        //     this.apps = appsConfig.getDesktopApps();
 
+        //     this.reReqUserConfig();
+        // }
+
+        async mounted() {
             this.reReqUserConfig();
-        }
+            
+            const defAppsList = appsConfig.getAllApps();
+            const findUserApps = await usersTable.getApps(this.USERID);
+
+            await this.findUser();
+
+            this.apps = defAppsList;
+            this.USERApps = (findUserApps) ? findUserApps : defAppsList;
+        },
     }
 </script>

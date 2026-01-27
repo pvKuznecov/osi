@@ -1,6 +1,6 @@
 <div id="desktop-area" class="desktop-area" @click="activateDesktop" :style="desktopStyle">
     <div class="desktop-icons">
-        <div v-for="app in apps" :key="app.name" class="desktop-icon" @dblclick="launchApp(app)">
+        <div v-for="app in deskApps" :key="app.name" class="desktop-icon" @dblclick="launchApp(app)">
         <!-- <div v-for="app in apps" :key="app.name" class="desktop-icon" @dblclick="launchApp(app.name, app.contentapp)"> -->
             <div class="icon" :class="!app.icon ? app.iconclass : ''" :style="app.iconclass ? 'color: white' : ''">{{app.icon}}</div>
             <span class="label">{{ app.label }}</span>
