@@ -103,37 +103,49 @@ export const usersTable = {
     },
 
     prepareUserForDB(user) {
-        // Убеждаемся, что apps содержит только клонируемые данные
-        const safeApps = user.apps ? user.apps.map(app => {
-            // Создаем безопасную копию без функций
-            const safeApp = { ...app };
+        // Функция для проверки сериализуемости
+        const isSerializable = (value) => {
+            if (value === null || value === undefined) return true;
+            if (typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string') return true;
+            if (value instanceof Date) return true;
             
-            // Удаляем любые несериализуемые свойства
-            Object.keys(safeApp).forEach(key => {
-                const val = safeApp[key];
-                if (typeof val === 'function' || 
-                    (val && typeof val === 'object' && val.constructor && 
-                     val.constructor.name === 'Promise')) {
-                    delete safeApp[key];
-                }
-            });
-            
-            return safeApp;
-        }) : [];
-        console.log('safeApps', safeApps);
+            try {
+                JSON.stringify(value);
+                return true;
+            } catch {
+                return false;
+            }
+        };
 
-        // Создаем простой объект, который можно сохранить в IndexedDB
+        // Функция для создания безопасной копии
+        const createSafeCopy = (value) => {
+            if (!isSerializable(value)) return undefined;
+            
+            if (Array.isArray(value)) return value.map(createSafeCopy).filter(item => item !== undefined);
+            
+            if (value && typeof value === 'object' && !(value instanceof Date)) {
+                const result = {};
+                Object.entries(value).forEach(([key, val]) => {
+                    if (typeof val !== 'function' && isSerializable(val)) result[key] = createSafeCopy(val);
+                });
+                return result;
+            }
+            
+            return value;
+        };
+
+        // Создаем безопасный объект для сохранения
         return {
             id: user.id,
-            login: user.login,
-            name: user.name,
-            password: user.password,
-            apps: safeApps,
-            data: user.data ? JSON.parse(JSON.stringify(user.data)) : {},
-            config: user.config ? { ...user.config } : {avatar: "cat.jpg"},
-            systemconfig: user.systemconfig ? { ...user.systemconfig } : {desktopWallpaper: "nwall.jpg"},
-            createdAt: user.createdAt instanceof Date ? user.createdAt : new Date(user.createdAt),
-            updatedAt: user.updatedAt instanceof Date ? user.updatedAt : new Date(user.updatedAt)
+            login: user.login || '',
+            name: user.name || '',
+            password: user.password || '',
+            apps: Array.isArray(user.apps) ? user.apps.map(app => createSafeCopy(app) || {}).filter(app => Object.keys(app).length > 0) : [],
+            data: createSafeCopy(user.data) || {},
+            config: createSafeCopy(user.config) || { avatar: "cat.jpg" },
+            systemconfig: createSafeCopy(user.systemconfig) || { desktopWallpaper: "nwall.jpg" },
+            createdAt: user.createdAt instanceof Date ? user.createdAt : (user.createdAt ? new Date(user.createdAt) : new Date()),
+            updatedAt: user.updatedAt instanceof Date ? user.updatedAt : (user.updatedAt ? new Date(user.updatedAt) : new Date())
         };
     },
 

@@ -52,13 +52,12 @@
     width: 60px;
     height: 60px;
     margin: 10px;
-    /* cursor: pointer; */
-    /* padding: 10px; */
     border-radius: 50px;
     transition: all 0.2s;
     user-select: none;
     font-size: 48px;
-}
+    cursor: pointer; }
+.appslist-elem-ico:hover { opacity: .8; }
 
 .appslist-elem-info {
     width: calc(100% - 90px);
