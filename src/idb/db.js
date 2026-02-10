@@ -17,6 +17,7 @@ async function getDefaultApps() {
     // Преобразуем каждый объект приложения в упрощенную версию
     return apps.map(app => ({
         id: app.id,
+        name: app.name,
         label: app.label,
         description: app.description || '',
         category: app.category || 'Другое',
