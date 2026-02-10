@@ -117,7 +117,6 @@
             },
 
             launchApp(_appData) {
-                console.log('_appData', _appData);
                 const appData = {..._appData};
                 console.log('appData', appData);
                 const appName = appData.name;

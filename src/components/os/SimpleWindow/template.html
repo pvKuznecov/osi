@@ -14,10 +14,18 @@
                 <p>Это окно {{ isMaximized ? 'развернуто' : 'не развернуто' }}</p>
                 <p>Размер: {{ windowWidth }} × {{ windowHeight }}</p>
                 <hr>
-                <p>appName:: {{ appName }}</p>                
+                <p>appName:: {{ appName }}</p>
+                <p>title:: {{title}}</p>
+                <p>isActive:: {{isActive}}</p>
+                <p>resizable:: {{resizable}}</p>
                 <p>isMinimized:: {{isMinimized}}</p>
                 <p>isMaximized:: {{isMaximized}}</p>
-                <p>componentPath:: {{ componentPath }}</p>
+                <!-- <p>componentPath:: {{ componentPath }}</p> -->
+                <p>zIndex:: {{zIndex}}</p>
+                <p>defWidth:: {{defWidth}}</p>
+                <p>defHeight:: {{defHeight}}</p>
+                <p>icon:: {{icon}}</p>
+                <p>canMinimize:: {{canMinimize}}</p>
             </div>    
         </slot>
     </div>
