@@ -1,17 +1,75 @@
 <div class="calendar-app">
     <div class="calendar-top-panel d-flex justify-content-center align-items-center">
-        Текущее время: {{currentTime}} {{currentDate}}
+        Текущее время: {{currentTime}} {{currentDateStr}}
     </div>
     <div class="calendar-area-work">
         <div class="calendar-area-table">
             <div class="calendar-area-table-head">
-                ***
+                <span>{{Get_monthStr(selectDate.getMonth())}} {{selectDate.getFullYear()}}</span>
             </div>
-            <div>
-
+            <div class="calendar-area-table-tab">
+                <table class="calendar-mtable">
+                    <thead>
+                        <tr>
+                            <th><div class="calendar-mtable-wday">{{LangData('mon')}}</div></th>
+                            <th><div class="calendar-mtable-wday">{{LangData('tue')}}</div></th>
+                            <th><div class="calendar-mtable-wday">{{LangData('wed')}}</div></th>
+                            <th><div class="calendar-mtable-wday">{{LangData('thu')}}</div></th>
+                            <th><div class="calendar-mtable-wday">{{LangData('fri')}}</div></th>
+                            <th><div class="calendar-mtable-wday">{{LangData('sat')}}</div></th>
+                            <th><div class="calendar-mtable-wday">{{LangData('sun')}}</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="week in calendarWeeks()">
+                            <td v-for="day in week.days">
+                                <div class="calendar-mtable-day" :class="(day.SelectedDay ? 'selected-date-border' : ''), (!day.CurrentMonth ? 'opacity-6' : '')">
+                                    <div class="calendar-mtable-day-header" :class="day.SelectedDay ? 'selected-date-hbg' : ''">
+                                        {{day.dateString}}
+                                    </div>
+                                    <span><i class="bi bi-calendar2-week-fill"></i> : </span>
+                                    <span><i class="bi bi-exclamation-circle-fill"></i> : </span>
+                                    <span v-if="day.CurrentDay" style="height: 1px; margin: 3px 4px 0 0; color: rgba(75, 75, 240, 0.829); transform: rotate(-10deg); text-align: right;"><i>Сегодня!</i></span>
+                                </div>                                
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div class="calendar-area-info"></div>
+        <div class="calendar-area-info">
+            <div class="calendar-area-table-head">Выбранная дата:</div>
+            <div class="calendar-area-info-sdate">
+                <table class="calendar-sdate-table">
+                    <tbody>
+                        <tr>
+                            <td style="width: 140px;">
+                                <div class="calendar-sdate-table-list selected-date-border">
+                                    <div class="header selected-date-hbg">
+                                        <div class="d-flex justify-content-around align-items-center"><i class="odiv"></i><i class="odiv"></i></div>
+                                        <span>{{selectDate.toLocaleDateString()}}</span>
+                                    </div>
+                                    {{Get_wdayStr(selectDate.getDay())}}
+                                    <br>
+                                    <div style="margin: 30px 5px 0 0; color: rgba(75, 75, 240, 0.829); transform: rotate(-10deg); text-align: right;"><i>Сегодня!</i></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="calendar-sdate-table-info">
+                                    <div>
+                                        <i class="bi bi-calendar2-week-fill"></i> События: {{selectDate_Events.length}}
+                                    </div>
+                                    <div>
+                                        <i class="bi bi-exclamation-circle-fill"></i> Напоминания: {{selectDate_Reminders.length}}
+                                    </div>
+                                </div>                                
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
     </div>
     <div class="calendar-bottom-panel d-flex justify-content-center align-items-center"></div>
 </div>

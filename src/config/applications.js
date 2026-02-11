@@ -56,8 +56,8 @@ const applications = [
 
         // componentPath: '@/apps/system/OSICalendar/OSICalendar.vue', // Путь к компоненту Vue
         
-        showOnDesktop: true,    // Отображать на рабочем столе
-        showInStartMenu: true,  // Отображать в меню "Пуск"
+        showOnDesktop: false,    // Отображать на рабочем столе
+        showInStartMenu: false,  // Отображать в меню "Пуск"
 
         category: 'utilities',  // Категория для группировки (опционально)
 
