@@ -19,17 +19,22 @@ async function getDefaultApps() {
         id: app.id,
         name: app.name,
         label: app.label,
-        description: app.description || '',
-        category: app.category || 'Другое',
+        category: app.category || 'Other',
         icon: app.icon || '',
         iconclass: app.iconclass || '',
+        description: app.description || '',
+        defWidth: app.defWidth || false,
+        defHeight: app.defHeight || false,
+        isMaximized: app.isMaximized || false,
+        resizable: app.resizable || false,
+        canMinimize: app.canMinimize || false,
         showOnDesktop: app.showOnDesktop !== undefined ? app.showOnDesktop : true,
         showInStartMenu: app.showInStartMenu !== undefined ? app.showInStartMenu : true,
         // Сохраняем только базовые данные, удаляем функции и компоненты
         path: app.path || '',
         component: app.component ? app.component.name || 'Component' : 'Component',
         // Добавляем только примитивные типы данных
-        data: app.data && typeof app.data === 'object' ? JSON.parse(JSON.stringify(app.data)) : {}
+        data: app.data && typeof app.data === 'object' ? JSON.parse(JSON.stringify(app.data)) : {}        
     }));
 }
 
