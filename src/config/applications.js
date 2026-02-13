@@ -4,126 +4,90 @@ const applications = [
         id: 'osisettings',
         name: 'OSISettings',
         label: 'Настройки',
+        category: 'system',
         icon: '',
         iconclass: 'bi-gear-fill text-ico-tech',
         description: 'Настройки системы OSI.',   // Описание приложения
-
-        defWidth: 800,
-        defHeight: 450,
+        defWidth: 800, defHeight: 450,
         isMaximized: false,  // По умолчанию НЕ открывается развернутым
         resizable: true,
-        canMinimize: true,
-
-        // componentPath: '@/apps/system/OSISettings/OSISettings.vue', // Путь к компоненту Vue
-        
+        canMinimize: true,        
         showOnDesktop: true,    // Отображать на рабочем столе
-        showInStartMenu: true,  // Отображать в меню "Пуск"
-        
-        category: 'system',  // Категория для группировки (опционально)
+        showInStartMenu: true,  // Отображать в меню "Пуск"        
     },
     {
         id: 'osihelper',
         name: 'OSIHelper',
         label: 'OSI помощник',
+        category: 'system',
         icon: '',
         iconclass: 'bi-info-square-fill text-ico-info',
-        description: 'Справочная система и помощь по OSI.',   // Описание приложения
-        
-        defWidth: 600,
-        defHeight: 700,
+        description: 'Справочная система и помощь по OSI.',   // Описание приложения        
+        defWidth: 600, defHeight: 700,
         isMaximized: false,  // По умолчанию НЕ открывается развернутым
         resizable: true,
-        canMinimize: true,
-
-        // componentPath: '@/apps/system/OSIHelper/OSIHelper.vue', // Путь к компоненту Vue
-        
+        canMinimize: true,        
         showOnDesktop: true,    // Отображать на рабочем столе
-        showInStartMenu: true,  // Отображать в меню "Пуск"
-        
-        category: 'system',  // Категория для группировки (опционально)
+        showInStartMenu: true,  // Отображать в меню "Пуск"        
     },
     {
         id: 'osicalendar',
         name: 'OSICalendar',
         label: 'Календарь',
+        category: 'utilities',
         icon: '',
         iconclass: 'bi-calendar2-date text-ico-purpure',
         description: 'Системный календарь.',
-        
         isMaximized: true,  // По умолчанию НЕ открывается развернутым
         resizable: true,
-        canMinimize: true,
-
-        // componentPath: '@/apps/system/OSICalendar/OSICalendar.vue', // Путь к компоненту Vue
-        
+        canMinimize: true,        
         showOnDesktop: false,    // Отображать на рабочем столе
-        showInStartMenu: false,  // Отображать в меню "Пуск"
-
-        category: 'utilities',  // Категория для группировки (опционально)
-
+        showInStartMenu: false,  // Отображать в меню "Пуск"        
     },
     {
         id: 'osicalculator',
         name: 'OSICalculator',
         label: 'Калькулятор',
+        category: 'utilities',
         icon: '',
         iconclass: 'bi-calculator-fill text-ico-purpure',
         description: 'Простой калькулятор для базовых вычислений.',   // Описание приложения
-
-        defWidth: 400,
-        defHeight: 670,
+        defWidth: 400, defHeight: 670,
         isMaximized: false,  // По умолчанию НЕ открывается развернутым
         resizable: false,
-        canMinimize: true,
-        
-        // componentPath: '@/apps/system/OSICalculator/OSICalculator.vue', // Путь к компоненту Vue
-        
+        canMinimize: true,        
         showOnDesktop: true,    // Отображать на рабочем столе
-        showInStartMenu: true,  // Отображать в меню "Пуск"
-
-        category: 'utilities',  // Категория для группировки (опционально)
+        showInStartMenu: true,  // Отображать в меню "Пуск"        
     },
     {
         id: 'osimplayer',
         name: 'OSIMPlayer',
         label: 'MPlayer',
+        category: 'utilities',
         icon: '',
         iconclass: 'bi-cassette-fill text-ico-purpure',
         description: 'Простейший музыкальный плеер.',   // Описание приложения
-
-        defWidth: 850,
-        defHeight: 400,
+        defWidth: 850, defHeight: 400,
         isMaximized: false,  // По умолчанию НЕ открывается развернутым
         resizable: false,
-        canMinimize: false,
-
-        // componentPath: '@/apps/system/OSIMPlayer/OSIMPlayer.vue', // Путь к компоненту Vue
-        
+        canMinimize: false,        
         showOnDesktop: true,    // Отображать на рабочем столе
-        showInStartMenu: true,  // Отображать в меню "Пуск"
-        
-        category: 'utilities',  // Категория для группировки (опционально)
+        showInStartMenu: true,  // Отображать в меню "Пуск"        
     },
     {
         id: 'osiappmanager',
         name: 'OSIAppManager',
         label: 'AppManager',
+        category: 'system',
         icon: '',
         iconclass: 'bi-grid-3x3-gap-fill text-ico-tech',
         description: 'Менеджер приложений OSI.',   // Описание приложения
-
-        defWidth: 850,
-        defHeight: 400,
+        defWidth: 850, defHeight: 400,
         isMaximized: true,  // По умолчанию НЕ открывается развернутым
         resizable: false,
         canMinimize: false,
-
-        // componentPath: '@/apps/system/OSIMPlayer/OSIMPlayer.vue', // Путь к компоненту Vue
-        
         showOnDesktop: false,    // Отображать на рабочем столе
-        showInStartMenu: true,  // Отображать в меню "Пуск"
-        
-        category: 'system',  // Категория для группировки (опционально)
+        showInStartMenu: true,  // Отображать в меню "Пуск"        
     },
 ];
 

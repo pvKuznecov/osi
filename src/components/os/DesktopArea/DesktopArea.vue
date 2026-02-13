@@ -73,12 +73,29 @@
                 this.osStore.activeWindowId = null;
             },
     
-            // launchApp(appName, contentApp) {
-            launchApp(appData) {
+            async launchApp(appData) {
                 const appName = appData.name;
                 const contentApp = appData.contentapp;
 
-                // Ищем окно по windowId или по типу приложения
+                // // Ищем окно по типу приложения
+                // const existWindow_byConfig = await usersTable.getSConfig_window_byConfig(this.USERID, appData);
+                // console.log('existWindow_byConfig', existWindow_byConfig);
+                
+                // // окно есть и оно свернуто
+                // if (existWindow_byConfig && existingWindow.isMinimized) {
+                //   //'restore window'
+                // // окно есть и оно НЕ свернуто
+                // } else if (existWindow_byConfig) {
+                //   //'activate window'
+                // } else {
+                //     // создаем новое окно
+                //     usersTable.addSConfig_newWindow(this.USERID, {
+                //         ...appData,
+                //         defWidth: appData.defWidth || 800,
+                //         defHeight: appData.defHeight || 600
+                //     });
+                // }
+
                 const existingWindow = this.osStore.windows.find(
                     w => w.appName === appName && w.contentApp === contentApp
                 );
@@ -86,8 +103,10 @@
                 if (existingWindow) {
                     // Если окно существует, активируем его
                     if (existingWindow.isMinimized) {
+                        console.log('--------------isMinimized:: Y');
                         this.osStore.restoreWindow(existingWindow.id);
                     } else {
+                        console.log('--------------isMinimized:: N');
                         this.osStore.activateWindow(existingWindow.id);
                     }
                 } else {

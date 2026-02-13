@@ -19,17 +19,22 @@ async function getDefaultApps() {
         id: app.id,
         name: app.name,
         label: app.label,
-        description: app.description || '',
-        category: app.category || 'Другое',
+        category: app.category || 'Other',
         icon: app.icon || '',
         iconclass: app.iconclass || '',
+        description: app.description || '',
+        defWidth: app.defWidth || false,
+        defHeight: app.defHeight || false,
+        isMaximized: app.isMaximized || false,
+        resizable: app.resizable || false,
+        canMinimize: app.canMinimize || false,
         showOnDesktop: app.showOnDesktop !== undefined ? app.showOnDesktop : true,
         showInStartMenu: app.showInStartMenu !== undefined ? app.showInStartMenu : true,
         // Сохраняем только базовые данные, удаляем функции и компоненты
         path: app.path || '',
         component: app.component ? app.component.name || 'Component' : 'Component',
         // Добавляем только примитивные типы данных
-        data: app.data && typeof app.data === 'object' ? JSON.parse(JSON.stringify(app.data)) : {}
+        data: app.data && typeof app.data === 'object' ? JSON.parse(JSON.stringify(app.data)) : {}        
     }));
 }
 
@@ -39,6 +44,15 @@ DB.version(db_version).stores({
     settings: '++id, key, value, updatedAt',
 });
 
+const Def_userConfig = {
+    avatar: "cat.jpg"
+};
+
+const Def_userSystemconfig = {
+    desktopWallpaper: "nwall.jpg",
+    windows: {},
+};
+
 // -=-=-=-=-=-=-Описание классов моделей-=-=-=-=-=-=-
 export class User {
     constructor(data = {}) {
@@ -47,8 +61,8 @@ export class User {
         this.password = data.password || '';    //ПРОДУМАТЬ РЕАЛЬНУЮ СХЕМУ ЗАЩИТЫ
         this.apps = data.apps || [];
         this.data = data.data || {};
-        this.config = data.config || {avatar: "cat.jpg"};
-        this.systemconfig = data.systemconfig || {desktopWallpaper: "nwall.jpg"};
+        this.config = data.config || Def_userConfig;
+        this.systemconfig = data.systemconfig || Def_userSystemconfig
         this.createdAt = data.createdAt || new Date();
         this.updatedAt = data.updatedAt || new Date();
 
@@ -295,6 +309,94 @@ export const usersTable = {
         } catch (error) {
             console.error('Error operation (users; search');
             throw new Error(`Search failed: ${error.message}`);
+        }
+    },
+
+    // получить объект "окна" в SConfig пользователя (по его id)
+    async getSConfig_windows(userId) {
+        try {
+            const FindUser = await this.getbyId(userId);
+            const FindSConfig = (FindUser && FindUser.systemconfig) ? FindUser.systemconfig : false;
+            
+            return (FindSConfig && FindSConfig.windows) ? FindSConfig.windows : false;
+        } catch (error) {
+            console.error('Error operation(users; getSConfig_windows).');
+            throw new Error(`Failed: ${error.message}`);
+        }
+    },
+    // создание нового "окна" в SConfig пользователя
+    async addSConfig_newWindow(userId, appData) {
+        const newId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        try {
+            let FindUser = await this.getbyId(userId);
+
+            if (FindUser) {
+                let nSystemConfig = (FindUser.systemconfig) ? FindUser.systemconfig : {windows: {}};
+                let nWindows = (nSystemConfig && nSystemConfig.windows) ? nSystemConfig.windows : false;
+                nWindows[newId] = { ...appData };
+
+                if (nSystemConfig && nWindows) {
+                    nSystemConfig.windows = nWindows;
+                    FindUser.systemconfig = nSystemConfig;
+                    
+                    const userForDB = this.prepareUserForDB(FindUser);
+                    userForDB.updatedAt = new Date();
+
+                    await DB.users.update(userForDB.id, userForDB);
+
+                    return true;
+                } else {
+                    console.error('Error operation(users; addSConfig_newWindow; c:1).');
+                    return false;
+                }
+            } else {
+                console.error('Error operation(users; addSConfig_newWindow; c:2).');
+                return false;
+            }
+
+        } catch (error) {
+            console.error('Error operation(users; addSConfig_newWindow).');
+            throw new Error(`Failed: ${error.message}`);
+        }
+    },
+    // поиск "окна" в SConfig пользователя по его id
+    async getSConfig_window_byId(userId, windowId) {
+        try {
+            const FindUser = await this.getbyId(userId);
+            const FindSConfig = (FindUser && FindUser.systemconfig) ? FindUser.systemconfig : false;
+            const FindWindows = (FindSConfig && FindSConfig.windows) ? FindSConfig.windows : false;
+
+            return (FindWindows && Object.keys(FindWindows).includes(windowId)) ? FindWindows[windowId] : false;
+        } catch (error) {
+            console.error('Error operation(users; getSConfig_window_byId).');
+            throw new Error(`Failed: ${error.message}`);
+        }
+    },
+    // поиск "окна" в SConfig пользователя по данным приложения
+    async getSConfig_window_byConfig(userId, appData) {
+        try {
+            const FindWindows = await this.getSConfig_windows(userId);
+            
+            if (FindWindows) {
+                let res = false;
+
+                Object.keys(FindWindows).forEach(function(key) {
+                    if (
+                        appData.id
+                        && FindWindows[key].id === appData.id
+                        && appData.name
+                        && FindWindows[key].name === appData.name
+                    ) {
+                        res = FindWindows[key];
+                    }
+                });
+
+                return res;
+            } else { return false; }
+        } catch (error) {
+            console.error('Error operation(users; getSConfig_window_byConfig).');
+            throw new Error(`Failed: ${error.message}`);
         }
     },
 };

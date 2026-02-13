@@ -66,7 +66,11 @@
                 console.log("navigator", navigator);
 
                 return result;
-            }
+            },
+
+            indexedDBStatistic() {
+                return false;
+            },
         },
 
         async mounted() {
