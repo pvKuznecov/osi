@@ -13,7 +13,7 @@
             isMinimized: { type: Boolean, default: false },
             isMaximized: { type: Boolean, default: false },
             isActive: { type: Boolean, default: false },
-            resizable: { type: Boolean, default: true },
+            resizable: { type: Boolean, default: false },
             zIndex: { type: Number, default: 100 },
             defWidth: { type: Number, default: 400 },
             defHeight: { type: Number, default: 400 },
@@ -64,17 +64,17 @@
                 }
             },
             windowStyles() {
-                const baseStyles = {zIndex: this.zIndex };
-      
+                const baseStyles = { zIndex: this.zIndex };
+        
                 if (this.isMaximized) {
                     return {
                         ...baseStyles,
                         left: '0',
                         top: '0',
-                        width: '100vw',
-                        height: '100vh',
+                        width: '100%',
+                        height: '100%',
                         borderRadius: '0'
-                    }
+                    };
                 } else {
                     return {
                         ...baseStyles,
@@ -82,7 +82,7 @@
                         top: `${this.posY}px`,
                         width: `${this.windowWidth}px`,
                         height: `${this.windowHeight}px`
-                    }
+                    };
                 }
             }
         },

@@ -1,94 +1,65 @@
 // Централизованная конфигурация всех приложений OSI
+
+// "базовый" класс для приложения
+class OSIApp {
+    constructor(data = {}) {
+        this.id = data.id || ('newApp_' + Date.now());
+        this.name = data.name || 'NewApp';
+        this.label = data.label || 'Новое приложение';
+        this.category = data.category || 'other';
+        this.icon = data.icon || '';                            // Эмодзи-иконка (самый элементарный вариант; TODO: сделать адекватный вариант с картинкой)
+        this.iconclass = data.iconclass || 'text-ico-tech';     // Список классов bootstrap для отрисовки иконки
+        this.description = data.description || '';              // Описание приложения
+        this.defWidth = data.defWidth || 800;                   // Ширина по-умолчанию
+        this.defHeight = data.defHeight || 450;                 // Высота по-умолчанию
+        this.isMaximized = data.isMaximized || false;           // По умолчанию открывать развернутым
+        this.resizable = data.resizable || false;               // Возможность изменять размеры окна
+        this.canMinimize = data.canMinimize || false;           // Возможность сворачивать окно
+        this.showOnDesktop = data.showOnDesktop || false;       // Отображать на рабочем столе
+        this.showInStartMenu = data.showInStartMenu || false;   // Отображать в меню "Пуск"
+    }
+}
+
 const applications = [
-    {
-        id: 'osisettings',
-        name: 'OSISettings',
-        label: 'Настройки',
-        category: 'system',
-        icon: '',
+    new OSIApp({
+        id: 'osisettings', name: 'OSISettings',
+        label: 'Настройки', category: 'system', description: 'Настройки системы OSI.',
         iconclass: 'bi-gear-fill text-ico-tech',
-        description: 'Настройки системы OSI.',   // Описание приложения
-        defWidth: 800, defHeight: 450,
-        isMaximized: false,  // По умолчанию НЕ открывается развернутым
-        resizable: true,
-        canMinimize: true,        
-        showOnDesktop: true,    // Отображать на рабочем столе
-        showInStartMenu: true,  // Отображать в меню "Пуск"        
-    },
-    {
-        id: 'osihelper',
-        name: 'OSIHelper',
-        label: 'OSI помощник',
-        category: 'system',
-        icon: '',
-        iconclass: 'bi-info-square-fill text-ico-info',
-        description: 'Справочная система и помощь по OSI.',   // Описание приложения        
+        resizable: true, canMinimize: true, showOnDesktop: true, showInStartMenu: true,
+    }),
+    new OSIApp({
+        id: 'osihelper', name: 'OSIHelper',
+        label: 'OSI помощник', category: 'system', description: 'Справочная система и помощь по OSI.',
+        iconclass: 'bi-info-square-fill text-ico-info',        
         defWidth: 600, defHeight: 700,
-        isMaximized: false,  // По умолчанию НЕ открывается развернутым
-        resizable: true,
-        canMinimize: true,        
-        showOnDesktop: true,    // Отображать на рабочем столе
-        showInStartMenu: true,  // Отображать в меню "Пуск"        
-    },
-    {
-        id: 'osicalendar',
-        name: 'OSICalendar',
-        label: 'Календарь',
-        category: 'utilities',
-        icon: '',
+        resizable: true, canMinimize: true, showOnDesktop: true, showInStartMenu: true,
+    }),
+    new OSIApp({
+        id: 'osicalendar', name: 'OSICalendar',
+        label: 'Календарь', category: 'utilities', description: 'Системный календарь.',
         iconclass: 'bi-calendar2-date text-ico-purpure',
-        description: 'Системный календарь.',
-        isMaximized: true,  // По умолчанию НЕ открывается развернутым
-        resizable: true,
-        canMinimize: true,        
-        showOnDesktop: false,    // Отображать на рабочем столе
-        showInStartMenu: false,  // Отображать в меню "Пуск"        
-    },
-    {
-        id: 'osicalculator',
-        name: 'OSICalculator',
-        label: 'Калькулятор',
-        category: 'utilities',
-        icon: '',
-        iconclass: 'bi-calculator-fill text-ico-purpure',
-        description: 'Простой калькулятор для базовых вычислений.',   // Описание приложения
+        isMaximized: true, resizable: true, canMinimize: true,
+    }),
+    new OSIApp({
+        id: 'osicalculator', name: 'OSICalculator',
+        label: 'Калькулятор', category: 'utilities', description: 'Простой калькулятор для базовых вычислений.',
+        iconclass: 'bi-calculator-fill text-ico-purpure',        
         defWidth: 400, defHeight: 670,
-        isMaximized: false,  // По умолчанию НЕ открывается развернутым
-        resizable: false,
-        canMinimize: true,        
-        showOnDesktop: true,    // Отображать на рабочем столе
-        showInStartMenu: true,  // Отображать в меню "Пуск"        
-    },
-    {
-        id: 'osimplayer',
-        name: 'OSIMPlayer',
-        label: 'MPlayer',
-        category: 'utilities',
-        icon: '',
+        canMinimize: true, showOnDesktop: true, showInStartMenu: true,
+    }),
+    new OSIApp({
+        id: 'osimplayer', name: 'OSIMPlayer',
+        label: 'MPlayer', category: 'utilities', description: 'Простейший музыкальный плеер.',
         iconclass: 'bi-cassette-fill text-ico-purpure',
-        description: 'Простейший музыкальный плеер.',   // Описание приложения
         defWidth: 850, defHeight: 400,
-        isMaximized: false,  // По умолчанию НЕ открывается развернутым
-        resizable: false,
-        canMinimize: false,        
-        showOnDesktop: true,    // Отображать на рабочем столе
-        showInStartMenu: true,  // Отображать в меню "Пуск"        
-    },
-    {
-        id: 'osiappmanager',
-        name: 'OSIAppManager',
-        label: 'AppManager',
-        category: 'system',
-        icon: '',
+        showOnDesktop: true, showInStartMenu: true,
+    }),
+    new OSIApp({
+        id: 'osiappmanager', name: 'OSIAppManager',
+        label: 'AppManager', category: 'system', description: 'Менеджер приложений OSI.',
         iconclass: 'bi-grid-3x3-gap-fill text-ico-tech',
-        description: 'Менеджер приложений OSI.',   // Описание приложения
-        defWidth: 850, defHeight: 400,
-        isMaximized: true,  // По умолчанию НЕ открывается развернутым
-        resizable: false,
-        canMinimize: false,
-        showOnDesktop: false,    // Отображать на рабочем столе
-        showInStartMenu: true,  // Отображать в меню "Пуск"        
-    },
+        isMaximized: true, showInStartMenu: true,
+    }),
 ];
 
 // const enrichedApplications = applications;
@@ -143,7 +114,6 @@ export const appsConfig = {
     // Получить функцию импорта компонента
     getAppImportFunction(appName) {
         const app = this.getAppByName(appName);
-        console.log("app", app);
         
         return app?.asyncImport || null;
     }

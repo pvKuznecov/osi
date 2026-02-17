@@ -6,30 +6,54 @@
         <span v-if="!USER" class="start-icon bi bi-house-fill"></span>
         <span v-if="!USER" class="start-text">Меню</span>
     </div>
-    <div v-for="cat in Object.keys(sortByType_appsList)" class="app-cat-area">
+    <div v-for="cat in Object.keys(sortByType_appsList)" :key="cat" class="app-cat-area">
         <i class="app-category-name">{{GLangData['cattype_' + cat]}}:</i>
-        <div class="task-bar-menu-elem" v-for="app in sortByType_appsList[cat]">
-            <div class="app-icon" :class="!app.icon ? app.iconclass : ''" @click="launchApp_byMenu(app)"></div> <span @click="launchApp_byMenu(app)">{{app.label}}</span>
+        <div class="task-bar-menu-elem" v-for="app in sortByType_appsList[cat]" :key="app.id">
+            <!-- ИСПРАВЛЕНИЕ: используем или иконку из стилей, или текстовую, но не оба -->
+            <div v-if="app.iconclass" class="app-icon" :class="app.iconclass" @click="launchApp_byMenu(app)"></div>
+            <div v-else-if="app.icon" class="app-icon" @click="launchApp_byMenu(app)">{{ app.icon }}</div>
+            <div v-else class="app-icon" @click="launchApp_byMenu(app)">📄</div>
+            <span @click="launchApp_byMenu(app)">{{app.label}}</span>
         </div>
+        <hr>
     </div>
 </div>
+
 <div class="task-bar">
     <!-- Кнопка Menu -->
     <button class="start-button d-flex justify-content-center align-items-center" @click="toggleStartMenu">
         <span class="start-icon bi bi-house-fill"></span>
         <span class="start-text">Меню</span>
     </button>    
-    <!-- Открытые приложения -->
+    
+    <!-- Открытые приложения в таскбаре -->
     <div class="taskbar-apps d-flex align-items-center">
-        <button v-for="window in osStore.windows" :key="window.id" class="taskbar-app d-flex justify-content-center align-items-center" :class="{ 'active': osStore.activeWindowId === window.id }" @click="toggleWindow(window.id)">
-            <div class="app-icon" :class="!window.icon ? window.iconclass : ''">{{ window.icon}}</div>
-            <span class="app-title">{{ window.title }}</span>
+        <button 
+            v-for="window in windowsList" 
+            :key="window.id" 
+            class="taskbar-app d-flex justify-content-center align-items-center" 
+            :class="getWindowClass(window)"
+            @click="toggleWindow(window.id)"
+            :title="(window.isMinimized ? 'Свернуто: ' : '') + (window.label || window.name)"
+        >
+            <!-- ИСПРАВЛЕНИЕ: используем или иконку из стилей, или текстовую, но не оба -->
+            <div v-if="window.iconclass" class="app-icon" :class="window.iconclass"></div>
+            <div v-else-if="window.icon" class="app-icon">{{ window.icon }}</div>
+            <div v-else class="app-icon">📄</div>
+            
+            <span class="app-title">{{ window.label || window.name }}</span>
+            <span v-if="window.isMinimized" class="minimized-indicator">▼</span>
         </button>
     </div>
 
+    <!-- Менеджер приложений -->
     <div>
-        <i class="bi bi-grid-3x3-gap-fill appmanager-minico" :title="`Запущено приложений: ${osStore.windows.length}.`" @click="launchApp(appManager_data)"></i>
+        <i class="bi bi-grid-3x3-gap-fill appmanager-minico" 
+           :title="`Запущено приложений: ${windowsList.length}.`" 
+           @click="launchApp(appManager_data)">
+        </i>
     </div>
+    
     <!-- Системный трей -->
     <div class="system-tray">
         <div class="tray-time d-flex justify-content-center align-items-center">
