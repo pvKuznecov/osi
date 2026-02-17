@@ -2,7 +2,7 @@
 <style src="./style.css"></style>
 <script>
     import { usersTable } from '@/idb/db';
-    import { useOsStore } from '@/stores/os.store';
+    // import { useOsStore } from '@/stores/os.store';
     import { appsConfig } from '@/config/applications'
 
     export default {
@@ -28,13 +28,14 @@
         },
   
         computed: {    
-            osStore() { return useOsStore(); },
+            // osStore() { return useOsStore(); },
 
             deskApps() {
                 const allApps = this.apps;
                 const usersApps = this.USERApps.filter(function(val) {
                     return val.showOnDesktop;
                 });
+                console.log('usersApps', usersApps);
                 const usersAppsId = usersApps.map(app => app.id);
 
                 return allApps.filter(function(elem) {
@@ -64,58 +65,65 @@
                     this.$toast.error('Не удалось загрузить данные пользователя');
                 }
             },
-
-            getWallpaperUrl() {
-                return require('@/assets/wallpapers/abacus.jpg');
-            },
             
-            activateDesktop() {
-                this.osStore.activeWindowId = null;
-            },
+            // activateDesktop() {
+            //     this.osStore.activeWindowId = null;
+            // },
     
             async launchApp(appData) {
-                const appName = appData.name;
-                const contentApp = appData.contentapp;
-
-                // // Ищем окно по типу приложения
-                // const existWindow_byConfig = await usersTable.getSConfig_window_byConfig(this.USERID, appData);
-                // console.log('existWindow_byConfig', existWindow_byConfig);
+                console.log('DesktopArea launchApp called with:', appData);
                 
-                // // окно есть и оно свернуто
-                // if (existWindow_byConfig && existingWindow.isMinimized) {
-                //   //'restore window'
-                // // окно есть и оно НЕ свернуто
-                // } else if (existWindow_byConfig) {
-                //   //'activate window'
-                // } else {
-                //     // создаем новое окно
-                //     usersTable.addSConfig_newWindow(this.USERID, {
-                //         ...appData,
-                //         defWidth: appData.defWidth || 800,
-                //         defHeight: appData.defHeight || 600
-                //     });
-                // }
-
-                const existingWindow = this.osStore.windows.find(
-                    w => w.appName === appName && w.contentApp === contentApp
-                );
+                if (!this.USERID) {
+                    console.error('USERID not set');
+                    return;
+                }
                 
-                if (existingWindow) {
-                    // Если окно существует, активируем его
-                    if (existingWindow.isMinimized) {
-                        console.log('--------------isMinimized:: Y');
-                        this.osStore.restoreWindow(existingWindow.id);
+                try {
+                    // Ищем существующее окно по конфигурации приложения
+                    const existWindow_byConfig = await usersTable.windows.getWindow_byConfig(this.USERID, appData);
+                    console.log('existWindow_byConfig', existWindow_byConfig);
+                    
+                    // окно есть и оно свернуто
+                    if (existWindow_byConfig && existWindow_byConfig.isMinimized) {
+                        console.log('point-2 - Window exists and is minimized, restoring...');
+                        
+                        // Вариант 1: Используем activate (рекомендуется, если activate снимает свернутость)
+                        await usersTable.windows.activate(this.USERID, existWindow_byConfig.id);
+                        
+                        // Вариант 2: Если есть отдельный метод restore
+                        // if (usersTable.windows.restore) {
+                        //     await usersTable.windows.restore(this.USERID, existWindow_byConfig.id);
+                        // } else {
+                        //     await usersTable.windows.activate(this.USERID, existWindow_byConfig.id);
+                        // }
+                        
+                    // окно есть и оно НЕ свернуто
+                    } else if (existWindow_byConfig) {
+                        console.log('point-3 - Window exists and is visible, activating...');
+                        await usersTable.windows.activate(this.USERID, existWindow_byConfig.id);
+                        
+                    // окна нет - создаем новое
                     } else {
-                        console.log('--------------isMinimized:: N');
-                        this.osStore.activateWindow(existingWindow.id);
+                        console.log('point-4 - No window exists, creating new...');
+                        
+                        // Создаем новое окно с параметрами из appData
+                        await usersTable.windows.create(this.USERID, { 
+                            ...appData,
+                            // Можно добавить значения по умолчанию
+                            defWidth: appData.defWidth || 800,
+                            defHeight: appData.defHeight || 600,
+                            isMinimized: false, // Новое окно не свернуто
+                            isMaximized: false
+                        });
                     }
-                } else {
-                    // Создаем новое окно
-                    this.osStore.openWindow({
-                        ...appData,
-                        defWidth: appData.defWidth || 800,
-                        defHeight: appData.defHeight || 600
-                    });
+                    
+                    // Обновляем список окон для синхронизации
+                    await usersTable.windows.reupdate(this.USERID);
+                    
+                    console.log('Launch app completed');
+                    
+                } catch (error) {
+                    console.error('Error in launchApp:', error);
                 }
             },
 
@@ -164,6 +172,7 @@
             
             const defAppsList = appsConfig.getAllApps();
             const findUserApps = await usersTable.getApps(this.USERID);
+            console.log('findUserApps', findUserApps);
 
             await this.findUser();
 

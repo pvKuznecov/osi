@@ -1,7 +1,7 @@
 export const OSIDATA = {
     name: 'OSI (Operating System Imitation)',
-    version: '0.1',
-    date: '09.12.2025',
+    version: '0.2',
+    date: '16.02.2026',
     en: {
         versionName: 'skeleton',
     },

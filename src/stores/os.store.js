@@ -67,9 +67,7 @@ export const useOsStore = defineStore('os', () => {
         if (window) {
             activeWindowId.value = windowId;
             windows.value.forEach(w => {
-                if (w.id === windowId) {
-                    w.zIndex = nextZIndex++;
-                }
+                if (w.id === windowId) w.zIndex = nextZIndex++;
             });
             
             // Сохраняем при активации окна

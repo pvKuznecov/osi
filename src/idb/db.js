@@ -1,5 +1,5 @@
 import Dexie from "dexie";
-
+import { ref } from "vue";
 import { appsConfig } from "@/config/applications";
 
 // конфигураторы БД
@@ -28,11 +28,11 @@ async function getDefaultApps() {
         isMaximized: app.isMaximized || false,
         resizable: app.resizable || false,
         canMinimize: app.canMinimize || false,
-        showOnDesktop: app.showOnDesktop !== undefined ? app.showOnDesktop : true,
-        showInStartMenu: app.showInStartMenu !== undefined ? app.showInStartMenu : true,
+        showOnDesktop: app.showOnDesktop || false,
+        showInStartMenu: app.showInStartMenu || false,
         // Сохраняем только базовые данные, удаляем функции и компоненты
         path: app.path || '',
-        component: app.component ? app.component.name || 'Component' : 'Component',
+        component: (app.component && app.component.name) ? app.component.name : 'Component',
         // Добавляем только примитивные типы данных
         data: app.data && typeof app.data === 'object' ? JSON.parse(JSON.stringify(app.data)) : {}        
     }));
@@ -50,8 +50,13 @@ const Def_userConfig = {
 
 const Def_userSystemconfig = {
     desktopWallpaper: "nwall.jpg",
-    windows: {},
+    windows: [],
+    activeWindowId: null,
 };
+
+let nextZIndex = 100;
+const IDBWindows = ref([]);
+const activeWindowId = ref(null);
 
 // -=-=-=-=-=-=-Описание классов моделей-=-=-=-=-=-=-
 export class User {
@@ -88,12 +93,10 @@ export const usersTable = {
     async save(userData) {
         try {
             const NUser = new User(userData);
-            console.log('NUser', NUser);
 
             if (NUser.id) {
                 // Преобразуем объект User в простой объект для IndexedDB
                 const userForDB = this.prepareUserForDB(NUser);
-                console.log('userForDB', userForDB);
 
                 userForDB.updatedAt = new Date();
                 await DB.users.update(userForDB.id, userForDB);
@@ -107,8 +110,6 @@ export const usersTable = {
                 NUser.createdAt = new Date();
                 NUser.updatedAt = new Date();
 
-                console.log('NUser-2', NUser);
-
                 return await DB.users.add(NUser);
             }
         } catch (error) {
@@ -117,48 +118,75 @@ export const usersTable = {
         }
     },
 
+    // Функция для проверки сериализуемости
+    isSerializable(value) {
+        if (value === null || value === undefined) return true;
+        if (typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string') return true;
+        if (value instanceof Date) return true;
+        
+        try {
+            JSON.stringify(value);
+            return true;
+        } catch {
+            return false;
+        }
+    },
+
+    // Функция для создания безопасной копии
+    createSafeCopy(value) {
+        const self = this;
+        
+        // Базовая проверка на null/undefined
+        if (value === null || value === undefined) return undefined;
+        
+        // Проверка сериализуемости
+        if (!this.isSerializable(value)) return undefined;
+        
+        // Примитивные типы возвращаем как есть
+        if (typeof value !== 'object' || value instanceof Date) return value;
+        
+        // Обработка массивов
+        if (Array.isArray(value)) {
+            return value
+                .map(item => self.createSafeCopy(item))
+                .filter(item => item !== undefined);
+        }
+        
+        // Обработка объектов
+        const result = {};
+        Object.entries(value).forEach(([key, val]) => {
+            // Пропускаем функции
+            if (typeof val === 'function') return;
+            
+            // Проверяем сериализуемость значения
+            if (self.isSerializable(val)) {
+                const copied = self.createSafeCopy(val);
+                if (copied !== undefined) {
+                    result[key] = copied;
+                }
+            }
+        });
+        
+        return result;
+    },
+
     prepareUserForDB(user) {
-        // Функция для проверки сериализуемости
-        const isSerializable = (value) => {
-            if (value === null || value === undefined) return true;
-            if (typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string') return true;
-            if (value instanceof Date) return true;
-            
-            try {
-                JSON.stringify(value);
-                return true;
-            } catch {
-                return false;
-            }
-        };
-
-        // Функция для создания безопасной копии
-        const createSafeCopy = (value) => {
-            if (!isSerializable(value)) return undefined;
-            
-            if (Array.isArray(value)) return value.map(createSafeCopy).filter(item => item !== undefined);
-            
-            if (value && typeof value === 'object' && !(value instanceof Date)) {
-                const result = {};
-                Object.entries(value).forEach(([key, val]) => {
-                    if (typeof val !== 'function' && isSerializable(val)) result[key] = createSafeCopy(val);
-                });
-                return result;
-            }
-            
-            return value;
-        };
-
         // Создаем безопасный объект для сохранения
+        const self = this;
+        
         return {
             id: user.id,
             login: user.login || '',
             name: user.name || '',
             password: user.password || '',
-            apps: Array.isArray(user.apps) ? user.apps.map(app => createSafeCopy(app) || {}).filter(app => Object.keys(app).length > 0) : [],
-            data: createSafeCopy(user.data) || {},
-            config: createSafeCopy(user.config) || { avatar: "cat.jpg" },
-            systemconfig: createSafeCopy(user.systemconfig) || { desktopWallpaper: "nwall.jpg" },
+            apps: Array.isArray(user.apps) 
+                ? user.apps
+                    .map(app => self.createSafeCopy(app))
+                    .filter(app => app && Object.keys(app).length > 0) 
+                : [],
+            data: this.createSafeCopy(user.data) || {},
+            config: this.createSafeCopy(user.config) || { avatar: "cat.jpg" },
+            systemconfig: this.createSafeCopy(user.systemconfig) || Def_userSystemconfig,
             createdAt: user.createdAt instanceof Date ? user.createdAt : (user.createdAt ? new Date(user.createdAt) : new Date()),
             updatedAt: user.updatedAt instanceof Date ? user.updatedAt : (user.updatedAt ? new Date(user.updatedAt) : new Date())
         };
@@ -241,6 +269,8 @@ export const usersTable = {
 
     // обновление конфигуратора приложений в учетной записи
     async updateAppSetting(userId, appId, key, value) {
+        if (!userId) throw new Error('User ID required');
+        
         try {
             // Получаем пользователя
             const user = await DB.users.get(userId);
@@ -270,7 +300,6 @@ export const usersTable = {
                 updatedAt: new Date()
             });
             
-            // console.log(`Обновлено: пользователь ${userId}, приложение ${appId}, ${key} = ${value}`);
             return { success: true, userId, appId, key, value };
             
         } catch (error) {
@@ -312,92 +341,486 @@ export const usersTable = {
         }
     },
 
-    // получить объект "окна" в SConfig пользователя (по его id)
-    async getSConfig_windows(userId) {
-        try {
-            const FindUser = await this.getbyId(userId);
-            const FindSConfig = (FindUser && FindUser.systemconfig) ? FindUser.systemconfig : false;
+    // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+    windows: {
+        prepareWindowForDB(wdata) {
+            // Убеждаемся, что zIndex передан правильно
+            console.log('prepareWindowForDB input:', wdata);
             
-            return (FindSConfig && FindSConfig.windows) ? FindSConfig.windows : false;
-        } catch (error) {
-            console.error('Error operation(users; getSConfig_windows).');
-            throw new Error(`Failed: ${error.message}`);
-        }
-    },
-    // создание нового "окна" в SConfig пользователя
-    async addSConfig_newWindow(userId, appData) {
-        const newId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        
-        try {
-            let FindUser = await this.getbyId(userId);
+            return {
+                id: wdata.id,
+                canMinimize: wdata.canMinimize || false,
+                category: wdata.category || 'other',
+                defHeight: wdata.defHeight,
+                defWidth: wdata.defWidth,
+                description: wdata.description || '',
+                icon: wdata.icon || '',
+                iconclass: wdata.iconclass || '',
+                isMaximized: wdata.isMaximized || false,
+                label: wdata.label || 'Unknown',
+                name: wdata.name || "Unknown name",
+                resizable: wdata.resizable || false,
+                showInStartMenu: wdata.showInStartMenu || false,
+                showOnDesktop: wdata.showOnDesktop || false,
+                zIndex: wdata.zIndex || nextZIndex++, // Используем переданный zIndex или увеличиваем
+            };
+        },
 
-            if (FindUser) {
-                let nSystemConfig = (FindUser.systemconfig) ? FindUser.systemconfig : {windows: {}};
-                let nWindows = (nSystemConfig && nSystemConfig.windows) ? nSystemConfig.windows : false;
-                nWindows[newId] = { ...appData };
+        async reupdate(userId) {
+            if (!userId) throw new Error('User ID required');
 
-                if (nSystemConfig && nWindows) {
-                    nSystemConfig.windows = nWindows;
-                    FindUser.systemconfig = nSystemConfig;
-                    
-                    const userForDB = this.prepareUserForDB(FindUser);
-                    userForDB.updatedAt = new Date();
-
-                    await DB.users.update(userForDB.id, userForDB);
-
-                    return true;
-                } else {
-                    console.error('Error operation(users; addSConfig_newWindow; c:1).');
-                    return false;
+            try {
+                const FindWindows = await this.windows_getAll(userId);
+                console.log('reupdate - windows from DB:', FindWindows);
+                
+                // Убедимся, что у всех окон есть zIndex
+                const windowsWithZIndex = FindWindows.map(w => ({
+                    ...w,
+                    zIndex: w.zIndex || 100
+                }));
+                
+                IDBWindows.value = windowsWithZIndex;
+                console.log('reupdate - IDBWindows.value set to:', IDBWindows.value);
+                
+                // Обновляем activeWindowId
+                const user = await DB.users.get(userId);
+                if (user && user.systemconfig) {
+                    activeWindowId.value = user.systemconfig.activeWindowId;
                 }
-            } else {
-                console.error('Error operation(users; addSConfig_newWindow; c:2).');
-                return false;
+                
+                return { success: true, userId };
+            } catch (error) {
+                console.error('Failed to reupdate windows:', error);
+                throw new Error(`Failed to reupdate windows: ${error.message}`);
             }
+        },
 
-        } catch (error) {
-            console.error('Error operation(users; addSConfig_newWindow).');
-            throw new Error(`Failed: ${error.message}`);
-        }
-    },
-    // поиск "окна" в SConfig пользователя по его id
-    async getSConfig_window_byId(userId, windowId) {
-        try {
-            const FindUser = await this.getbyId(userId);
-            const FindSConfig = (FindUser && FindUser.systemconfig) ? FindUser.systemconfig : false;
-            const FindWindows = (FindSConfig && FindSConfig.windows) ? FindSConfig.windows : false;
+        // создание нового окна с обновлением данных
+        async create(userId, appData) {
+            // валидация
+            if (!appData.name) throw new Error('App name required!');
 
-            return (FindWindows && Object.keys(FindWindows).includes(windowId)) ? FindWindows[windowId] : false;
-        } catch (error) {
-            console.error('Error operation(users; getSConfig_window_byId).');
-            throw new Error(`Failed: ${error.message}`);
-        }
-    },
-    // поиск "окна" в SConfig пользователя по данным приложения
-    async getSConfig_window_byConfig(userId, appData) {
-        try {
-            const FindWindows = await this.getSConfig_windows(userId);
-            
-            if (FindWindows) {
-                let res = false;
+            const windowId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            appData.id = windowId;
 
-                Object.keys(FindWindows).forEach(function(key) {
-                    if (
-                        appData.id
-                        && FindWindows[key].id === appData.id
-                        && appData.name
-                        && FindWindows[key].name === appData.name
-                    ) {
-                        res = FindWindows[key];
-                    }
+            try {
+                console.log('========== CREATE WINDOW ==========');
+                
+                // Получаем текущие окна из БД
+                const user = await DB.users.get(userId);
+                if (!user) throw new Error(`User with ID ${userId} not found`);
+                
+                const currentWindows = user?.systemconfig?.windows || [];
+                
+                // Определяем максимальный zIndex среди существующих окон
+                let maxZIndex = 100;
+                if (currentWindows.length > 0) {
+                    const zIndices = currentWindows.map(w => w.zIndex || 100);
+                    maxZIndex = Math.max(...zIndices, 100);
+                }
+                
+                // Устанавливаем zIndex для нового окна (max + 1)
+                const newZIndex = maxZIndex + 1;
+                
+                // Создаем объект окна - новое окно НЕ свернуто
+                const windowForDB = this.prepareWindowForDB({ 
+                    ...appData, 
+                    zIndex: newZIndex,
+                    isMinimized: false  // Явно указываем, что новое окно не свернуто
                 });
 
-                return res;
-            } else { return false; }
-        } catch (error) {
-            console.error('Error operation(users; getSConfig_window_byConfig).');
-            throw new Error(`Failed: ${error.message}`);
-        }
+                // Устанавливаем активное окно
+                activeWindowId.value = windowId;
+
+                // Добавляем новое окно к существующим
+                const newWindows = [...currentWindows, windowForDB];
+
+                // Обновляем системную конфигурацию пользователя
+                await DB.users.where('id').equals(userId)
+                    .modify(user => {
+                        user.systemconfig.windows = newWindows;
+                        user.systemconfig.activeWindowId = windowId;
+                        user.updatedAt = new Date();
+                    });
+
+                // Обновляем реактивную переменную
+                IDBWindows.value = newWindows;
+                
+                // Обновляем nextZIndex
+                nextZIndex = newZIndex + 1;
+                
+                console.log('Window created with zIndex:', newZIndex);
+                
+                return windowForDB;
+            } catch (error) {
+                console.error('Error creating window:', error);
+                throw error;
+            }
+        },
+
+        // получить список всех окон по ID пользователя
+        async windows_getAll(userId) {
+            if (!userId) throw new Error('User ID required');
+            
+            const user = await DB.users.get(userId);
+            if (!user) throw new Error(`User with ID ${userId} not found`);
+            
+            console.log('windows_getAll - user from DB:', user);
+            
+            const windows = user?.systemconfig?.windows || [];
+            console.log('windows_getAll - windows from DB:', windows);
+            
+            // Убедимся, что у каждого окна есть zIndex
+            const windowsWithZIndex = windows.map(w => ({
+                ...w,
+                zIndex: w.zIndex || 100
+            }));
+            
+            return windowsWithZIndex;
+        },
+
+        // получение конкретного окна по ID пользователя + ID окна
+        async getById(userId, windowId) {
+            if (!userId) throw new Error('User ID required')
+            if (!windowId) throw new Error('Window ID required')
+            
+            const user = await DB.users.get(userId)
+            if (!user) throw new Error(`User with ID ${userId} not found`)
+            
+            const findWindows = user?.systemconfig?.windows || [];
+            let result = null;
+
+            findWindows.forEach(function(val) {
+                if (val.id === windowId) result = val;
+            });
+
+            return result;
+        },
+        
+        // проверка наличия окна по ID пользователя + ID окна
+        async exists(userId, windowId) {
+            if (!userId) throw new Error('User ID required')
+            if (!windowId) throw new Error('Window ID required')
+            
+            try {
+                const window = await this.getById(userId, windowId);
+                return window !== null;
+            } catch {
+                return false;
+            }
+        },
+
+        // возвращает "следующее" значение zIndex, которое можно использовать
+        async getCurZIndex(userId) {
+            if (!userId) throw new Error('User ID required');
+
+            let maxZIndex = 100;
+
+            try {
+                const findWindows = await this.windows_getAll(userId);
+
+                if (findWindows && findWindows.length > 0) {
+                    findWindows.forEach(function(value) {
+                        if (value.zIndex > maxZIndex) maxZIndex = value.zIndex;
+                    });
+
+                    return (maxZIndex + 1);
+                } else {
+                    return maxZIndex;
+                }
+            } catch {
+                return maxZIndex;
+            }            
+        },
+
+        // Сохраняем все окна в systemconfig.windows пользователя
+        async saveWindowsToUser(userId) {
+            if (!userId) throw new Error('User ID required');
+
+            try {
+                const user = await DB.users.get(userId);
+                const nWindows = IDBWindows.value.map(w => (this.prepareWindowForDB(w)));
+
+                let uSystemconfig = user.systemconfig || Def_userSystemconfig;
+                
+                uSystemconfig.windows = nWindows;
+                uSystemconfig.activeWindowId = activeWindowId.value;
+                
+                // Сохраняем обновленный systemconfig
+                await DB.users.where('id').equals(userId)
+                .modify(user => {
+                    user.systemconfig = uSystemconfig;
+                    user.updatedAt = new Date();
+                });
+                
+                return { success: true, userId };
+            } catch (error) {
+                console.error('Failed to save windows to IDB:', error);
+                throw new Error(`Failed to update user's systemconfig/windows: ${error.message}`);
+            }
+        },
+
+        // активирование окна (поднятие его zIndex)
+        async activate(userId, windowId) {
+            if (!userId) throw new Error('User ID required');
+            if (!windowId) throw new Error('Window ID required');
+
+            try {
+                console.log('========== ACTIVATE WINDOW ==========');
+                
+                // Получаем пользователя
+                const user = await DB.users.get(userId);
+                const windows = user?.systemconfig?.windows || [];
+                
+                // Находим окно
+                const windowIndex = windows.findIndex(w => w.id === windowId);
+                if (windowIndex === -1) {
+                    throw new Error(`Window with ID ${windowId} not found`);
+                }
+                
+                // Если окно свернуто - разворачиваем его
+                if (windows[windowIndex].isMinimized) {
+                    windows[windowIndex].isMinimized = false;
+                }
+                
+                // Находим текущий максимальный zIndex
+                const maxZIndex = Math.max(...windows.map(w => w.zIndex || 100), 100);
+                const newZIndex = maxZIndex + 1;
+                
+                // Обновляем zIndex активируемого окна
+                windows[windowIndex].zIndex = newZIndex;
+
+                // Обновляем конфиг
+                await DB.users.where('id').equals(userId)
+                    .modify(user => {
+                        user.systemconfig.windows = windows;
+                        user.systemconfig.activeWindowId = windowId;
+                        user.updatedAt = new Date();
+                    });
+
+                // Обновляем реактивную переменную
+                IDBWindows.value = windows;
+                activeWindowId.value = windowId;
+                
+                console.log('Window activated with zIndex:', newZIndex);
+                return { success: true };
+                
+            } catch (error) {
+                console.error('Failed to activate window:', error);
+                throw error;
+            }
+        },
+
+        // поиск "окна" в SConfig пользователя по данным приложения
+        async getWindow_byConfig(userId, appData) {
+            if (!userId) throw new Error('User ID required');
+            if (!appData) throw new Error('appData required');
+            
+            try {
+                const FindWindows = await this.windows_getAll(userId);
+                
+                if (FindWindows && FindWindows.length > 0) {
+                    let res = false;
+
+                    FindWindows.forEach(function(val) {
+                        if (appData && appData.name && val.name === appData.name) {
+                            res = val;
+                        }
+                    });
+
+                    return res;
+                } else {
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error operation(users; getSConfig_window_byConfig).', error);
+                throw new Error(`Failed: ${error.message}`);
+            }
+        },
+
+        // сворачивание окна
+        async minimize(userId, windowId) {
+            if (!userId) throw new Error('User ID required');
+            if (!windowId) throw new Error('Window ID required');
+
+            try {
+                console.log('========== MINIMIZE WINDOW ==========');
+                console.log('Minimizing window:', windowId, 'for user:', userId);
+                
+                // Получаем пользователя
+                const user = await DB.users.get(userId);
+                if (!user) throw new Error(`User with ID ${userId} not found`);
+                
+                const windows = user?.systemconfig?.windows || [];
+                console.log('Current windows:', windows.map(w => ({id: w.id, isMinimized: w.isMinimized})));
+                
+                // Находим индекс сворачиваемого окна
+                const windowIndex = windows.findIndex(w => w.id === windowId);
+                
+                if (windowIndex === -1) {
+                    throw new Error(`Window with ID ${windowId} not found`);
+                }
+                
+                // Устанавливаем isMinimized в true
+                windows[windowIndex].isMinimized = true;
+                
+                // Определяем новое активное окно (окно с максимальным zIndex среди не свернутых)
+                const nonMinimizedWindows = windows.filter(w => !w.isMinimized);
+                let newActiveWindowId = null;
+                
+                if (nonMinimizedWindows.length > 0) {
+                    // Находим окно с максимальным zIndex среди не свернутых
+                    newActiveWindowId = nonMinimizedWindows.reduce((max, w) => 
+                        (w.zIndex > max.zIndex) ? w : max
+                    , nonMinimizedWindows[0]).id;
+                }
+                
+                console.log('Window minimized, new active window:', newActiveWindowId);
+                
+                // Обновляем конфиг
+                await DB.users.where('id').equals(userId)
+                    .modify(user => {
+                        user.systemconfig.windows = windows;
+                        user.systemconfig.activeWindowId = newActiveWindowId;
+                        user.updatedAt = new Date();
+                    });
+                
+                // Обновляем глобальные переменные
+                activeWindowId.value = newActiveWindowId;
+                IDBWindows.value = windows;
+                
+                console.log('Window minimized successfully');
+                console.log('========== MINIMIZE END ==========');
+                
+                return { success: true, userId, windowId, newActiveWindowId };
+            } catch (error) {
+                console.error('Failed to minimize window:', error);
+                throw new Error(`Failed to minimize window: ${error.message}`);
+            }
+        },
+        
+        // восстановление окна из свернутого состояния
+        async restore(userId, windowId) {
+            if (!userId) throw new Error('User ID required');
+            if (!windowId) throw new Error('Window ID required');
+
+            try {
+                console.log('========== RESTORE WINDOW ==========');
+                console.log('Restoring window:', windowId, 'for user:', userId);
+                
+                // Получаем пользователя
+                const user = await DB.users.get(userId);
+                if (!user) throw new Error(`User with ID ${userId} not found`);
+                
+                const windows = user?.systemconfig?.windows || [];
+                
+                // Находим индекс восстанавливаемого окна
+                const windowIndex = windows.findIndex(w => w.id === windowId);
+                
+                if (windowIndex === -1) {
+                    throw new Error(`Window with ID ${windowId} not found`);
+                }
+                
+                // Устанавливаем isMinimized в false
+                windows[windowIndex].isMinimized = false;
+                
+                // Получаем текущий максимальный zIndex
+                const maxZIndex = Math.max(...windows.map(w => w.zIndex || 100), 100);
+                const newZIndex = maxZIndex + 1;
+                
+                // Обновляем zIndex восстанавливаемого окна
+                windows[windowIndex].zIndex = newZIndex;
+                
+                console.log('Window restored with zIndex:', newZIndex);
+                
+                // Обновляем конфиг
+                await DB.users.where('id').equals(userId)
+                    .modify(user => {
+                        user.systemconfig.windows = windows;
+                        user.systemconfig.activeWindowId = windowId;
+                        user.updatedAt = new Date();
+                    });
+                
+                // Обновляем глобальные переменные
+                activeWindowId.value = windowId;
+                IDBWindows.value = windows;
+                
+                console.log('Window restored successfully');
+                console.log('========== RESTORE END ==========');
+                
+                return { success: true, userId, windowId, zIndex: newZIndex };
+            } catch (error) {
+                console.error('Failed to restore window:', error);
+                throw new Error(`Failed to restore window: ${error.message}`);
+            }
+        },
+
+        // "закрытие" окна у пользователя
+        async close(userId, windowId) {
+            if (!userId) throw new Error('User ID required');
+            if (!windowId) throw new Error('Window ID required');
+
+            try {
+                const FindWindows = await this.windows_getAll(userId);
+                console.log('FindWindows before close:', FindWindows);
+                
+                // Фильтруем окна, удаляя закрываемое
+                const resultArray = FindWindows.filter(val => val.id !== windowId);
+                console.log('resultArray after close:', resultArray);
+
+                // Обновляем реактивную переменную
+                IDBWindows.value = resultArray;
+
+                // Получаем пользователя и обновляем его конфиг
+                const user = await DB.users.get(userId);
+                let uSystemconfig = user.systemconfig || Def_userSystemconfig;
+                
+                // Обновляем windows в конфиге
+                uSystemconfig.windows = resultArray.map(w => this.prepareWindowForDB(w));
+                
+                // Если закрываем активное окно, активируем другое
+                if (uSystemconfig.activeWindowId === windowId) {
+                    if (resultArray.length > 0) {
+                        // Активируем окно с максимальным zIndex
+                        const windowsWithZIndex = resultArray.map(w => ({
+                            ...w,
+                            zIndex: w.zIndex || 100
+                        }));
+                        
+                        const maxZWindow = windowsWithZIndex.reduce((max, w) => 
+                            w.zIndex > max.zIndex ? w : max
+                        );
+                        
+                        uSystemconfig.activeWindowId = maxZWindow.id;
+                        activeWindowId.value = maxZWindow.id;
+                    } else {
+                        uSystemconfig.activeWindowId = null;
+                        activeWindowId.value = null;
+                    }
+                }
+
+                // Сохраняем в БД
+                await DB.users.where('id').equals(userId)
+                    .modify(user => {
+                        user.systemconfig = uSystemconfig;
+                        user.updatedAt = new Date();
+                    });
+
+                // Обновляем nextZIndex
+                if (resultArray.length > 0) {
+                    const maxZ = Math.max(...resultArray.map(w => w.zIndex));
+                    nextZIndex = maxZ + 1;
+                } else {
+                    nextZIndex = 100;
+                }
+
+                return { success: true, userId, windowId };
+            } catch (error) {
+                console.error('Error operation(users; windows.close).', error);
+                throw new Error(`Failed: ${error.message}`);
+            }
+        },
+
     },
 };
 
@@ -553,11 +976,11 @@ export async function clearDatabase() {
 //     console.log('Migration to version 2 completed');
 // });
 
-export { DB };
+export { DB, IDBWindows };
 
 export default {
     DB,
-    User,
+    User,    
     usersTable,
     settingsTable,
     initDatabase,

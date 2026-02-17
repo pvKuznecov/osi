@@ -2,8 +2,8 @@
 <style src="./style.css"></style>
 <script>
     import { usersTable } from '@/idb/db';
+    import { IDBWindows, activeWindowId } from '@/idb/db'; // Убедитесь, что activeWindowId импортирован
     import { JSH } from '@/core/helpers';
-    // import { useOSIAppsStore } from '@/stores/os.apps.store';
     import { useOsStore } from '@/stores/os.store';
     import { appsConfig } from '@/config/applications';
 
@@ -27,20 +27,23 @@
         },
 
         async mounted() {
-            this.reloadBar();
-            // const GlobalLangPack = JSH.lang;
-            // const userLang = navigator.language || navigator.userLanguage;
-            // const userLangS = userLang.split('-')[0];
-            // this.UserLang = userLangS; 
-            
-            // this.GLangData = (userLangS && GlobalLangPack && GlobalLangPack[userLangS]) ? GlobalLangPack[userLangS] : GlobalLangPack.en;
-
-            // this.findUser();
-            // this.updateTime();
-            // this.timer = setInterval(this.updateTime, 1000);
+            console.log('TaskBar mounted with USERID:', this.USERID);
+            await this.reloadBar();
         },
+
+        created() { this.usersTable = usersTable; },
   
         computed: {
+            // Получаем все окна из IDBWindows
+            windowsList() {
+                return IDBWindows?.value || [];
+            },
+
+            // Активное окно - с проверкой на undefined
+            currentActiveWindowId() {
+                return activeWindowId?.value || null;
+            },
+
             appManager_data() {
                 let resObj = {};
 
@@ -53,8 +56,9 @@
 
                 return resObj;
             },
-            osStore() {
-                return useOsStore();
+            
+            osStore() { 
+                return useOsStore(); 
             },
 
             appsList() {
@@ -64,20 +68,20 @@
 
             sortByType_appsList() {
                 const resultObj = {};
-                // const apps = this.appsList;
-                const apps = this.USERApps.filter(function(val) {
-                    return val.showInStartMenu;
-                });
+                const apps = this.USERApps.filter(val => val && val.showInStartMenu);
                 
                 apps.forEach(element => {
                     const category = element.category;
                     
-                    if (!resultObj[category]) { resultObj[category] = []; }
+                    if (!resultObj[category]) { 
+                        resultObj[category] = []; 
+                    }
                     resultObj[category].push(element);
                 });
 
+                // Сортируем каждую категорию
                 Object.keys(resultObj).forEach(key => {
-                    resultObj[key].sort((a, b) => a.label - b.label);
+                    resultObj[key].sort((a, b) => (a.label || '').localeCompare(b.label || ''));
                 });
 
                 return resultObj;
@@ -85,13 +89,15 @@
         },
   
         methods: {
-            async reloadBar() {
+            async reloadBar() {                
                 const GlobalLangPack = JSH.lang;
                 const userLang = navigator.language || navigator.userLanguage;
                 const userLangS = userLang.split('-')[0];
                 this.UserLang = userLangS; 
                 
-                this.GLangData = (userLangS && GlobalLangPack && GlobalLangPack[userLangS]) ? GlobalLangPack[userLangS] : GlobalLangPack.en;
+                this.GLangData = (userLangS && GlobalLangPack && GlobalLangPack[userLangS]) 
+                    ? GlobalLangPack[userLangS] 
+                    : GlobalLangPack.en;
 
                 await this.findUser();
 
@@ -99,9 +105,10 @@
                 const findUserApps = await usersTable.getApps(this.USERID);                
 
                 this.apps = defAppsList;
-                this.USERApps = (findUserApps) ? findUserApps : defAppsList;
+                this.USERApps = (findUserApps && Array.isArray(findUserApps)) ? findUserApps : defAppsList;
 
                 this.updateTime();
+                if (this.timer) clearInterval(this.timer);
                 this.timer = setInterval(this.updateTime, 1000);
             },
 
@@ -110,13 +117,11 @@
                     this.USER = await usersTable.getbyId(this.USERID);
                 } catch (error) {
                     console.error('Ошибка поиска пользователя:', error);
-                    this.$toast.error('Не удалось загрузить данные пользователя');
                 }
             },
 
             getAvatarUrl(avatarName) {
-                const res = `url(${require('@/assets/avatars/' + avatarName)})`;
-                return res;
+                return `url(${require('@/assets/avatars/' + avatarName)})`;
             },
 
             avatarStyle(avatarName) {
@@ -131,47 +136,90 @@
                 const now = new Date();
 
                 this.currentDate = now.toLocaleDateString();
-                this.currentTime = now.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+                this.currentTime = now.toLocaleTimeString('ru-RU', {
+                    hour: '2-digit', 
+                    minute: '2-digit'
+                });
             },
     
-            toggleWindow(windowId) {
-                const window = this.osStore.windows.find(w => w.id === windowId);
-                
-                if (window) {
-                    console.log('window', window);
-                    if (window.isMinimized) {
-                        this.osStore.restoreWindow(windowId);
-                    } else {
-                        this.osStore.activateWindow(windowId);
+            // Основной метод для обработки клика по окну в таскбаре
+            async toggleWindow(windowId) {                
+                if (!this.USERID || !usersTable) {
+                    console.error('USERID or usersTable missing');
+                    return;
+                }
+
+                try {
+                    // Получаем окно из IDBWindows
+                    const window = this.windowsList.find(w => w.id === windowId);
+                    
+                    if (!window) {
+                        console.error('Window not found:', windowId);
+                        return;
                     }
+
+                    if (window.isMinimized) {                        
+                        // Используем метод restore если он есть, иначе activate
+                        if (usersTable.windows.restore) {
+                            await usersTable.windows.restore(this.USERID, window.id);
+                        } else {
+                            // activate тоже снимает свернутость и поднимает zIndex
+                            await usersTable.windows.activate(this.USERID, window.id);
+                        }
+                    } else {
+                        // Если окно не свернуто - активируем его (поднимаем zIndex)
+                        await usersTable.windows.activate(this.USERID, window.id);
+                    }
+                    
+                    // Обновляем список окон
+                    await usersTable.windows.reupdate(this.USERID);
+                } catch (error) {
+                    console.error('Error toggling window:', error);
                 }
             },
-    
-            toggleStartMenu() { this.showMenu = !this.showMenu; },
 
-            launchApp(appData) {
-                const appName = appData.name;
-                const contentApp = appData.contentapp;
+            toggleStartMenu() { 
+                this.showMenu = !this.showMenu; 
+            },
 
-                // Ищем окно по windowId или по типу приложения
-                const existingWindow = this.osStore.windows.find(
-                    w => w.appName === appName && w.contentApp === contentApp
-                );
+            async launchApp(appData) {
                 
-                if (existingWindow) {
-                    // Если окно существует, активируем его
-                    if (existingWindow.isMinimized) {
-                        this.osStore.restoreWindow(existingWindow.id);
+                if (!this.USERID || !usersTable) {
+                    console.error('USERID or usersTable missing');
+                    return;
+                }
+
+                try {
+                    // Ищем существующее окно по конфигурации
+                    const existingWindow = await usersTable.windows.getWindow_byConfig(this.USERID, appData);
+                    
+                    if (existingWindow) {
+                        // Если окно существует
+                        if (existingWindow.isMinimized) {
+                            // Если свернуто - разворачиваем
+                            if (usersTable.windows.restore) {
+                                await usersTable.windows.restore(this.USERID, existingWindow.id);
+                            } else {
+                                await usersTable.windows.activate(this.USERID, existingWindow.id);
+                            }
+                        } else {
+                            // Если не свернуто - активируем
+                            await usersTable.windows.activate(this.USERID, existingWindow.id);
+                        }
                     } else {
-                        this.osStore.activateWindow(existingWindow.id);
+                        // Создаем новое окно
+                        await usersTable.windows.create(this.USERID, {
+                            ...appData,
+                            defWidth: appData.defWidth || 800,
+                            defHeight: appData.defHeight || 600
+                        });
                     }
-                } else {
-                    // Создаем новое окно
-                    this.osStore.openWindow({
-                        ...appData,
-                        defWidth: appData.defWidth || 800,
-                        defHeight: appData.defHeight || 600
-                    });
+                    
+                    // Обновляем список окон
+                    await usersTable.windows.reupdate(this.USERID);
+                    
+                } catch (error) {
+                    console.error('Error launching app:', error);
                 }
             },
 
@@ -179,6 +227,30 @@
                 this.launchApp(appData);
                 this.toggleStartMenu();
             },
+
+            // Получить иконку для окна
+            getWindowIcon(window) {
+                return window?.icon || window?.iconclass || '📄';
+            },
+
+            // Проверить, активно ли окно - С ПРОВЕРКОЙ НА UNDEFINED
+            isWindowActive(windowId) {
+                // Проверяем, что activeWindowId и его value существуют
+                if (!activeWindowId || !activeWindowId.value) {
+                    return false;
+                }
+                return activeWindowId.value === windowId;
+            },
+
+            // Получить класс для окна в таскбаре - С ПРОВЕРКОЙ НА UNDEFINED
+            getWindowClass(window) {
+                if (!window) return {};
+                
+                return {
+                    'active': this.isWindowActive(window.id),
+                    'minimized': window.isMinimized === true
+                };
+            }
         },
   
         beforeUnmount() {
