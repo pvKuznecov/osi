@@ -1,17 +1,15 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
-    import { usersTable } from '@/idb/db';
-    import { IDBWindows, activeWindowId } from '@/idb/db'; // Убедитесь, что activeWindowId импортирован
+    import { usersTable, IDBWindows, activeWindowId } from '@/idb/db';
     import { JSH } from '@/core/helpers';
-    import { useOsStore } from '@/stores/os.store';
     import { appsConfig } from '@/config/applications';
 
     export default {
         name: "TaskBar",
 
         props: {
-            USERID: {type: Number, default: 0}
+            USERID: { type: Number, default: 0 }
         },
   
         data() {
@@ -35,14 +33,9 @@
   
         computed: {
             // Получаем все окна из IDBWindows
-            windowsList() {
-                return IDBWindows?.value || [];
-            },
-
+            windowsList() { return IDBWindows?.value || []; },
             // Активное окно - с проверкой на undefined
-            currentActiveWindowId() {
-                return activeWindowId?.value || null;
-            },
+            currentActiveWindowId() { return activeWindowId?.value || null; },
 
             appManager_data() {
                 let resObj = {};
@@ -55,10 +48,6 @@
                 }
 
                 return resObj;
-            },
-            
-            osStore() { 
-                return useOsStore(); 
             },
 
             appsList() {
@@ -178,9 +167,7 @@
                 }
             },
 
-            toggleStartMenu() { 
-                this.showMenu = !this.showMenu; 
-            },
+            toggleStartMenu() { this.showMenu = !this.showMenu; },
 
             async launchApp(appData) {
                 
@@ -210,8 +197,8 @@
                         // Создаем новое окно
                         await usersTable.windows.create(this.USERID, {
                             ...appData,
-                            defWidth: appData.defWidth || 800,
-                            defHeight: appData.defHeight || 600
+                            defWidth: appData.defWidth,
+                            defHeight: appData.defHeight,
                         });
                     }
                     
@@ -230,7 +217,7 @@
 
             // Получить иконку для окна
             getWindowIcon(window) {
-                return window?.icon || window?.iconclass || '📄';
+                return window?.icon || window?.iconclass || '🟢';
             },
 
             // Проверить, активно ли окно - С ПРОВЕРКОЙ НА UNDEFINED
@@ -254,9 +241,7 @@
         },
   
         beforeUnmount() {
-            if (this.timer) {
-                clearInterval(this.timer);
-            }
+            if (this.timer) { clearInterval(this.timer); }
         }
     }
 </script>

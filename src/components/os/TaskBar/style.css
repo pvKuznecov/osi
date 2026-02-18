@@ -34,9 +34,11 @@
 }
 
 .task-bar-menu-elem {
+    display: flex;
     padding-left: 10px;
     margin-top: 5px;
-}
+    cursor: pointer; }
+.task-bar-menu-elem:hover { background-color: rgba(255, 255, 255, 0.1);}
 
 .start-button {
     /* display: flex; */
@@ -105,7 +107,6 @@
     padding: 2px 5px;
     border-radius: 5px; }
 
-.task-bar-menu-elem { cursor: pointer; }
 
 .app-icon {
     display: inline-block;
@@ -147,13 +148,10 @@
 }
 
 .taskbar-app.active {
-    background: #0078ff;
-    border-color: #0058cc;
-}
+    background: linear-gradient(180deg, #ffffff, #c5d5e7);
+    border-color: #92b3d8; }
 
-.taskbar-app.active .minimized-indicator {
-    color: #fff;
-}
+.taskbar-app.active .minimized-indicator { color: #fff; }
 
 /* В style.css добавьте базовые стили для иконок */
 .app-icon {
@@ -162,8 +160,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
-}
+    font-size: 16px; }
 
 /* Для иконок из стилей (bi, fa и т.д.) */
 .app-icon.bi,

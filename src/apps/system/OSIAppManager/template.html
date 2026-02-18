@@ -7,6 +7,7 @@
         
         <div v-if="isNeedReload" class="warning-text-area">
             <h3>Для того, чтобы изменения вступили в силу, необходимо перезагрузить систему.</h3>
+            <div @click="reloadPage()">Перезагрузить</div>
         </div>
         <div v-else></div>
 

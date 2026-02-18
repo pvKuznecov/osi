@@ -9,13 +9,13 @@
     <div v-for="cat in Object.keys(sortByType_appsList)" :key="cat" class="app-cat-area">
         <i class="app-category-name">{{GLangData['cattype_' + cat]}}:</i>
         <div class="task-bar-menu-elem" v-for="app in sortByType_appsList[cat]" :key="app.id">
-            <!-- ИСПРАВЛЕНИЕ: используем или иконку из стилей, или текстовую, но не оба -->
-            <div v-if="app.iconclass" class="app-icon" :class="app.iconclass" @click="launchApp_byMenu(app)"></div>
-            <div v-else-if="app.icon" class="app-icon" @click="launchApp_byMenu(app)">{{ app.icon }}</div>
-            <div v-else class="app-icon" @click="launchApp_byMenu(app)">📄</div>
+            <div style="display: inline-block; margin-right: 5px;">
+                <div v-if="app.iconclass" class="app-icon" :class="app.iconclass" @click="launchApp_byMenu(app)"></div>
+                <div v-else-if="app.icon" class="app-icon" @click="launchApp_byMenu(app)">{{ app.icon }}</div>
+                <div v-else class="app-icon" @click="launchApp_byMenu(app)">📄</div>
+            </div>
             <span @click="launchApp_byMenu(app)">{{app.label}}</span>
         </div>
-        <hr>
     </div>
 </div>
 
@@ -31,16 +31,13 @@
         <button 
             v-for="window in windowsList" 
             :key="window.id" 
-            class="taskbar-app d-flex justify-content-center align-items-center" 
-            :class="getWindowClass(window)"
-            @click="toggleWindow(window.id)"
+            class="taskbar-app d-flex justify-content-center align-items-center" :class="getWindowClass(window)"
             :title="(window.isMinimized ? 'Свернуто: ' : '') + (window.label || window.name)"
+            @click="toggleWindow(window.id)"
         >
-            <!-- ИСПРАВЛЕНИЕ: используем или иконку из стилей, или текстовую, но не оба -->
             <div v-if="window.iconclass" class="app-icon" :class="window.iconclass"></div>
             <div v-else-if="window.icon" class="app-icon">{{ window.icon }}</div>
             <div v-else class="app-icon">📄</div>
-            
             <span class="app-title">{{ window.label || window.name }}</span>
             <span v-if="window.isMinimized" class="minimized-indicator">▼</span>
         </button>
@@ -48,10 +45,7 @@
 
     <!-- Менеджер приложений -->
     <div>
-        <i class="bi bi-grid-3x3-gap-fill appmanager-minico" 
-           :title="`Запущено приложений: ${windowsList.length}.`" 
-           @click="launchApp(appManager_data)">
-        </i>
+        <i class="bi bi-grid-3x3-gap-fill appmanager-minico" :title="`Запущено приложений: ${windowsList.length}.`" @click="launchApp(appManager_data)"></i>
     </div>
     
     <!-- Системный трей -->

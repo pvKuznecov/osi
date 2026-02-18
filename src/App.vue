@@ -14,7 +14,7 @@
                 :defWidth="window.defWidth"
                 :defHeight="window.defHeight"
                 :isMinimized="window.isMinimized"
-                :isActive="osStore?.activeWindowId === window.id"
+                :isActive="isActiveElem(window.id)"
                 :isMaximized="window.isMaximized"
                 :zIndex="window.zIndex"
                 :resizable="window.resizable"
@@ -29,17 +29,14 @@
         <TaskBar :USERID="USERID" />
     </div>
 </template>
-
 <style src="./styles/global.css"></style>
-
 <script>
 import AutorizationArea from './components/os/AutorizationArea/AutorizationArea.vue';
 import DesktopArea from './components/os/DesktopArea/DesktopArea.vue';
 import TaskBar from './components/os/TaskBar/TaskBar.vue';
 import SimpleWindow from './components/os/SimpleWindow/SimpleWindow.vue';
-import { useOsStore } from './stores/os.store';
 import { useAppsStore } from './stores/apps.store';
-import { usersTable, IDBWindows } from './idb/db';
+import { usersTable, IDBWindows, activeWindowId } from './idb/db';
 
 export default {
     name: 'App',
@@ -59,46 +56,28 @@ export default {
         }
     },
 
-    watch: {
-        // Отслеживаем изменения IDBWindows
-        IDBWindows: {
-            handler(newVal) {
-                console.log('IDBWindows changed:', newVal?.map(w => ({id: w.id, zIndex: w.zIndex, isMinimized: w.isMinimized})));
-            },
-            deep: true,
-            immediate: true
-        }
-    },
-
     computed: {
+        IDBWindows() { return IDBWindows.value; },
+        appsStore() { return useAppsStore(); },
         // Сортируем окна по zIndex для правильного отображения
         sortedWindows() {
-            if (!this.IDBWindows) return [];
+            if (!this.IDBWindows) {
+                return [];
+            } else {
+                // Фильтруем свернутые окна - они не отображаются на рабочем столе
+                const visibleWindows = this.IDBWindows.filter(w => !w.isMinimized);
             
-            // Фильтруем свернутые окна - они не отображаются на рабочем столе
-            const visibleWindows = this.IDBWindows.filter(w => !w.isMinimized);
-            
-            // Сортируем по zIndex (от меньшего к большему)
-            return [...visibleWindows].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
-        },
-
-        IDBWindows() { 
-            return IDBWindows.value; 
-        },
-        
-        osStore() { 
-            return useOsStore(); 
-        },
-        
-        appsStore() { 
-            return useAppsStore(); 
+                // Сортируем по zIndex (от меньшего к большему)
+                return [...visibleWindows].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+            }
         },
     },
 
     methods: {
-        async closeWindow(windowId) {
-            console.log('closeWindow called:', windowId);
-            
+        // проверка на "это активный элемент"
+        isActiveElem(windowId) { return windowId === activeWindowId.value; },
+
+        async closeWindow(windowId) {            
             if (this.USERID && usersTable) {
                 try {
                     await usersTable.windows.close(this.USERID, windowId);
@@ -108,32 +87,21 @@ export default {
                 }
             }
 
-            if (this.appsStore) {
-                this.appsStore.deleteWindowState(windowId);
-            }
+            if (this.appsStore) this.appsStore.deleteWindowState(windowId);
         },
     
-        async minimizeWindow(windowId) {
-            console.log('minimizeWindow called:', windowId);
-            
+        async minimizeWindow(windowId) {            
             if (this.USERID && usersTable) {
                 try {
-                    // ИСПРАВЛЕНИЕ: Используем метод minimize из usersTable.windows
                     await usersTable.windows.minimize(this.USERID, windowId);
                     await usersTable.windows.reupdate(this.USERID);
-                    console.log('Window minimized successfully');
                 } catch (error) {
                     console.error('Error minimizing window:', error);
                 }
-            } else if (this.osStore) {
-                // Fallback на osStore если usersTable недоступен
-                this.osStore.minimizeWindow(windowId);
             }
         },
     
-        async toggleMaximizeWindow(windowId) {
-            console.log('toggleMaximizeWindow called:', windowId);
-            
+        async toggleMaximizeWindow(windowId) {            
             if (this.USERID && usersTable) {
                 try {
                     // Получаем текущее состояние окна
@@ -163,24 +131,16 @@ export default {
                 } catch (error) {
                     console.error('Error toggling maximize window:', error);
                 }
-            } else if (this.osStore) {
-                this.osStore.toggleMaximizeWindow(windowId);
             }
         },
     
-        async activateWindow(windowId) {
-            console.log('🎯 App.activateWindow called with:', windowId);
-            console.log('Current USERID:', this.USERID);
-            
+        async activateWindow(windowId) {            
             if (this.USERID && usersTable) { 
                 try {
                     // Активируем окно (обновляет zIndex и снимает свернутость)
                     await usersTable.windows.activate(this.USERID, windowId);
-                    
                     // Обновляем список окон
                     await usersTable.windows.reupdate(this.USERID);
-                    
-                    console.log('Window activated successfully');
                 } catch (error) {
                     console.error('Error activating window:', error);
                 }
@@ -190,7 +150,6 @@ export default {
         },
 
         async selectUser(userId) {
-            console.log('selectUser called:', userId);
             this.USERID = userId;
 
             if (usersTable) {
@@ -208,9 +167,7 @@ export default {
         },
 
         // Метод для восстановления окна из свернутого состояния
-        async restoreWindow(windowId) {
-            console.log('restoreWindow called:', windowId);
-            
+        async restoreWindow(windowId) {            
             if (this.USERID && usersTable) {
                 try {
                     // Если у вас есть метод restore в usersTable.windows
