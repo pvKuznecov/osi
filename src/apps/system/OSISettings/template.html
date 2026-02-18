@@ -1,17 +1,16 @@
 <div class="osisettings-app">
     <div class="osisettings-menu">
         <ul>
+            <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('all'))}"><span class="osisettings-menu-elem" @click="ChngArea('all')">{{ LangData.allsettings }}</span></li>
             <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('description'))}"><span class="osisettings-menu-elem" @click="ChngArea('description')">{{ LangData.description }}</span></li>
             <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('accounts'))}"><span class="osisettings-menu-elem" @click="ChngArea('accounts')">{{ LangData.accounts }}</span></li>
             <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('design'))}"><span class="osisettings-menu-elem" @click="ChngArea('design')">{{ LangData.design }}</span></li>
             <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('memmanagment'))}"><span class="osisettings-menu-elem" @click="ChngArea('memmanagment')">{{ LangData.memmanagment }}</span></li>
         </ul>
     </div>
-    <div class="osisettings-content">
-        <!-- <img src="@/assets/img/logo.png" alt="OSI" class="osilogo"> -->
-        
+    <div class="osisettings-content">        
         <!-- description area -->
-        <div v-if="SelectArea === 'description'" class="osisettings-elem-info">
+        <div v-if="SelectArea === 'description' || SelectArea === 'all'" class="osisettings-elem-info">
             <div>
                 <h2>{{LangData.description}}</h2>
                 <ul>
@@ -32,7 +31,7 @@
         </div>
 
         <!-- accounts area -->
-        <div v-if="SelectArea === 'accounts'" class="osisettings-elem-info">
+        <div v-if="SelectArea === 'accounts' || SelectArea === 'all'" class="osisettings-elem-info">
             <h2>{{LangData.accounts}}</h2>
             <h3>Текущая учетная запись:</h3>
             <div class="account-elem d-flex justify-content-center align-items-center">
@@ -56,12 +55,11 @@
                         <b>{{u.login}}</b>
                     </div>
                 </div>
-            </div>
-            
+            </div>            
         </div>
 
         <!-- design area -->
-        <div v-if="SelectArea === 'design'" class="osisettings-elem-info">
+        <div v-if="SelectArea === 'design' || SelectArea === 'all'" class="osisettings-elem-info">
             <h2>{{LangData.design}}</h2>
             <ul>
                 <li>
@@ -75,7 +73,7 @@
         </div>
 
         <!-- memory managment area -->
-        <div v-if="SelectArea === 'memmanagment'" class="osisettings-elem-info">
+        <div v-if="SelectArea === 'memmanagment' || SelectArea === 'all'" class="osisettings-elem-info">
             <h2>{{ LangData.memmanagment }}</h2>
             <h3 style="padding-left: 10px; margin-top: 10px;">localStorage:</h3>
             <div v-if="storeStatistic">

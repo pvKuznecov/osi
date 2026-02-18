@@ -62,9 +62,8 @@
                 apps.forEach(element => {
                     const category = element.category;
                     
-                    if (!resultObj[category]) { 
-                        resultObj[category] = []; 
-                    }
+                    if (!resultObj[category]) resultObj[category] = [];
+                    
                     resultObj[category].push(element);
                 });
 

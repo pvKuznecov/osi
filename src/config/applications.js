@@ -34,12 +34,12 @@ const applications = [
         defWidth: 600, defHeight: 700,
         resizable: true, canMinimize: true, showOnDesktop: true, showInStartMenu: true,
     }),
-    new OSIApp({
-        id: 'osicalendar', name: 'OSICalendar',
-        label: 'Календарь', category: 'utilities', description: 'Системный календарь.',
-        iconclass: 'bi-calendar2-date text-ico-purpure',
-        isMaximized: true, resizable: true, canMinimize: true,
-    }),
+    // new OSIApp({
+    //     id: 'osicalendar', name: 'OSICalendar',
+    //     label: 'Календарь', category: 'utilities', description: 'Системный календарь.',
+    //     iconclass: 'bi-calendar2-date text-ico-purpure',
+    //     isMaximized: true, resizable: true, canMinimize: true,
+    // }),
     new OSIApp({
         id: 'osicalculator', name: 'OSICalculator',
         label: 'Калькулятор', category: 'utilities', description: 'Простой калькулятор для базовых вычислений.',

@@ -948,4 +948,3 @@ export default {
     initDatabase,
     clearDatabase
 };
-

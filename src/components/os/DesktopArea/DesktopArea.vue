@@ -28,16 +28,13 @@
   
         computed: {
             deskApps() {
-                const allApps = this.apps;
-                const usersApps = this.USERApps.filter(function(val) {
-                    return val.showOnDesktop;
-                });
-                
-                const usersAppsId = usersApps.map(app => app.id);
+                const usersAppsId = this.USERApps
+                    .filter(app => app.showOnDesktop)
+                    .map(app => app.id);
 
-                return allApps.filter(function(elem) {
-                    return usersAppsId.includes(elem.id);
-                });
+                return this.apps
+                    .filter(app => usersAppsId.includes(app.id))
+                    .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
             },
         },
   
