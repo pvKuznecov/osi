@@ -3,7 +3,6 @@
 <script>
     import { appsConfig } from '@/config/applications';
     import { usersTable } from '@/idb/db';
-    import { useOsStore } from '@/stores/os.store';
 
     export default {
         name: 'OSIAppManager',
@@ -26,9 +25,6 @@
         },
 
         computed: {
-            osStore() {
-                return useOsStore();
-            },
             // Отфильтрованные приложения по поисковому запросу
             filteredApps() {
                 if (!this.searchInputTxt.trim()) {
@@ -85,6 +81,9 @@
         },
 
         methods: {
+            // перезагрузка страницы
+            reloadPage() { document.location.reload(); },
+
             async findUser() {
                 try {                    
                     this.USER = await usersTable.getbyId(this.USERID);
@@ -116,35 +115,46 @@
                 }
             },
 
-            launchApp(_appData) {
-                const appData = {..._appData};
-                console.log('appData', appData);
-                const appName = appData.name;
-                const contentApp = appData.contentapp;
-
-                console.log('appName', appName);
-                console.log('contentApp', contentApp);
-
-                // Ищем окно по windowId или по типу приложения
-                const existingWindow = this.osStore.windows.find(
-                    w => w.appName === appName && w.contentApp === contentApp
-                );
+            async launchApp(appData) {                
+                if (!this.USERID) {
+                    console.error('USERID not set');
+                    return;
+                }
                 
-                if (existingWindow) {
-                    // Если окно существует, активируем его
-                    if (existingWindow.isMinimized) {
-                        this.osStore.restoreWindow(existingWindow.id);
-                    } else {
-                        this.osStore.activateWindow(existingWindow.id);
+                try {
+                    // Ищем существующее окно по конфигурации приложения
+                    const existWindow_byConfig = await usersTable.windows.getWindow_byConfig(this.USERID, appData);
+                    
+                    // окно есть и оно свернуто
+                    if (existWindow_byConfig && existWindow_byConfig.isMinimized) {
+                        console.log('point-2 - Window exists and is minimized, restoring...');
+                        
+                        // Вариант 1: Используем activate (рекомендуется, если activate снимает свернутость)
+                        await usersTable.windows.activate(this.USERID, existWindow_byConfig.id);
+                        
+                        // Вариант 2: Если есть отдельный метод restore
+                        // if (usersTable.windows.restore) {
+                        //     await usersTable.windows.restore(this.USERID, existWindow_byConfig.id);
+                        // } else {
+                        //     await usersTable.windows.activate(this.USERID, existWindow_byConfig.id);
+                        // }
+                    } else if (existWindow_byConfig) {  // окно есть и оно НЕ свернуто
+                        await usersTable.windows.activate(this.USERID, existWindow_byConfig.id);
+                    } else {    // окна нет - создаем новое                        
+                        // Создаем новое окно с параметрами из appData
+                        await usersTable.windows.create(this.USERID, { 
+                            ...appData,
+                            isMinimized: false, // Новое окно не свернуто
+                        });
                     }
-                } else {
-                    // Создаем новое окно
-                    this.osStore.openWindow({
-                        ...appData,
-                        defWidth: appData.defWidth || 800,
-                        defHeight: appData.defHeight || 600
-                    });
-                }             
+                    
+                    // Обновляем список окон для синхронизации
+                    await usersTable.windows.reupdate(this.USERID);
+                    
+                    console.log('Launch app completed');                    
+                } catch (error) {
+                    console.error('Error in launchApp:', error);
+                }
             },
         },
     }

@@ -56,10 +56,8 @@
         },
 
         methods: {
-            reloadPage() {
-                // Перезагрузить текущую страницу
-                document.location.reload();
-            },
+            // // Перезагрузить текущую страницу
+            // reloadPage() { document.location.reload(); },
 
             pre_selectUser(userData) {
                 this.selectedUser = userData;
@@ -99,14 +97,11 @@
                         name: this.defaultUser.name || 'User',
                         login: this.defaultUser.login,
                         password: this.defaultUser.password || '',
-                        config: {
-                            avatar: this.defaultUser.avatar
-                        }
+                        config: { avatar: this.defaultUser.avatar }
                     };
 
                     try {
-                        const operResult = await usersTable.save(NUserData);
-                        console.log('operResult', operResult);
+                        await usersTable.save(NUserData);
                         
                         this.loadUsers();
                         this.showForm_addUser();
@@ -138,8 +133,7 @@
 
                 if (isValidOper) {
                     try {
-                        const operResult = await usersTable.delete(userId);
-                        console.log('operResult', operResult);
+                        await usersTable.delete(userId);
 
                         this.loadUsers();
                         this.defaultUser = EmptyUser;
@@ -148,13 +142,13 @@
                         this.inpPass = '';
                     } catch (error) {
                         console.error('Ошибка удаления пользователя:', error);
-                        this.operationDelUserResult = 'Ошибка при удалении учетной записи.'
+                        this.operationDelUserResult = 'Ошибка при удалении учетной записи.';
                     }
                 } else if (!isValidOper && needPass) {
                     this.operationDelUserResult = 'Ошибка при удалении учетной записи: указан некорректный пароль.'
                 } else {
                     this.operationDelUserResult = 'Неизвестная ошибка при удалении учетной записи.'
-                }            
+                }
             },
 
             showForm_addUser() {

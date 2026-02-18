@@ -343,10 +343,7 @@ export const usersTable = {
 
     // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     windows: {
-        prepareWindowForDB(wdata) {
-            // Убеждаемся, что zIndex передан правильно
-            console.log('prepareWindowForDB input:', wdata);
-            
+        prepareWindowForDB(wdata) {            
             return {
                 id: wdata.id,
                 canMinimize: wdata.canMinimize || false,
@@ -371,7 +368,6 @@ export const usersTable = {
 
             try {
                 const FindWindows = await this.windows_getAll(userId);
-                console.log('reupdate - windows from DB:', FindWindows);
                 
                 // Убедимся, что у всех окон есть zIndex
                 const windowsWithZIndex = FindWindows.map(w => ({
@@ -380,13 +376,11 @@ export const usersTable = {
                 }));
                 
                 IDBWindows.value = windowsWithZIndex;
-                console.log('reupdate - IDBWindows.value set to:', IDBWindows.value);
                 
                 // Обновляем activeWindowId
                 const user = await DB.users.get(userId);
-                if (user && user.systemconfig) {
-                    activeWindowId.value = user.systemconfig.activeWindowId;
-                }
+
+                if (user && user.systemconfig) activeWindowId.value = user.systemconfig.activeWindowId;
                 
                 return { success: true, userId };
             } catch (error) {
@@ -403,17 +397,17 @@ export const usersTable = {
             const windowId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             appData.id = windowId;
 
-            try {
-                console.log('========== CREATE WINDOW ==========');
-                
+            try {                
                 // Получаем текущие окна из БД
                 const user = await DB.users.get(userId);
+
                 if (!user) throw new Error(`User with ID ${userId} not found`);
                 
                 const currentWindows = user?.systemconfig?.windows || [];
                 
                 // Определяем максимальный zIndex среди существующих окон
                 let maxZIndex = 100;
+
                 if (currentWindows.length > 0) {
                     const zIndices = currentWindows.map(w => w.zIndex || 100);
                     maxZIndex = Math.max(...zIndices, 100);
@@ -449,8 +443,6 @@ export const usersTable = {
                 // Обновляем nextZIndex
                 nextZIndex = newZIndex + 1;
                 
-                console.log('Window created with zIndex:', newZIndex);
-                
                 return windowForDB;
             } catch (error) {
                 console.error('Error creating window:', error);
@@ -463,12 +455,10 @@ export const usersTable = {
             if (!userId) throw new Error('User ID required');
             
             const user = await DB.users.get(userId);
+
             if (!user) throw new Error(`User with ID ${userId} not found`);
             
-            console.log('windows_getAll - user from DB:', user);
-            
             const windows = user?.systemconfig?.windows || [];
-            console.log('windows_getAll - windows from DB:', windows);
             
             // Убедимся, что у каждого окна есть zIndex
             const windowsWithZIndex = windows.map(w => ({
@@ -565,23 +555,18 @@ export const usersTable = {
             if (!userId) throw new Error('User ID required');
             if (!windowId) throw new Error('Window ID required');
 
-            try {
-                console.log('========== ACTIVATE WINDOW ==========');
-                
+            try {                
                 // Получаем пользователя
                 const user = await DB.users.get(userId);
                 const windows = user?.systemconfig?.windows || [];
                 
                 // Находим окно
                 const windowIndex = windows.findIndex(w => w.id === windowId);
-                if (windowIndex === -1) {
-                    throw new Error(`Window with ID ${windowId} not found`);
-                }
+
+                if (windowIndex === -1) throw new Error(`Window with ID ${windowId} not found`);
                 
                 // Если окно свернуто - разворачиваем его
-                if (windows[windowIndex].isMinimized) {
-                    windows[windowIndex].isMinimized = false;
-                }
+                if (windows[windowIndex].isMinimized) windows[windowIndex].isMinimized = false;
                 
                 // Находим текущий максимальный zIndex
                 const maxZIndex = Math.max(...windows.map(w => w.zIndex || 100), 100);
@@ -601,10 +586,8 @@ export const usersTable = {
                 // Обновляем реактивную переменную
                 IDBWindows.value = windows;
                 activeWindowId.value = windowId;
-                
-                console.log('Window activated with zIndex:', newZIndex);
-                return { success: true };
-                
+
+                return { success: true };                
             } catch (error) {
                 console.error('Failed to activate window:', error);
                 throw error;
@@ -623,9 +606,7 @@ export const usersTable = {
                     let res = false;
 
                     FindWindows.forEach(function(val) {
-                        if (appData && appData.name && val.name === appData.name) {
-                            res = val;
-                        }
+                        if (appData && appData.name && val.name === appData.name) res = val;
                     });
 
                     return res;
@@ -643,23 +624,17 @@ export const usersTable = {
             if (!userId) throw new Error('User ID required');
             if (!windowId) throw new Error('Window ID required');
 
-            try {
-                console.log('========== MINIMIZE WINDOW ==========');
-                console.log('Minimizing window:', windowId, 'for user:', userId);
-                
+            try {                
                 // Получаем пользователя
                 const user = await DB.users.get(userId);
                 if (!user) throw new Error(`User with ID ${userId} not found`);
                 
                 const windows = user?.systemconfig?.windows || [];
-                console.log('Current windows:', windows.map(w => ({id: w.id, isMinimized: w.isMinimized})));
                 
                 // Находим индекс сворачиваемого окна
                 const windowIndex = windows.findIndex(w => w.id === windowId);
                 
-                if (windowIndex === -1) {
-                    throw new Error(`Window with ID ${windowId} not found`);
-                }
+                if (windowIndex === -1) throw new Error(`Window with ID ${windowId} not found`);
                 
                 // Устанавливаем isMinimized в true
                 windows[windowIndex].isMinimized = true;
@@ -689,9 +664,6 @@ export const usersTable = {
                 activeWindowId.value = newActiveWindowId;
                 IDBWindows.value = windows;
                 
-                console.log('Window minimized successfully');
-                console.log('========== MINIMIZE END ==========');
-                
                 return { success: true, userId, windowId, newActiveWindowId };
             } catch (error) {
                 console.error('Failed to minimize window:', error);
@@ -704,10 +676,7 @@ export const usersTable = {
             if (!userId) throw new Error('User ID required');
             if (!windowId) throw new Error('Window ID required');
 
-            try {
-                console.log('========== RESTORE WINDOW ==========');
-                console.log('Restoring window:', windowId, 'for user:', userId);
-                
+            try {                
                 // Получаем пользователя
                 const user = await DB.users.get(userId);
                 if (!user) throw new Error(`User with ID ${userId} not found`);
@@ -717,9 +686,7 @@ export const usersTable = {
                 // Находим индекс восстанавливаемого окна
                 const windowIndex = windows.findIndex(w => w.id === windowId);
                 
-                if (windowIndex === -1) {
-                    throw new Error(`Window with ID ${windowId} not found`);
-                }
+                if (windowIndex === -1) throw new Error(`Window with ID ${windowId} not found`);
                 
                 // Устанавливаем isMinimized в false
                 windows[windowIndex].isMinimized = false;
@@ -745,9 +712,6 @@ export const usersTable = {
                 activeWindowId.value = windowId;
                 IDBWindows.value = windows;
                 
-                console.log('Window restored successfully');
-                console.log('========== RESTORE END ==========');
-                
                 return { success: true, userId, windowId, zIndex: newZIndex };
             } catch (error) {
                 console.error('Failed to restore window:', error);
@@ -762,11 +726,9 @@ export const usersTable = {
 
             try {
                 const FindWindows = await this.windows_getAll(userId);
-                console.log('FindWindows before close:', FindWindows);
                 
                 // Фильтруем окна, удаляя закрываемое
                 const resultArray = FindWindows.filter(val => val.id !== windowId);
-                console.log('resultArray after close:', resultArray);
 
                 // Обновляем реактивную переменную
                 IDBWindows.value = resultArray;
@@ -954,7 +916,7 @@ export async function clearDatabase() {
     }
 }
 
-// ==================== МИГРАЦИИ ====================
+// ==================== МИГРАЦИИ (пример, не факт что рабочий) ====================
 
 // Пример добавления миграции при увеличении версии
 // DB.version(2).stores({
@@ -976,7 +938,7 @@ export async function clearDatabase() {
 //     console.log('Migration to version 2 completed');
 // });
 
-export { DB, IDBWindows };
+export { DB, IDBWindows, activeWindowId };
 
 export default {
     DB,
