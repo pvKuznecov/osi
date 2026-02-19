@@ -104,6 +104,7 @@
 
             async changeWallpaper(inpName) {
                 try {
+                    this.findUser();
                     const nUser = this.USER;
 
                     nUser.systemconfig.desktopWallpaper = inpName;

@@ -70,18 +70,15 @@ export class User {
     constructor(data = {}) {
         this.login = data.login || 'user';
         this.name = data.name || 'User';
-        this.password = data.password || '';    //ПРОДУМАТЬ РЕАЛЬНУЮ СХЕМУ ЗАЩИТЫ
+        this.password = data.password || '';    //TODO ПРОДУМАТЬ РЕАЛЬНУЮ СХЕМУ ЗАЩИТЫ
         this.apps = data.apps || [];
         this.data = data.data || {};
         this.config = data.config || Def_userConfig;
         this.systemconfig = data.systemconfig || Def_userSystemconfig
         this.createdAt = data.createdAt || new Date();
         this.updatedAt = data.updatedAt || new Date();
-
         // автоматическое присваение id (вариант для "совместимости")
-        if (data.id) {
-            this.id = data.id;
-        }
+        if (data.id) this.id = data.id;
     }
 }
 

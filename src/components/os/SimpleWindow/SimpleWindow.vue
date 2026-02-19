@@ -85,7 +85,7 @@ import { defineAsyncComponent } from 'vue';
             dynamicComponent() {
                 // маппинг имен компонентов (пока это никак не победить, ПОДУМАТЬ НАД ЭТИМ)
                 const componentMap = {
-                    'OSIHelper': () => import('@/apps/system/OSIHelper/OSIHelper.vue'),
+                    // 'OSIHelper': () => import('@/apps/system/OSIHelper/OSIHelper.vue'),
                     'OSICalculator': () => import('@/apps/system/OSICalculator/OSICalculator.vue'),
                     'OSISettings': () => import('@/apps/system/OSISettings/OSISettings.vue'),
                     'OSIMPlayer': () => import('@/apps/system/OSIMPlayer/OSIMPlayer.vue'),

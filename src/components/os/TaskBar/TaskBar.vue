@@ -236,7 +236,7 @@
                     'active': this.isWindowActive(window.id),
                     'minimized': window.isMinimized === true
                 };
-            }
+            },
         },
   
         beforeUnmount() {

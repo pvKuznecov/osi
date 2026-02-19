@@ -27,13 +27,13 @@ const applications = [
         iconclass: 'bi-gear-fill text-ico-tech',
         resizable: true, canMinimize: true, showOnDesktop: true, showInStartMenu: true,
     }),
-    new OSIApp({
-        id: 'osihelper', name: 'OSIHelper',
-        label: 'OSI помощник', category: 'system', description: 'Справочная система и помощь по OSI.',
-        iconclass: 'bi-info-square-fill text-ico-info',        
-        defWidth: 600, defHeight: 700,
-        resizable: true, canMinimize: true, showOnDesktop: true, showInStartMenu: true,
-    }),
+    // new OSIApp({
+    //     id: 'osihelper', name: 'OSIHelper',
+    //     label: 'OSI помощник', category: 'system', description: 'Справочная система и помощь по OSI.',
+    //     iconclass: 'bi-info-square-fill text-ico-info',        
+    //     defWidth: 600, defHeight: 700,
+    //     resizable: true, canMinimize: true, showOnDesktop: true, showInStartMenu: true,
+    // }),
     // new OSIApp({
     //     id: 'osicalendar', name: 'OSICalendar',
     //     label: 'Календарь', category: 'utilities', description: 'Системный календарь.',
