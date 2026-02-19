@@ -58,6 +58,13 @@ let nextZIndex = 100;
 const IDBWindows = ref([]);
 const activeWindowId = ref(null);
 
+function getRandomPosPixel() {
+    const min = Math.ceil(50); // Округляем минимум вверх
+    const max = Math.floor(200); // Округляем максимум вниз
+
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 // -=-=-=-=-=-=-Описание классов моделей-=-=-=-=-=-=-
 export class User {
     constructor(data = {}) {
@@ -86,6 +93,27 @@ export class Setting {
     }
 }
 
+export class Window {
+    constructor(data = {}) {
+        this.id = (data.id) ? data.id : Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        this.canMinimize = data.canMinimize || false;
+        this.category = data.category || 'other';
+        this.defHeight = data.defHeight || 400;
+        this.defWidth = data.defWidth || 850;
+        this.description = data.description || '';
+        this.icon = data.icon || '';
+        this.iconclass = data.iconclass || '';
+        this.isMaximized = data.isMaximized || false;
+        this.label = data.label || 'Unknown';
+        this.name = data.name || "Unknown name";
+        this.resizable = data.resizable || false;
+        this.showInStartMenu = data.showInStartMenu || false;
+        this.showOnDesktop = data.showOnDesktop || false;
+        this.zIndex = data.zIndex || nextZIndex++;
+        this.positionx = data.positionx || getRandomPosPixel();
+        this.positiony = data.positiony || getRandomPosPixel();
+    }
+}
 
 // -=-=-=-=-=-=-Основные операции CRUD-=-=-=-=-=-=-
 export const usersTable = {
@@ -343,26 +371,6 @@ export const usersTable = {
 
     // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     windows: {
-        prepareWindowForDB(wdata) {            
-            return {
-                id: wdata.id,
-                canMinimize: wdata.canMinimize || false,
-                category: wdata.category || 'other',
-                defHeight: wdata.defHeight,
-                defWidth: wdata.defWidth,
-                description: wdata.description || '',
-                icon: wdata.icon || '',
-                iconclass: wdata.iconclass || '',
-                isMaximized: wdata.isMaximized || false,
-                label: wdata.label || 'Unknown',
-                name: wdata.name || "Unknown name",
-                resizable: wdata.resizable || false,
-                showInStartMenu: wdata.showInStartMenu || false,
-                showOnDesktop: wdata.showOnDesktop || false,
-                zIndex: wdata.zIndex || nextZIndex++, // Используем переданный zIndex или увеличиваем
-            };
-        },
-
         async reupdate(userId) {
             if (!userId) throw new Error('User ID required');
 
@@ -394,40 +402,65 @@ export const usersTable = {
             // валидация
             if (!appData.name) throw new Error('App name required!');
 
-            const windowId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            appData.id = windowId;
-
+            // Используем существующий id или создаем новый
+            const windowId = appData.id || Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
             try {                
                 // Получаем текущие окна из БД
                 const user = await DB.users.get(userId);
-
                 if (!user) throw new Error(`User with ID ${userId} not found`);
                 
                 const currentWindows = user?.systemconfig?.windows || [];
                 
-                // Определяем максимальный zIndex среди существующих окон
-                let maxZIndex = 100;
-
-                if (currentWindows.length > 0) {
-                    const zIndices = currentWindows.map(w => w.zIndex || 100);
-                    maxZIndex = Math.max(...zIndices, 100);
+                // Проверяем, существует ли уже окно с таким ID
+                const existingWindowIndex = currentWindows.findIndex(w => w.id === windowId);
+                
+                let newWindows;
+                let targetWindow;
+                
+                if (existingWindowIndex !== -1) {
+                    // Окно уже существует - используем его с сохраненными координатами
+                    targetWindow = currentWindows[existingWindowIndex];
+                    
+                    // Обновляем только некоторые свойства, но сохраняем позицию
+                    targetWindow = {
+                        ...targetWindow,
+                        ...appData,
+                        id: windowId, // сохраняем ID
+                        // НЕ перезаписываем positionx и positiony, если они не переданы явно
+                        positionx: appData.positionx !== undefined ? appData.positionx : targetWindow.positionx,
+                        positiony: appData.positiony !== undefined ? appData.positiony : targetWindow.positiony,
+                        isMinimized: false
+                    };
+                    
+                    newWindows = [...currentWindows];
+                    newWindows[existingWindowIndex] = targetWindow;
+                } else {
+                    // Новое окно - определяем zIndex
+                    let maxZIndex = 100;
+                    if (currentWindows.length > 0) {
+                        const zIndices = currentWindows.map(w => w.zIndex || 100);
+                        maxZIndex = Math.max(...zIndices, 100);
+                    }
+                    
+                    const newZIndex = maxZIndex + 1;
+                    
+                    // Создаем новое окно с переданными координатами или рандомными
+                    targetWindow = new Window({
+                        ...appData,
+                        id: windowId,
+                        zIndex: newZIndex,
+                        isMinimized: false,
+                        // Если координаты переданы, используем их, иначе будут рандомные из конструктора
+                        positionx: appData.positionx,
+                        positiony: appData.positiony
+                    });
+                    
+                    newWindows = [...currentWindows, targetWindow];
                 }
-                
-                // Устанавливаем zIndex для нового окна (max + 1)
-                const newZIndex = maxZIndex + 1;
-                
-                // Создаем объект окна - новое окно НЕ свернуто
-                const windowForDB = this.prepareWindowForDB({ 
-                    ...appData, 
-                    zIndex: newZIndex,
-                    isMinimized: false  // Явно указываем, что новое окно не свернуто
-                });
 
                 // Устанавливаем активное окно
                 activeWindowId.value = windowId;
-
-                // Добавляем новое окно к существующим
-                const newWindows = [...currentWindows, windowForDB];
 
                 // Обновляем системную конфигурацию пользователя
                 await DB.users.where('id').equals(userId)
@@ -440,12 +473,9 @@ export const usersTable = {
                 // Обновляем реактивную переменную
                 IDBWindows.value = newWindows;
                 
-                // Обновляем nextZIndex
-                nextZIndex = newZIndex + 1;
-                
-                return windowForDB;
+                return targetWindow;
             } catch (error) {
-                console.error('Error creating window:', error);
+                console.error('Error creating/updating window:', error);
                 throw error;
             }
         },
@@ -529,7 +559,8 @@ export const usersTable = {
 
             try {
                 const user = await DB.users.get(userId);
-                const nWindows = IDBWindows.value.map(w => (this.prepareWindowForDB(w)));
+                const nWindows = IDBWindows.value.map(w => (new Window(w)));
+                // const nWindows = IDBWindows.value.map(w => (this.prepareWindowForDB(w)));
 
                 let uSystemconfig = user.systemconfig || Def_userSystemconfig;
                 
@@ -738,7 +769,8 @@ export const usersTable = {
                 let uSystemconfig = user.systemconfig || Def_userSystemconfig;
                 
                 // Обновляем windows в конфиге
-                uSystemconfig.windows = resultArray.map(w => this.prepareWindowForDB(w));
+                uSystemconfig.windows = resultArray.map(w => new Window(w));
+                // uSystemconfig.windows = resultArray.map(w => this.prepareWindowForDB(w));
                 
                 // Если закрываем активное окно, активируем другое
                 if (uSystemconfig.activeWindowId === windowId) {
@@ -783,6 +815,94 @@ export const usersTable = {
             }
         },
 
+        // фиксирование новых координат окна
+        async updatePosition(userId, windowId, positionx, positiony) {
+            if (!userId) throw new Error('User ID required');
+            if (!windowId) throw new Error('Window ID required');
+            if (positionx === undefined || positiony === undefined) throw new Error('Position coordinates required');
+
+            try {
+                // Получаем пользователя
+                const user = await DB.users.get(userId);
+                if (!user) throw new Error(`User with ID ${userId} not found`);
+                
+                const windows = user?.systemconfig?.windows || [];
+                
+                // Находим индекс окна
+                const windowIndex = windows.findIndex(w => w.id === windowId);
+                
+                if (windowIndex === -1) throw new Error(`Window with ID ${windowId} not found`);
+                
+                // Обновляем позицию окна
+                windows[windowIndex].positionx = positionx;
+                windows[windowIndex].positiony = positiony;
+                
+                // Обновляем конфиг в БД
+                await DB.users.where('id').equals(userId)
+                    .modify(user => {
+                        user.systemconfig.windows = windows;
+                        user.updatedAt = new Date();
+                    });
+                
+                // Обновляем реактивную переменную
+                IDBWindows.value = windows;
+                
+                return { 
+                    success: true, 
+                    userId, 
+                    windowId, 
+                    positionx, 
+                    positiony 
+                };
+            } catch (error) {
+                console.error('Error updating window position:', error);
+                throw new Error(`Failed to update window position: ${error.message}`);
+            }
+        },
+
+        async updateSize(userId, windowId, width, height) {
+            if (!userId) throw new Error('User ID required');
+            if (!windowId) throw new Error('Window ID required');
+            if (width === undefined || height === undefined) throw new Error('Width and height required');
+
+            try {
+                // Получаем пользователя
+                const user = await DB.users.get(userId);
+                if (!user) throw new Error(`User with ID ${userId} not found`);
+                
+                const windows = user?.systemconfig?.windows || [];
+                
+                // Находим индекс окна
+                const windowIndex = windows.findIndex(w => w.id === windowId);
+                
+                if (windowIndex === -1) throw new Error(`Window with ID ${windowId} not found`);
+                
+                // Обновляем размеры окна
+                windows[windowIndex].defWidth = width;
+                windows[windowIndex].defHeight = height;
+                
+                // Обновляем конфиг в БД
+                await DB.users.where('id').equals(userId)
+                    .modify(user => {
+                        user.systemconfig.windows = windows;
+                        user.updatedAt = new Date();
+                    });
+                
+                // Обновляем реактивную переменную
+                IDBWindows.value = windows;
+                
+                return { 
+                    success: true, 
+                    userId, 
+                    windowId, 
+                    width, 
+                    height 
+                };
+            } catch (error) {
+                console.error('Error updating window size:', error);
+                throw new Error(`Failed to update window size: ${error.message}`);
+            }
+        },
     },
 };
 
@@ -942,7 +1062,8 @@ export { DB, IDBWindows, activeWindowId };
 
 export default {
     DB,
-    User,    
+    User,
+    Window,
     usersTable,
     settingsTable,
     initDatabase,

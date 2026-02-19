@@ -30,13 +30,13 @@
             </div>    
         </slot>
     </div>
-    <div v-if="!isMaximized && resizable" class="resize-handle resize-top" @mousedown="startResize('n')"></div>
-    <div v-if="!isMaximized && resizable" class="resize-handle resize-right" @mousedown="startResize('e')"></div>
-    <div v-if="!isMaximized && resizable" class="resize-handle resize-bottom" @mousedown="startResize('s')"></div>
-    <div v-if="!isMaximized && resizable" class="resize-handle resize-left" @mousedown="startResize('w')"></div>
-    <div v-if="!isMaximized && resizable" class="resize-handle resize-top-right" @mousedown="startResize('ne')"></div>
-    <div v-if="!isMaximized && resizable" class="resize-handle resize-bottom-right" @mousedown="startResize('se')"></div>
-    <div v-if="!isMaximized && resizable" class="resize-handle resize-bottom-left" @mousedown="startResize('sw')"></div>
-    <div v-if="!isMaximized && resizable" class="resize-handle resize-top-left" @mousedown="startResize('nw')"></div>
+    <div v-if="!isMaximized && resizable" class="resize-handle resize-top" @mousedown="startResize('n', $event)"></div>
+    <div v-if="!isMaximized && resizable" class="resize-handle resize-right" @mousedown="startResize('e', $event)"></div>
+    <div v-if="!isMaximized && resizable" class="resize-handle resize-bottom" @mousedown="startResize('s', $event)"></div>
+    <div v-if="!isMaximized && resizable" class="resize-handle resize-left" @mousedown="startResize('w', $event)"></div>
+    <div v-if="!isMaximized && resizable" class="resize-handle resize-top-right" @mousedown="startResize('ne', $event)"></div>
+    <div v-if="!isMaximized && resizable" class="resize-handle resize-bottom-right" @mousedown="startResize('se', $event)"></div>
+    <div v-if="!isMaximized && resizable" class="resize-handle resize-bottom-left" @mousedown="startResize('sw', $event)"></div>
+    <div v-if="!isMaximized && resizable" class="resize-handle resize-top-left" @mousedown="startResize('nw', $event)"></div>
 </div>
 <div v-else></div>
