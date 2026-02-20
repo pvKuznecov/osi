@@ -2,7 +2,7 @@
 <style src="./style.css"></style>
 <script>
     import { usersTable } from '@/idb/db';
-import { defineAsyncComponent } from 'vue';
+    import { defineAsyncComponent } from 'vue';
 
     export default {
         name: "SimpleWindow",
@@ -70,14 +70,10 @@ import { defineAsyncComponent } from 'vue';
             
             // Следим за изменениями локальной позиции
             posX: {
-                handler() {
-                    this.debounceSavePosition();
-                }
+                handler() { this.debounceSavePosition(); }
             },
             posY: {
-                handler() {
-                    this.debounceSavePosition();
-                }
+                handler() { this.debounceSavePosition(); }
             }
         },
   

@@ -14,7 +14,6 @@
         },
   
         data() {
-            // Инициализируем базовые значения, НЕ используем this.appsStore здесь
             return {
                 expression: '',
                 result: '0',

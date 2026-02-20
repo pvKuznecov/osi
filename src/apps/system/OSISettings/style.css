@@ -9,6 +9,10 @@
     font-family: 'Segoe UI', Arial, sans-serif;
     overflow: auto; }
 
+.dark-area {
+    background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85));
+    color: white; }
+
 .osisettings-menu {
     display: block;
     width: 300px;
@@ -62,6 +66,7 @@ h2 {
 }
 
 .osisettings-btn,
+.osisettings-btn-neutral,
 .osisettings-btn-warning {
     display: inline-block;
     min-width: 20px;
@@ -69,13 +74,19 @@ h2 {
     padding: 3px 5px;
     cursor: pointer;
     font-weight: 600;
-    margin-left: 5px; }
+    margin-left: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); }
 
-.osisettings-btn-warning {    
+.osisettings-btn-neutral:hover,
+.osisettings-btn-warning:hover { opacity: 0.85; }
+
+.osisettings-btn-warning {
     background: linear-gradient(rgb(165, 34, 34), rgb(197, 34, 34), rgb(126, 34, 34));
     color: white; }
 
-.osisettings-btn-warning:hover { opacity: 0.85; }
+.osisettings-btn-neutral {
+    background: linear-gradient(rgb(207, 207, 207), rgb(111, 120, 121), rgb(111, 120, 121));
+    color: white; }
 
 .deskimg-preview {
     display: inline-block;
@@ -107,7 +118,7 @@ h2 {
     color: rgb(179, 146, 240); }
 
 .osisettings-elem-info-tab {
-    width: 96%;
+    width: 98%;
     margin-right: auto;
     margin-left: auto;
     border-radius: 5px; }
@@ -157,6 +168,12 @@ h2 {
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 1rem;
+}
+
+.account-elem-avatar-max {
+    width: 160px;
+    height: 160px;
+    border-radius: 5px;
 }
 
 .account-elem-avatar {

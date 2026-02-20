@@ -88,6 +88,7 @@
                         // Создаем новое окно с параметрами из appData
                         await usersTable.windows.create(this.USERID, { 
                             ...appData,
+                            id: false,
                             isMinimized: false, // Новое окно не свернуто
                             // isMaximized: appData.isMaximized,
                         });

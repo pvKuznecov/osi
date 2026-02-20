@@ -31,6 +31,13 @@
                 showPanel_deskimg: false,
                 wpList: JSH.system.getImageList(),
                 USER: null,
+                editUser: {
+                    name: '',
+                    login: '',
+                    password: '',
+                    newpassword: '',
+                },
+                avatarsList: JSH.system.getAvatarsList(),
             }
         },
 

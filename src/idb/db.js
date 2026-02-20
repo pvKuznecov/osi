@@ -40,18 +40,19 @@ async function getDefaultApps() {
 
 // описание схемы БД
 DB.version(db_version).stores({
-    users: '++id, name, login, password, apps, data, config, systemСonfig, createdAt, updatedAt',
+    users: '++id, name, login, password, apps, data, config, systemconfig, systemdata, createdAt, updatedAt',
     settings: '++id, key, value, updatedAt',
 });
 
-const Def_userConfig = {
-    avatar: "cat.jpg"
-};
-
+// ========Default configs========
+const Def_userConfig = { avatar: "cat.jpg" };
 const Def_userSystemconfig = {
     desktopWallpaper: "nwall.jpg",
     windows: [],
     activeWindowId: null,
+};
+const Def_systemdata = {
+    windowsstates: {},
 };
 
 let nextZIndex = 100;
@@ -74,7 +75,8 @@ export class User {
         this.apps = data.apps || [];
         this.data = data.data || {};
         this.config = data.config || Def_userConfig;
-        this.systemconfig = data.systemconfig || Def_userSystemconfig
+        this.systemconfig = data.systemconfig || Def_userSystemconfig;
+        this.systemdata = data.systemdata || Def_systemdata;
         this.createdAt = data.createdAt || new Date();
         this.updatedAt = data.updatedAt || new Date();
         // автоматическое присваение id (вариант для "совместимости")
@@ -87,6 +89,13 @@ export class Setting {
         this.key = key;
         this.value = value;
         this.updatedAt = new Date();
+    }
+}
+
+export class WindowState {
+    constructor(data = {}) {
+        this.windowId = data.windowId || null;
+        this.data = data.data || {};
     }
 }
 
@@ -366,7 +375,6 @@ export const usersTable = {
         }
     },
 
-    // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     windows: {
         async reupdate(userId) {
             if (!userId) throw new Error('User ID required');
@@ -898,6 +906,134 @@ export const usersTable = {
             } catch (error) {
                 console.error('Error updating window size:', error);
                 throw new Error(`Failed to update window size: ${error.message}`);
+            }
+        },
+    },
+
+    windstates: {
+        // получить список всех состояний окон по ID пользователя
+        async getAll(userId) {
+            if (!userId) throw new Error('User ID required');
+            
+            try {
+                const user = await DB.users.get(userId);
+
+                if (!user) {
+                    throw new Error(`User with ID ${userId} not found`);
+                } else {
+                    const states = Object.values(user?.systemdata?.windowsstates) || [];
+                
+                    return states;
+                }
+            } catch (error) {
+                console.error("Error: ", error);
+                return false;
+            }        
+        },
+
+        // получить состояние конкретного окна по ID пользователя + ID окна
+        async getById(userId, windowId) {
+            if (!userId) throw new Error('User ID required');
+            if (!windowId) throw new Error('Window ID required');
+
+            try {
+                const user = await DB.users.get(userId);
+                
+                if (!user) {
+                    throw new Error(`User with ID ${userId} not found`);
+                } else {
+                    const states = user?.systemdata?.windowsstates || false;
+
+                    if (states && Object.keys(states).includes(windowId)) {
+                        return states[windowId];
+                    } else {
+                        return false;
+                    }
+                }
+            } catch (error) {
+                console.error("Error: ", error);
+                return false;
+            }
+        },
+
+        // удалить состояние конкретного окна по ID пользователя + ID окна
+        async delById(userId, windowId) {
+            if (!userId) throw new Error('User ID required');
+            if (!windowId) throw new Error('Window ID required');
+
+            try {
+                const user = await DB.users.get(userId);
+
+                if (!user) throw new Error(`User with ID ${userId} not found`);
+
+                const states = user?.systemdata?.windowsstates || false;
+
+                if (!states) {
+                    return true;
+                } else {
+                    let newStates = states;
+                    delete newStates[windowId];
+
+                    // Обновляем в БД
+                    await DB.users.where('id').equals(userId)
+                        .modify(user => {
+                            user.systemdata.windowsstates = newStates;
+                            user.updatedAt = new Date();
+                        });
+
+                    return { success: true, userId, windowId };
+                }
+            } catch (error) {
+                console.error("Error: ", error);
+                return false;
+            }
+        },
+
+        // переписать состояние окна по ID пользователя + ID окна + данные состояния
+        async updateVal(userId, windowId, stateData = false) {
+            if (!userId) throw new Error('User ID required');
+            if (!windowId) throw new Error('Window ID required');
+            if (!stateData) throw new Error('State data required');
+
+            console.log('|userId', userId);
+            console.log('|windowId', windowId);
+            console.log('|stateData', stateData);
+
+            try {
+                const user = await DB.users.get(userId);
+                console.log('user', user);
+
+                if (!user) throw new Error(`User with ID ${userId} not found`);
+
+                // Создаем безопасную копию stateData для сохранения в БД
+                const safeStateData = usersTable.createSafeCopy(stateData);
+                
+                if (!safeStateData) throw new Error('Failed to create safe copy of state data');
+
+                // Инициализируем systemdata.windowsstates если его нет
+                if (!user.systemdata) user.systemdata = {};
+                
+                if (!user.systemdata.windowsstates) user.systemdata.windowsstates = {};
+
+                // Получаем текущие состояния
+                const states = user.systemdata.windowsstates || {};                
+                // Создаем новый объект состояний
+                const newData = { ...states };
+
+                // Сохраняем безопасную копию данных для этого окна
+                newData[windowId] = safeStateData;
+
+                // Обновляем в БД
+                await DB.users.where('id').equals(userId)
+                    .modify(user => {
+                        user.systemdata.windowsstates = newData;
+                        user.updatedAt = new Date();
+                    });
+
+                return { success: true, userId, windowId, stateData: safeStateData };                
+            } catch (error) {
+                console.error("Error in updateVal: ", error);
+                return false;
             }
         },
     },
