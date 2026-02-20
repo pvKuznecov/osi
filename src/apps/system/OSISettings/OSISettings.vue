@@ -4,7 +4,7 @@
     import { JSH } from '@/core/helpers';
     import { usersTable } from '@/idb/db';
     import { OSIDATA } from '@/config/os';
-    import { OSICONFIG } from '@/config/config';
+    // import { OSICONFIG } from '@/config/config';
     import { LangPack } from './lang';
     // import { useOSIAppsStore } from '@/stores/os.apps.store';
     // import { mapStores } from 'pinia';
@@ -31,6 +31,13 @@
                 showPanel_deskimg: false,
                 wpList: JSH.system.getImageList(),
                 USER: null,
+                editUser: {
+                    name: '',
+                    login: '',
+                    password: '',
+                    newpassword: '',
+                },
+                avatarsList: JSH.system.getAvatarsList(),
             }
         },
 
@@ -49,11 +56,11 @@
                 };
             },
 
-            OSIConfig() {
-                return {
-                    ...OSICONFIG,
-                }
-            },
+            // OSIConfig() {
+            //     return {
+            //         ...OSICONFIG,
+            //     }
+            // },
 
             // osStore() {
             //     // return useOsStore();
@@ -153,15 +160,17 @@
                 this[`showPanel_${key}`] = !this[`showPanel_${key}`];
             },
 
-            ChangeWPImage(inpName) {
-               this.changeWallpaper(inpName);
-               this.findUser();
+            async ChangeWPImage(inpName) {
+                try {
+                    const changeResult = await this.changeWallpaper(inpName);
+                    
+                    if (changeResult) await this.findUser();
+                } catch {
+                    return false;
+                }
             },
 
-            getAvatarUrl(avatarName) {
-                const res = `url(${require('@/assets/avatars/' + avatarName)})`;
-                return res;
-            },
+            getAvatarUrl(avatarName) { return `url(${require('@/assets/avatars/' + avatarName)})`; },
 
             avatarStyle(avatarName) {
                 return {

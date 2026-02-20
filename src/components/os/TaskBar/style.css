@@ -175,3 +175,15 @@
 .app-icon:not(.bi):not(.fa):not(.fas):not(.far) {
     font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
 }
+
+.taskbar-app-elemcontext {
+    display: flex;
+    position: fixed;
+    min-width: 130px;
+    margin-top: -90px;
+    text-align: right;
+    background-color: #ffffff13;
+    color: white;
+    border-radius: 5px 5px 0 0; }
+
+.display-none { display: none; }

@@ -20,6 +20,9 @@
                 :resizable="window.resizable"
                 :canMinimize="window.canMinimize"
                 :USERID="USERID"
+                :positionx="window.positionx"
+                :positiony="window.positiony"
+                
                 @close="closeWindow"
                 @minimize="minimizeWindow"
                 @toggleMaximize="toggleMaximizeWindow"
@@ -35,8 +38,9 @@ import AutorizationArea from './components/os/AutorizationArea/AutorizationArea.
 import DesktopArea from './components/os/DesktopArea/DesktopArea.vue';
 import TaskBar from './components/os/TaskBar/TaskBar.vue';
 import SimpleWindow from './components/os/SimpleWindow/SimpleWindow.vue';
-import { useAppsStore } from './stores/apps.store';
 import { usersTable, IDBWindows, activeWindowId } from './idb/db';
+
+import { useAppsStore } from './stores/apps.store';
 
 export default {
     name: 'App',
@@ -82,6 +86,7 @@ export default {
                 try {
                     await usersTable.windows.close(this.USERID, windowId);
                     await usersTable.windows.reupdate(this.USERID);
+                    await usersTable.windstates.delById(this.USERID, windowId);
                 } catch (error) {
                     console.error('Error closing window:', error);
                 }

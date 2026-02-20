@@ -30,7 +30,7 @@
     <div class="taskbar-apps d-flex align-items-center">
         <button 
             v-for="window in windowsList" 
-            :key="window.id" 
+            :key="window.id"
             class="taskbar-app d-flex justify-content-center align-items-center" :class="getWindowClass(window)"
             :title="(window.isMinimized ? 'Свернуто: ' : '') + (window.label || window.name)"
             @click="toggleWindow(window.id)"

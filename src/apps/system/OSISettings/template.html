@@ -44,7 +44,8 @@
                 </ul>
             </div>
             <div class="d-flex justify-content-center align-items-center">
-                <span class="osisettings-btn-warning" @click="ReloadPage()">Выйти из учетной записи</span>
+                <!-- <span class="osisettings-btn-neutral" @click="ChngArea('account_settings')">Редактировать учетную запись</span> -->
+                <span class="osisettings-btn-warning" @click="ReloadPage()"><i class="bi bi-door-open-fill"></i> Выйти из учетной записи</span>
             </div>
             <hr>
             <h3>Все учетные записи на устройстве:</h3>
@@ -131,7 +132,54 @@
                     </tbody>
                 </table>
             </div>
-        </div>        
-    </div>
-        
-</div>    
+        </div>
+
+        <!-- частные разделы -->
+        <div v-if="SelectArea === 'account_settings'" class="osisettings-elem-info">
+            <h2>Редактирование учетной записи</h2>
+            <table class="osisettings-elem-info-tab" style="width: 100%;">
+                <tbody>
+                    <tr>
+                        <td style="width: 180px; height: 180px;" class="dark-area">
+                            <div class="d-flex justify-content-center align-items-center" style="width: 100%;">
+                                <div class="account-elem-avatar-max" :style="avatarStyle(USER.config.avatar)"></div>
+                            </div>                            
+                        </td>
+                        <td class="dark-area">
+                            <div class="d-flex justify-content-center align-items-center mt-3 newuser-inputelem">
+                                <label for="editUser_name">Name:</label>
+                                <input type="text" id="editUser_name" v-model="editUser.name" placeholder="Ваше имя" maxlength="20">
+                            </div>
+                            <div class="d-flex justify-content-center align-items-center mt-3 newuser-inputelem">
+                                <label for="editUser_login">Login:</label>
+                                <input type="text" id="editUser_login" v-model="editUser.login" placeholder="Ваш логин" maxlength="15">
+                            </div>
+                            <div class="d-flex justify-content-center align-items-center mt-3 newuser-inputelem">
+                                <label for="editUser_password">Password:</label>
+                                <input type="password" id="editUser_password" v-model="editUser.password" :placeholder="LangData.yourpasswordoptional">
+                            </div>
+                            <div class="d-flex justify-content-center align-items-center mt-3 newuser-inputelem">
+                                <label for="editUser_newpassword">New password:</label>
+                                <input type="password" id="editUser_newpassword" v-model="editUser.newpassword" :placeholder="LangData.yourpasswordoptional">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="dark-area">
+                            <div class="row" style="width: 98%; margin-left: auto; margin-right: auto;">
+                                <h3>Аватар:</h3>
+                                <!-- <div v-for="av in avatarsList" class="account-elem-avatar-max col-2">{{av}}</div> -->
+                                <div v-for="av in avatarsList" class="account-elem-avatar-min col-3" :style="avatarStyle(av.nameExt)" style="margin: 10px;"></div>
+                            </div>                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="dark-area">
+                            
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>       
+</div>
