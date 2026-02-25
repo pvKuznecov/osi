@@ -1,10 +1,10 @@
 <template src="./template.html"></template>
 <style src="./styles.css"></style>
 <script>
-    import { LangPack } from './lang';
-    import { mapStores } from 'pinia';
-    import { useAppsStore } from '@/stores/apps.store';
     import { usersTable } from '@/idb/db';
+    import { LangPack } from './lang';
+    // import { mapStores } from 'pinia';
+    // import { useAppsStore } from '@/stores/apps.store';
 
     export default {
         name: 'OSICalendar',
@@ -35,7 +35,7 @@
         },
 
         computed: {
-            ...mapStores(useAppsStore),
+            // ...mapStores(useAppsStore),
             
             selectYear() {
                 const targetDate = this.selectDate;
@@ -69,16 +69,18 @@
             },
 
             // Сохраняем текущее состояние в store
-            saveState() {
-                if (!this.windowId || !this.appsStore || !this.isInitialized) return;
+            async saveState() {
+                if (!this.windowId || !this.isInitialized) return;
+                // if (!this.windowId || !this.appsStore || !this.isInitialized) return;
                 
                 const state = {
                     appType: 'calendar',
                     timestamp: Date.now()
                 };
                 
-                console.log('OSICalculator saving state:', state);
-                this.appsStore.saveWindowState(this.windowId, state);
+                // console.log('OSICalculator saving state:', state);
+                // this.appsStore.saveWindowState(this.windowId, state);
+                await usersTable.windstates.updateVal(this.USERID, this.windowId, state);
             },
 
             // поиск по lang файлу

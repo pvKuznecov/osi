@@ -111,6 +111,7 @@
                 console.log('OSIMPlayer initialized');
             },
 
+            // Сохраняем текущее состояние
             async saveState() {
                 console.log('START:: saveState');
                 if (!this.windowId || !this.isInitialized) return;

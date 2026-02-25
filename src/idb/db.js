@@ -46,13 +46,11 @@ DB.version(db_version).stores({
 
 // ========Default configs========
 const Def_userConfig = { avatar: "cat.jpg" };
+const Def_systemdata = {windowsstates: {}};
 const Def_userSystemconfig = {
     desktopWallpaper: "nwall.jpg",
     windows: [],
     activeWindowId: null,
-};
-const Def_systemdata = {
-    windowsstates: {},
 };
 
 let nextZIndex = 100;
@@ -686,8 +684,6 @@ export const usersTable = {
                     , nonMinimizedWindows[0]).id;
                 }
                 
-                console.log('Window minimized, new active window:', newActiveWindowId);
-                
                 // Обновляем конфиг
                 await DB.users.where('id').equals(userId)
                     .modify(user => {
@@ -733,8 +729,6 @@ export const usersTable = {
                 
                 // Обновляем zIndex восстанавливаемого окна
                 windows[windowIndex].zIndex = newZIndex;
-                
-                console.log('Window restored with zIndex:', newZIndex);
                 
                 // Обновляем конфиг
                 await DB.users.where('id').equals(userId)
@@ -995,13 +989,8 @@ export const usersTable = {
             if (!windowId) throw new Error('Window ID required');
             if (!stateData) throw new Error('State data required');
 
-            console.log('|userId', userId);
-            console.log('|windowId', windowId);
-            console.log('|stateData', stateData);
-
             try {
                 const user = await DB.users.get(userId);
-                console.log('user', user);
 
                 if (!user) throw new Error(`User with ID ${userId} not found`);
 

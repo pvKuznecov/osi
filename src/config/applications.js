@@ -60,6 +60,13 @@ const applications = [
         iconclass: 'bi-grid-3x3-gap-fill text-ico-tech',
         isMaximized: true, showInStartMenu: true,
     }),
+    new OSIApp({
+        id: 'osipicta', name: 'OSIPicta',
+        label: 'Picta', category: 'utilities', description: 'Просмотр изображений.',
+        iconclass: 'bi-easel-fill text-ico-purpure',
+        defWidth: 850, defHeight: 600,
+        isMaximized: true, canMinimize: true, showInStartMenu: true, showOnDesktop: true,
+    }),
 ];
 
 // const enrichedApplications = applications;
