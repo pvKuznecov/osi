@@ -1,10 +1,9 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
-    import { useAppsStore } from '@/stores/apps.store';
+    import { usersTable } from '@/idb/db';
     import { LangPack } from './lang';
-    import { mapStores } from 'pinia';
-
+    
     export default {
         name: 'OSICalculator',
 
@@ -25,8 +24,6 @@
         },
   
         computed: {
-            ...mapStores(useAppsStore),
-
             reversedHistory() {
                 return [...this.history].reverse().slice(0, 5);
             }
@@ -42,31 +39,27 @@
             },
             history: {
                 handler() { 
-                    if (this.isInitialized) {
-                        this.saveState(); 
-                    }
+                    if (this.isInitialized) this.saveState();
                 },
                 deep: true
             },
             result() {
-                if (this.isInitialized) {
-                    this.saveState();
-                }
+                if (this.isInitialized) this.saveState();
             }
         },
 
         methods: {
             // Инициализация из store
-            initFromStore() {
-                if (!this.windowId || !this.appsStore) {
-                    console.error('OSICalculator: windowId or appsStore is missing');
+            async initFromStore() {
+                if (!this.windowId) {
+                    console.error('OSICalculator: windowId is missing');
                     return;
                 }
-            
-                const savedState = this.appsStore.getWindowState(this.windowId);
-                console.log('OSICalculator loaded state:', savedState);
-            
-                if (savedState && savedState.appType === 'calculator') {
+
+                const savedState = await usersTable.windstates.getById(this.USERID, this.windowId);
+                console.log('savedState', savedState);
+
+                if (savedState) {
                     this.expression = savedState.expression || '';
                     this.result = savedState.result || '0';
                     this.history = savedState.history || [];
@@ -77,9 +70,9 @@
                 console.log('OSICalculator initialized');
             },
 
-            // Сохраняем текущее состояние в store
-            saveState() {
-                if (!this.windowId || !this.appsStore || !this.isInitialized) return;
+            // Сохраняем текущее состояние
+            async saveState() {
+                if (!this.windowId || !this.isInitialized) return;
                 
                 const state = {
                     appType: 'calculator',
@@ -90,8 +83,7 @@
                     timestamp: Date.now()
                 };
                 
-                console.log('OSICalculator saving state:', state);
-                this.appsStore.saveWindowState(this.windowId, state);
+                await usersTable.windstates.updateVal(this.USERID, this.windowId, state);
             },
 
             // Добавление цифры
@@ -116,6 +108,7 @@
                     }
                 } else {
                     const lastChar = this.expression.slice(-1);
+
                     if (['+', '-', '×', '÷'].includes(lastChar)) {
                         this.expression = this.expression.slice(0, -1) + operation;
                     } else {
@@ -179,9 +172,7 @@
                 });
                 
                 // Автоматически сохраняем после добавления в историю
-                if (this.isInitialized) {
-                    this.saveState();
-                }
+                if (this.isInitialized) this.saveState();
             },
     
             // Очистить все
@@ -208,9 +199,7 @@
             // Очистить историю
             clearHistory() { 
                 this.history = []; 
-                if (this.isInitialized) {
-                    this.saveState();
-                }
+                if (this.isInitialized) this.saveState();
             },
     
             // Использовать результат из истории
@@ -277,20 +266,14 @@
 
             // Сохраняем начальное состояние после небольшой задержки
             setTimeout(() => {
-                if (!this.isInitialized) {
-                    this.initFromStore();
-                }
+                if (!this.isInitialized) this.initFromStore();
+
                 this.saveState();
             }, 100);
         },
   
         beforeUnmount() {
             window.removeEventListener('keydown', this.handleKeyPress);
-            
-            // // Сохраняем состояние перед размонтированием
-            // if (this.isInitialized) {
-            //     this.saveState();
-            // }
         }
     }
 </script>

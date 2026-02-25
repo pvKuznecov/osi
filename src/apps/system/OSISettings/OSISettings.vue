@@ -4,7 +4,6 @@
     import { JSH } from '@/core/helpers';
     import { usersTable } from '@/idb/db';
     import { OSIDATA } from '@/config/os';
-    // import { OSICONFIG } from '@/config/config';
     import { LangPack } from './lang';
     // import { useOSIAppsStore } from '@/stores/os.apps.store';
     // import { mapStores } from 'pinia';

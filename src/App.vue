@@ -40,8 +40,6 @@ import TaskBar from './components/os/TaskBar/TaskBar.vue';
 import SimpleWindow from './components/os/SimpleWindow/SimpleWindow.vue';
 import { usersTable, IDBWindows, activeWindowId } from './idb/db';
 
-import { useAppsStore } from './stores/apps.store';
-
 export default {
     name: 'App',
 
@@ -62,15 +60,13 @@ export default {
 
     computed: {
         IDBWindows() { return IDBWindows.value; },
-        appsStore() { return useAppsStore(); },
         // Сортируем окна по zIndex для правильного отображения
         sortedWindows() {
             if (!this.IDBWindows) {
                 return [];
             } else {
                 // Фильтруем свернутые окна - они не отображаются на рабочем столе
-                const visibleWindows = this.IDBWindows.filter(w => !w.isMinimized);
-            
+                const visibleWindows = this.IDBWindows.filter(w => !w.isMinimized);            
                 // Сортируем по zIndex (от меньшего к большему)
                 return [...visibleWindows].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
             }
@@ -91,8 +87,6 @@ export default {
                     console.error('Error closing window:', error);
                 }
             }
-
-            if (this.appsStore) this.appsStore.deleteWindowState(windowId);
         },
     
         async minimizeWindow(windowId) {            
@@ -175,13 +169,12 @@ export default {
         async restoreWindow(windowId) {            
             if (this.USERID && usersTable) {
                 try {
-                    // Если у вас есть метод restore в usersTable.windows
                     if (usersTable.windows.restore) {
                         await usersTable.windows.restore(this.USERID, windowId);
                     } else {
-                        // Или используем activate для восстановления
                         await usersTable.windows.activate(this.USERID, windowId);
                     }
+
                     await usersTable.windows.reupdate(this.USERID);
                 } catch (error) {
                     console.error('Error restoring window:', error);
