@@ -80,9 +80,8 @@ export default {
         async closeWindow(windowId) {            
             if (this.USERID && usersTable) {
                 try {
-                    await usersTable.windows.close(this.USERID, windowId);
+                    await usersTable.closeComplWindow(this.USERID, windowId);
                     await usersTable.windows.reupdate(this.USERID);
-                    await usersTable.windstates.delById(this.USERID, windowId);
                 } catch (error) {
                     console.error('Error closing window:', error);
                 }

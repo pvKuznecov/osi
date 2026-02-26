@@ -19,7 +19,8 @@
                 history: [],
                 lastResult: null,
                 LangData: {},
-                isInitialized: false // Флаг инициализации
+                isInitialized: false, // Флаг инициализации
+                // isClosing: false,
             }
         },
   
