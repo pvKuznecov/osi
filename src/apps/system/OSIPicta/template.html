@@ -1,66 +1,56 @@
 <div class="picta-app">
     <div class="picta-toolbar d-flex justify-content-center align-items-center">
-        <!-- Скрытый input для выбора файлов -->
         <input type="file" ref="fileInput" accept="image/*" multiple @change="handleFileSelect" style="display: none">  
-        <button @click="openFilePicker" title="Открыть изображение">Открыть</button>
-        <button v-if="images && images.length > 0" title="Очистить список для просмотра" @click="clearImageList()">Очистить список</button>
+        <button @click="openFilePicker" :title="LangData('openimage')" class="text-ico-green">{{LangData('open')}}</button>
+        <button v-if="images && images.length > 0" :title="LangData('clearviewinglist')" @click="clearImageList()" class="text-ico-red">{{LangData('clearlist')}}</button>
         <div v-if="images && images.length > 0" class="picta-zoom-controls">
             <div class="picta-separator"></div>
-            <button @click="zoomOut" title="Уменьшить">−</button>
-            <button @click="resetView" title="Оригинальный размер">↺</button>
-            <button @click="zoomIn" title="Увеличить">+</button>
+            <button @click="zoomOut" :title="LangData('decrease')" class="text-ico-green">−</button>
+            <button @click="resetView" :title="LangData('originalsize')" class="text-ico-green">↺</button>
+            <button @click="zoomIn" :title="LangData('increase')" class="text-ico-green">+</button>
             <div class="picta-separator"></div>
-            <button @click="infoPanelVisible = !infoPanelVisible" title="Свойства изображения" style="width: 100px;">Свойства</button>
+            <button @click="infoPanelVisible = !infoPanelVisible" class="text-ico-info" :title="LangData('imageproperties')" style="width: 100px; font-size: 14px;">{{LangData('properties')}}</button>
         </div>
     </div>
     
     <div class="picta-viewport" ref="viewport">
-        <!-- Контейнер для центрирования всего содержимого -->
         <div class="picta-image-container">
-            <!-- Загрузка -->
             <div v-if="isLoading" class="picta-loader-area">
                 <div class="picta-load-spinner"></div>
-                <p>Загрузка...</p>
+                <p>{{LangData('loading')}}...</p>
             </div>
-            
-            <!-- Нет изображений -->
             <div v-else-if="images.length === 0" class="picta-no-image">
                 <div class="bi-easel-fill" style="width: 100%;"></div>
-                <p>Нет открытых изображений</p>
-                <button @click="openFilePicker" class="picta-browse-btn">Выбрать файл</button>
-            </div>
-            
-            <!-- Основное изображение -->
+                <p>{{LangData('noimagesopen')}}</p>
+                <button @click="openFilePicker" class="picta-browse-btn text-ico-green">{{LangData('selectfile')}}</button>
+            </div>            
             <img v-if="currentImage" :src="currentImage.dataUrl" ref="image" class="picta-viewer-image" :style="imageStyle" @error="onImageError" @load="onImageLoad">
         </div>
     </div>
     
     <div v-if="infoPanelVisible" class="picta-info-panel">
         <div class="picta-info-header">
+            <small><i style="color: gray;">{{LangData('filename')}}:</i> {{ currentImageInfo.name || '' }}</small>
             <b @click="infoPanelVisible = false">X</b>
         </div>
         <div class="picta-info-content">
-            <div class="d-flex" style="padding: 0 5px;">
-                <span><i>Имя файла:</i> {{ currentImageInfo.name || '' }}</span>
+            <div class="d-flex" style="padding: 0 5px;">                
+                <div><i>{{LangData('size')}}:</i> {{ currentImageInfo.width || '??' }} × {{ currentImageInfo.height || '??' }}</div>
                 <div class="picta-separator"></div>
-                <span><i>Размер:</i> {{ currentImageInfo.width || '??' }} × {{ currentImageInfo.height || '??' }}</span>
+                <div><i>{{LangData('volume')}}:</i> {{ formatFileSize(currentImageInfo.size) || ''}}</div>
                 <div class="picta-separator"></div>
-                <span><i>Объем:</i> {{ formatFileSize(currentImageInfo.size) || ''}}</span>
+                <div><i>{{LangData('type')}}:</i> {{ currentImageInfo.type || ''}}</div>
                 <div class="picta-separator"></div>
-                <span><i>Тип:</i> {{ currentImageInfo.type || ''}}</span>
-                <div class="picta-separator"></div>
-                <span><i>Дата:</i> {{ formatDate(currentImageInfo.lastModified) || '' }}</span>
+                <div><i>{{LangData('date')}}:</i> {{ formatDate(currentImageInfo.lastModified) || '' }}</div>
             </div>            
         </div>
     </div>
     
     <div v-if="images && images.length > 0" class="picta-img-toolbar">
         <div class="picta-thumbnail-container">
-            <!-- Стрелки для переключения изображений -->
             <div class="picta-nav-arrows">
-                <div class="bi bi-arrow-left-square-fill picta-arrow-selector" @click="Chng_currentIndex('min')" title="Предыдущее изображение"></div>
-            </div>
-            
+                <div class="bi bi-arrow-left-square-fill picta-arrow-selector" @click="Chng_currentIndex('min')" :title="LangData('previousimage')"></div>
+            </div>            
             <div class="picta-img-list" ref="thumbnailList" @scroll="onThumbnailScroll">
                 <div v-for="(p, index) in images" :key="index" class="picta-thumbnail-wrapper" :class="{ 'selected': p == currentImage }" @click="MakeHandSelectImg(p)" :ref="el => { if (p == currentImage) setSelectedThumbnailRef(el) }">
                     <img :src="p.dataUrl" :alt="p.name" class="picta-thumbnail-img" :class="{ 'picta-img-selected': p == currentImage }">
@@ -68,8 +58,8 @@
                 </div>
             </div>
 
-            <div class="picta-nav-arrows">
-                <div class="bi bi-arrow-right-square-fill picta-arrow-selector" @click="Chng_currentIndex('plus')" title="Следующее изображение"></div>
+            <div class="picta-nav-arrows ">
+                <div class="bi bi-arrow-right-square-fill picta-arrow-selector" @click="Chng_currentIndex('plus')" :title="LangData('nextimage')"></div>
             </div>
         </div>
     </div>

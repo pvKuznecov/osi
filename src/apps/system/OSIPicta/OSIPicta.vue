@@ -1,6 +1,9 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
+    import { LangPack } from './lang';
+    import { usersTable } from '@/idb/db';
+
     export default {
         name: 'OSIPicta',
 
@@ -11,6 +14,7 @@
 
         data() {
             return {
+                lang_data: {},
                 images: [],
                 isLoading: false,
                 currentIndex: -1,
@@ -23,7 +27,8 @@
                 saveTimeout: null,
                 imageNaturalWidth: 0,
                 imageNaturalHeight: 0,
-                isZoomed: false
+                isZoomed: false,
+                isInitialized: false,
             }
         },
 
@@ -56,10 +61,39 @@
         },
 
         methods: {
+            // Инициализация из IDB
+            async initFromIDB() {
+                if (!this.windowId) {
+                    console.error('OSIPicta: windowId is missing');
+                    return;
+                }
+
+                const savedState = await usersTable.windstates.getById(this.USERID, this.windowId);
+                console.log('savedState', savedState);
+
+                if (savedState) {
+                    this.images = savedState.images || [];
+ 
+                    if (savedState && this.images.length > 0) {
+                        this.currentIndex = (savedState.currentIndex !== undefined && savedState.currentIndex >= 0) 
+                            ? savedState.currentIndex 
+                            : 0;
+                    } else {
+                        this.currentIndex = -1;
+                    }
+                }
+                
+                this.isInitialized = true;
+                console.log('OSIPicta initialized');
+            },
+
+            LangData(key) { return this.lang_data[key] || ''; },
+
             throttledSaveState() {
                 if (this.saveTimeout) clearTimeout(this.saveTimeout);
-      
+            
                 this.saveTimeout = setTimeout(() => {
+                    this.saveState();
                     this.saveTimeout = null;
                 }, 2000);
             },
@@ -81,8 +115,18 @@
             async handleFileSelect(event) {
                 const files = Array.from(event.target.files);
                 
-                await this.loadImages(files);
+                // Добавить фильтрацию по типу
+                const imageFiles = files.filter(file => file.type.startsWith('image/'));
+                
+                if (imageFiles.length !== files.length) {
+                    alert(`Пропущено ${files.length - imageFiles.length} не-изображений`);
+                }
+                
+                await this.loadImages(imageFiles);
+    
                 event.target.value = '';
+
+                if (this.isInitialized) this.saveState();
             },
 
             async loadImages(files) {
@@ -181,7 +225,7 @@
                 }
             },
 
-            Chng_currentIndex(operVal) {
+            async Chng_currentIndex(operVal) {
                 let newVal = this.currentIndex;
 
                 if (operVal === 'min' && this.currentIndex > 0) {
@@ -197,6 +241,9 @@
                 }
                 
                 this.currentIndex = newVal;
+
+                // if (!this.isInitialized) this.initFromIDB();
+
                 this.$nextTick(() => {
                     this.scrollToSelectedThumbnail();
                     this.Prepare_fileInfo();
@@ -204,9 +251,7 @@
                 });
             },
 
-            onImageError() { 
-                alert('Не удалось загрузить изображение'); 
-            },
+            onImageError() { alert('Не удалось загрузить изображение'); },
 
             formatFileSize(bytes) {
                 if (bytes === 0) return '0 Б';
@@ -230,6 +275,8 @@
                         this.fitToWindow(); // Вместо resetView
                     });
                 }
+
+                if (this.isInitialized) this.saveState();
             },
 
             Prepare_fileInfo() {
@@ -267,9 +314,7 @@
                 }
             },
 
-            onThumbnailScroll() {
-                this.updateScrollButtons();
-            },
+            onThumbnailScroll() { this.updateScrollButtons(); },
 
             updateScrollButtons() {
                 if (this.$refs.thumbnailList) {
@@ -281,10 +326,19 @@
 
             // очистка списка
             clearImageList() {
+                // Очищаем dataUrl для предотвращения утечек памяти
+                this.images.forEach(img => {
+                    if (img.dataUrl && img.dataUrl.startsWith('blob:')) {
+                        URL.revokeObjectURL(img.dataUrl);
+                    }
+                });
+                
                 this.images = [];
                 this.isLoading = false;
                 this.currentIndex = -1;
                 this.scale = 1;
+
+                if (this.isInitialized) this.saveState();
             },
 
             DelElemImg(image) {
@@ -303,8 +357,6 @@
                     this.currentImageInfo = {};
                     this.isZoomed = false;
                     this.scale = 1;
-                    this.translateX = 0;
-                    this.translateY = 0;
                 } else {
                     // Если удалили текущее изображение
                     if (this.currentIndex === index) {
@@ -326,15 +378,98 @@
                         this.fitToWindow();
                     });
                 }
+
+                if (this.isInitialized) this.saveState();
+            },
+
+            // работа с кнопками стрелочки
+            handleKeyPress(e) {
+                if (!this.images.length) return;
+                
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        this.Chng_currentIndex('min');
+                        break;
+                    case 'ArrowRight':
+                        this.Chng_currentIndex('plus');
+                        break;
+                    case 'Escape':
+                        this.infoPanelVisible = false;
+                        break;
+                    case '+':
+                    case '=':
+                        this.zoomIn();
+                        break;
+                    case '-':
+                        this.zoomOut();
+                        break;
+                    case '0':
+                        this.resetView();
+                        break;
+                }
+            },
+
+            // работа с колесиком
+            handleWheel(e) {
+                if (!this.currentImage) return;
+                
+                e.preventDefault();
+                
+                if (e.deltaY < 0) {
+                    this.zoomIn();
+                } else {
+                    this.zoomOut();
+                }
+            },
+
+            // Сохраняем текущее состояние
+            async saveState() {
+                console.log('START:: saveState');
+                if (!this.windowId || !this.isInitialized) return;
+                
+                const state = {
+                    appType: 'picta',
+                    images: this.images,
+                    currentIndex: this.currentIndex,
+                    timestamp: Date.now()
+                };
+
+                await usersTable.windstates.updateVal(this.USERID, this.windowId, state);
             },
         },
 
         mounted() {
+            // Инициализируем данные из store после монтирования
+            this.$nextTick(() => {
+                this.initFromIDB();
+            });
+
+            const userLang = navigator.language || navigator.userLanguage;
+            const userLangS = userLang.split('-')[0];
+            
+            this.UserLang = userLangS; 
+            
+            const LangPackData = LangPack;
+
+            this.lang_data = (userLangS && LangPackData && LangPackData[userLangS]) ? LangPackData[userLangS] : LangPackData.en;
+
             window.addEventListener('resize', this.updateScrollButtons);
+            window.addEventListener('keydown', this.handleKeyPress);
+            this.$refs.viewport.addEventListener('wheel', this.handleWheel, { passive: false });
+
+            // Сохраняем начальное состояние после небольшой задержки
+            setTimeout(() => {
+                if (!this.isInitialized) this.initFromIDB();
+
+                this.saveState();
+            }, 100);
         },
 
         beforeUnmount() {
             window.removeEventListener('resize', this.updateScrollButtons);
+            window.removeEventListener('keydown', this.handleKeyPress);
+            this.$refs.viewport.removeEventListener('wheel', this.handleWheel);            
+            
             if (this.saveTimeout) clearTimeout(this.saveTimeout);
         }
     }
