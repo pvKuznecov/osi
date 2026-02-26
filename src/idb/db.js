@@ -373,6 +373,128 @@ export const usersTable = {
         }
     },
 
+    // комплексное закрытие окна (окно + состояние) с транзакцией и таймаутом
+    async closeComplWindow(userId, windowId) {
+        if (!userId) throw new Error('User ID required');
+        if (!windowId) throw new Error('Window ID required');
+
+        console.log(`Starting transaction for closing window ${windowId}`);
+        
+        // Сначала проверяем, существует ли пользователь
+        const user = await DB.users.get(userId);
+        if (!user) {
+            console.error(`User with ID ${userId} not found`);
+            return { success: false, reason: 'user_not_found' };
+        }
+        
+        const windowExists = user.systemconfig?.windows?.some(w => w.id === windowId);
+        const stateExists = !!(user.systemdata?.windowsstates?.[windowId]);
+        
+        console.log(`Window exists: ${windowExists}, State exists: ${stateExists}`);
+        
+        if (!windowExists && !stateExists) {
+            return { success: true, alreadyClosed: true };
+        }
+        
+        // Используем транзакцию с ТАЙМАУТОМ
+        try {
+            // Создаем промис с таймаутом
+            const transactionPromise = DB.transaction('rw', DB.users, async () => {
+                // Получаем пользователя снова внутри транзакции
+                const currentUser = await DB.users.get(userId);
+                // Подготавливаем изменения
+                const updates = { updatedAt: new Date() };
+                
+                // Обновляем systemdata (удаляем состояние)
+                if (currentUser.systemdata?.windowsstates?.[windowId]) {
+                    const newSystemData = { ...currentUser.systemdata };
+                    delete newSystemData.windowsstates[windowId];
+                    updates.systemdata = newSystemData;
+                }
+                
+                // Обновляем systemconfig (удаляем окно)
+                if (currentUser.systemconfig?.windows) {
+                    const newWindows = currentUser.systemconfig.windows.filter(w => w.id !== windowId);
+                    const newSystemConfig = {
+                        ...currentUser.systemconfig,
+                        windows: newWindows
+                    };
+                    
+                    // Обновляем activeWindowId если нужно
+                    if (newSystemConfig.activeWindowId === windowId) {
+                        if (newWindows.length > 0) {
+                            const maxZWindow = newWindows.reduce((max, w) => 
+                                (w.zIndex || 0) > (max.zIndex || 0) ? w : max
+                            );
+                            newSystemConfig.activeWindowId = maxZWindow.id;
+                        } else {
+                            newSystemConfig.activeWindowId = null;
+                        }
+                    }
+                    
+                    updates.systemconfig = newSystemConfig;
+                }
+                
+                // Применяем изменения
+                await DB.users.update(userId, updates);
+                
+                // Обновляем реактивные переменные
+                const updatedUser = await DB.users.get(userId);
+                
+                activeWindowId.value = updatedUser.systemconfig?.activeWindowId || null;
+                IDBWindows.value = updatedUser.systemconfig?.windows || [];
+                
+                console.log(`Window ${windowId} closed successfully`);
+                return { success: true, userId, windowId };
+            });
+            
+            // Создаем промис таймаута на 5 секунд
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Transaction timeout after 5s')), 5000);
+            });
+            
+            // Гонка между транзакцией и таймаутом
+            return await Promise.race([transactionPromise, timeoutPromise]);
+            
+        } catch (error) {
+            if (error.message === 'Transaction timeout after 5s') {
+                console.error('Transaction timeout, falling back to simple deletion');
+            } else {
+                console.error('Transaction failed:', error);
+            }
+            
+            // Fallback на простое удаление
+            console.log('Falling back to simple deletion...');
+            
+            const currentUser = await DB.users.get(userId);
+            if (!currentUser) return { success: false };
+            
+            // Просто удаляем состояние и окно по отдельности
+            if (currentUser.systemdata?.windowsstates?.[windowId]) {
+                const newStates = { ...currentUser.systemdata.windowsstates };
+                delete newStates[windowId];
+                
+                await DB.users.update(userId, {
+                    systemdata: { ...currentUser.systemdata, windowsstates: newStates }
+                });
+            }
+            
+            if (currentUser.systemconfig?.windows) {
+                const newWindows = currentUser.systemconfig.windows.filter(w => w.id !== windowId);
+                await DB.users.update(userId, {
+                    systemconfig: { ...currentUser.systemconfig, windows: newWindows }
+                });
+            }
+            
+            // Обновляем реактивные переменные
+            const updatedUser = await DB.users.get(userId);
+            activeWindowId.value = updatedUser.systemconfig?.activeWindowId || null;
+            IDBWindows.value = updatedUser.systemconfig?.windows || [];
+            
+            return { success: true, userId, windowId, fallback: true, timeout: error.message === 'Transaction timeout after 5s' };
+        }
+    },
+
     windows: {
         async reupdate(userId) {
             if (!userId) throw new Error('User ID required');
@@ -749,27 +871,39 @@ export const usersTable = {
             }
         },
 
-        // "закрытие" окна у пользователя
         async close(userId, windowId) {
             if (!userId) throw new Error('User ID required');
             if (!windowId) throw new Error('Window ID required');
 
             try {
-                const FindWindows = await this.windows_getAll(userId);
+                // Получаем пользователя
+                const user = await DB.users.get(userId);
+                if (!user) throw new Error(`User with ID ${userId} not found`);
+                
+                // Получаем текущие окна
+                const currentWindows = user?.systemconfig?.windows || [];
+                
+                // Проверяем, существует ли окно
+                const windowExists = currentWindows.some(w => w.id === windowId);
+                
+                if (!windowExists) {
+                    console.log(`Window ${windowId} already doesn't exist for user ${userId}`);
+                    // Если окна нет, просто обновляем реактивную переменную
+                    IDBWindows.value = currentWindows;
+                    return { success: true, userId, windowId, alreadyClosed: true };
+                }
                 
                 // Фильтруем окна, удаляя закрываемое
-                const resultArray = FindWindows.filter(val => val.id !== windowId);
+                const resultArray = currentWindows.filter(val => val.id !== windowId);
 
                 // Обновляем реактивную переменную
                 IDBWindows.value = resultArray;
 
-                // Получаем пользователя и обновляем его конфиг
-                const user = await DB.users.get(userId);
+                // Обновляем systemconfig пользователя
                 let uSystemconfig = user.systemconfig || Def_userSystemconfig;
                 
-                // Обновляем windows в конфиге
+                // Обновляем windows в конфиге (создаем новые объекты Window)
                 uSystemconfig.windows = resultArray.map(w => new Window(w));
-                // uSystemconfig.windows = resultArray.map(w => this.prepareWindowForDB(w));
                 
                 // Если закрываем активное окно, активируем другое
                 if (uSystemconfig.activeWindowId === windowId) {
@@ -801,7 +935,7 @@ export const usersTable = {
 
                 // Обновляем nextZIndex
                 if (resultArray.length > 0) {
-                    const maxZ = Math.max(...resultArray.map(w => w.zIndex));
+                    const maxZ = Math.max(...resultArray.map(w => w.zIndex || 100));
                     nextZIndex = maxZ + 1;
                 } else {
                     nextZIndex = 100;
@@ -810,7 +944,7 @@ export const usersTable = {
                 return { success: true, userId, windowId };
             } catch (error) {
                 console.error('Error operation(users; windows.close).', error);
-                throw new Error(`Failed: ${error.message}`);
+                throw new Error(`Failed to close window: ${error.message}`);
             }
         },
 
@@ -950,7 +1084,6 @@ export const usersTable = {
             }
         },
 
-        // удалить состояние конкретного окна по ID пользователя + ID окна
         async delById(userId, windowId) {
             if (!userId) throw new Error('User ID required');
             if (!windowId) throw new Error('Window ID required');
@@ -958,27 +1091,45 @@ export const usersTable = {
             try {
                 const user = await DB.users.get(userId);
 
-                if (!user) throw new Error(`User with ID ${userId} not found`);
-
-                const states = user?.systemdata?.windowsstates || false;
-
-                if (!states) {
-                    return true;
-                } else {
-                    let newStates = states;
-                    delete newStates[windowId];
-
-                    // Обновляем в БД
-                    await DB.users.where('id').equals(userId)
-                        .modify(user => {
-                            user.systemdata.windowsstates = newStates;
-                            user.updatedAt = new Date();
-                        });
-
-                    return { success: true, userId, windowId };
+                if (!user) {
+                    console.error(`User with ID ${userId} not found`);
+                    return false;
                 }
+
+                // Проверяем, есть ли systemdata и windowsstates
+                if (!user.systemdata) {
+                    console.log(`No systemdata for user ${userId}`);
+                    return true; // Считаем успешным, т.к. состояния нет
+                }
+                
+                if (!user.systemdata.windowsstates) {
+                    console.log(`No windowsstates for user ${userId}`);
+                    return true; // Считаем успешным, т.к. состояний нет
+                }
+
+                const states = user.systemdata.windowsstates;
+                
+                // Проверяем, есть ли состояние для этого окна
+                if (!states[windowId]) {
+                    console.log(`No state found for window ${windowId}`);
+                    return true; // Состояния нет, считаем успешным
+                }
+
+                // Создаем новый объект без удаляемого состояния
+                const newStates = { ...states };
+                delete newStates[windowId];
+
+                // Обновляем в БД
+                await DB.users.where('id').equals(userId)
+                    .modify(user => {
+                        user.systemdata.windowsstates = newStates;
+                        user.updatedAt = new Date();
+                    });
+                
+                console.log(`State for window ${windowId} deleted successfully`);
+                return { success: true, userId, windowId };
             } catch (error) {
-                console.error("Error: ", error);
+                console.error("Error in delById: ", error);
                 return false;
             }
         },
