@@ -49,8 +49,8 @@
         },
 
         methods: {
-            // Инициализация из store
-            async initFromStore() {
+            // Инициализация из IDB
+            async initFromIDB() {
                 if (!this.windowId) {
                     console.error('OSICalculator: windowId is missing');
                     return;
@@ -252,7 +252,7 @@
 
             // Инициализируем данные из store после монтирования
             this.$nextTick(() => {
-                this.initFromStore();
+                this.initFromIDB();
             });
             
             const userLang = navigator.language || navigator.userLanguage;
@@ -266,7 +266,7 @@
 
             // Сохраняем начальное состояние после небольшой задержки
             setTimeout(() => {
-                if (!this.isInitialized) this.initFromStore();
+                if (!this.isInitialized) this.initFromIDB();
 
                 this.saveState();
             }, 100);

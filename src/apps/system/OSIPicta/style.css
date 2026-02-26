@@ -10,7 +10,6 @@
 .picta-toolbar {
     width: 100%;
     height: 40px;
-    border-bottom: 1px solid darkslategrey;
     flex-shrink: 0; }
 
 .picta-toolbar button {
@@ -18,14 +17,11 @@
     height: 26px;
     border-radius: 5px;
     margin: 0 5px;
-    background: linear-gradient(180deg, #42b883, #2e865f);
     color: white;
     border: none;
     cursor: pointer;
     padding: 0 5px;
     transition: background 0.2s; }
-
-.picta-toolbar button:hover { background: #3aa876; }
 
 /* Элементы управления зумом */
 .picta-zoom-controls {
@@ -134,7 +130,6 @@
     font-size: 16px; }
 
 .picta-browse-btn {
-    background: linear-gradient(180deg, #42b883, #2e865f);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -142,8 +137,6 @@
     cursor: pointer;
     font-size: 16px;
     transition: background 0.2s; }
-
-.picta-browse-btn:hover { background: #3aa876; }
 
 /* Основное изображение */
 .picta-viewer-image {
@@ -292,31 +285,36 @@
 .picta-info-header {
     display: block;
     width: 100%;
-    height: 10px;
-    font-size: 16px;
-    padding: 0 5px;
-    text-align: right; }
+    height: 20px;
+    font-size: 14px;
+    padding: 0 5px 2px 5px;
+    text-align: left;
+    border-bottom: 1px solid gray;
+ }
 
 .picta-info-header b {
+    float: right;
     cursor: pointer;
     color: #42b883; }
 
 .picta-info-content {
     display: block;
     width: 100%;
-    height: 30px;
+    min-height: 30px;
     margin-top: 10px; }
+
+.picta-info-content i { color: gray; }
 
 .picta-del-elem-btn {
     width: 16px;
-    height: 16px;
-    border: 1px solid tomato;
+    height: 16px;    
     border-radius: 50px;
     color: white;
     margin-left: 3px;
     margin-top: -40px;
     text-align: center;
     font-size: 10px; }
+.picta-del-elem-btn:hover { color: rgb(255, 99, 71); box-shadow: 0 4px 12px rgba(255, 99, 71, 0.4); }
 
 /* ===== АДАПТИВНОСТЬ ===== */
 @media (max-width: 768px) {
