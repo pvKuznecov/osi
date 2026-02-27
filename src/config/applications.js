@@ -64,8 +64,14 @@ const applications = [
         id: 'osipicta', name: 'OSIPicta',
         label: 'Picta', category: 'utilities', description: 'Просмотр изображений.',
         iconclass: 'bi-easel-fill text-ico-purpure',
-        defWidth: 850, defHeight: 600,
         isMaximized: true, canMinimize: true, showInStartMenu: true, showOnDesktop: true,
+    }),
+    new OSIApp({
+        id: 'osidirdigger', name: 'OSIDirDigger',
+        label: 'DirDigger', category: 'utilities', description: 'Файловый менеджер.',
+        iconclass: 'bi-hdd-fill text-ico-purpure',
+        defWidth: 850, defHeight: 600,
+        resizable: true, isMaximized: true, canMinimize: true, showInStartMenu: true, showOnDesktop: true,
     }),
 ];
 

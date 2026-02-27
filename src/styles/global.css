@@ -34,14 +34,14 @@ h5 { font-size: 14px; }
     color: white;
     border-radius: 50px; }
 
-.text-ico-tech { background: linear-gradient(to bottom, rgb(235, 235, 235), rgb(122, 122, 122)); opacity: .85; }
-.text-ico-info { background: linear-gradient(to bottom, rgb(55, 154, 235), rgb(33, 65, 209)); opacity: .85; }
-.text-ico-purpure { background: linear-gradient(to bottom, rgb(103, 55, 235), rgb(80, 33, 209)); opacity: .85; }
-.text-ico-green { background: linear-gradient(180deg, #42b883, #2e865f); opacity: .85; }
-.text-ico-red { background: linear-gradient(180deg, #b84242, #862e2e); opacity: .85; }
+.text-ico-tech { background: linear-gradient(to bottom, rgb(235, 235, 235), rgb(122, 122, 122)); }
+.text-ico-info { background: linear-gradient(to bottom, rgb(55, 154, 235), rgb(33, 65, 209)); }
+.text-ico-purpure { background: linear-gradient(to bottom, rgb(103, 55, 235), rgb(80, 33, 209)); }
+.text-ico-green { background: linear-gradient(180deg, #42b883, #2e865f); }
+.text-ico-red { background: linear-gradient(180deg, #b84242, #862e2e); }
 
-.text-ico-tech:hover { opacity: 1; }
-.text-ico-info:hover { opacity: 1; }
-.text-ico-purpure:hover { opacity: 1; }
-.text-ico-green:hover { opacity: 1; }
-.text-ico-red:hover { opacity: 1; }
+.text-ico-tech:hover { opacity: .85; }
+.text-ico-info:hover { opacity: .85; }
+.text-ico-purpure:hover { opacity: .85; }
+.text-ico-green:hover { opacity: .85; }
+.text-ico-red:hover { opacity: .85; }
