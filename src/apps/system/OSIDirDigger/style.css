@@ -1,0 +1,325 @@
+/* ========== CSS Variables ========== */
+:root {
+    --osi-bg-primary: linear-gradient(180deg, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85));
+    --osi-bg-table: linear-gradient(180deg, rgba(245, 251, 252, 0.85), rgb(255, 255, 255), rgba(245, 251, 252, 0.85));
+    --osi-text-primary: white;
+    --osi-text-secondary: rgba(255, 255, 255, 0.6);
+    --osi-text-muted: rgba(255, 255, 255, 0.4);
+    --osi-hover-bg: rgba(255, 255, 255, 0.1);
+    --osi-hover-bg-strong: rgba(255, 255, 255, 0.2);
+    --osi-selected-bg: rgba(0, 120, 255, 0.3);
+    --osi-selected-border: rgba(0, 120, 255, 0.8);
+    --osi-folder-bg: rgba(255, 255, 0, 0.1);
+    --osi-border-color: gray;
+    --osi-success: #4caf50;
+}
+
+/* ========== Main Container ========== */
+.osidirdigger-app {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: var(--osi-bg-primary);
+    color: var(--osi-text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ========== Top Menu ========== */
+.osidirdigger-tmenu {
+    width: 100%;
+    height: 60px;
+}
+
+.osidirdigger-tmenu-btnpanel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 30px;
+    padding: 0 10px;
+}
+
+.osidirdigger-tmenu-btnpanel span {
+    min-width: 50px;
+    height: 24px;
+    border-radius: 5px;
+    border: 1px solid var(--osi-border-color);
+    padding: 0 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+.osidirdigger-tmenu-btnpanel span:hover {
+    background-color: var(--osi-hover-bg);
+}
+
+.osidirdigger-tmenu-breadpanel {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 30px;
+    padding: 0 10px;
+    font-size: 14px;
+}
+
+/* ========== Breadcrumbs ========== */
+.breadcrumb-item a {
+    color: var(--osi-text-primary);
+    text-decoration: none;
+    margin: 0 2px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+
+.breadcrumb-item a:hover {
+    background-color: var(--osi-hover-bg);
+    text-decoration: underline;
+}
+
+.breadcrumb-item a.current {
+    font-weight: bold;
+    color: var(--osi-success);
+    pointer-events: none;
+}
+
+.separator {
+    color: var(--osi-text-muted);
+    margin: 0 3px;
+}
+
+/* ========== Work Table ========== */
+.osidirdigger-worktable {
+    display: flex;
+    width: 100%;
+    height: calc(100% - 90px);
+    overflow: hidden;
+}
+
+/* Left Menu */
+.osidirdigger-wtmenu {
+    width: 250px; /* Уменьшил для современного вида */
+    height: 100%;
+    border-radius: 0 8px 8px 0;
+    color: var(--osi-text-primary);
+    overflow-y: auto;
+}
+
+.quick-access {
+    padding: 15px;
+}
+
+.quick-item {
+    padding: 8px 12px;
+    margin: 4px 0;
+    cursor: pointer;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+}
+
+.quick-item:hover {
+    background-color: var(--osi-hover-bg);
+}
+
+.quick-item span {
+    font-size: 18px;
+}
+
+/* Table Area */
+.osidirdigger-wt-table {
+    width: calc(100% - 256px); /* Adjusted for new menu width */
+    height: calc(100% - 6px);
+    margin: 3px;
+    background: var(--osi-bg-table);
+    border-radius: 8px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+/* ========== File Grid ========== */
+.d-flex.flex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* Используем gap вместо margin */
+}
+
+.osidirdigger-file-elem {
+    min-width: 100px;
+    max-width: 120px;
+    min-height: 120px;
+    max-height: 140px;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.osidirdigger-file-elem:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.osidirdigger-file-elem.selected {
+    background-color: var(--osi-selected-bg);
+    border: 2px solid var(--osi-selected-border);
+    box-shadow: 0 0 12px rgba(0, 120, 255, 0.5);
+}
+
+.osidirdigger-file-elem.folder {
+    background-color: rgba(255, 255, 0, 0.15);
+}
+
+/* File Preview */
+.file-preview {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.osidirdigger-file-elem:hover .preview-img {
+    transform: scale(1.1);
+}
+
+/* File Icon */
+.file-icon {
+    font-size: 42px;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* File Name */
+.file-name {
+    font-size: 11px;
+    text-align: center;
+    word-break: break-word;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    padding: 0 2px;
+    font-weight: 500;
+    color: black;
+}
+
+/* File Size */
+.file-size {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 2px;
+    font-weight: 400;
+    color: brown;
+}
+
+/* File Metadata */
+.file-meta {
+    font-size: 8px;
+    /* color: rgba(255, 255, 255, 0.5); */
+    color: black;
+    margin-top: 2px;
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Empty Folder Message */
+.empty-folder {
+    width: 100%;
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--osi-text-muted);
+    font-style: italic;
+    font-size: 14px;
+}
+
+/* ========== Bottom Menu ========== */
+.osidirdigger-bmenu {
+    width: 100%;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    font-size: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* ========== Utilities ========== */
+.d-flex { display: flex; }
+.flex-wrap { flex-wrap: wrap; }
+.align-items-center { align-items: center; }
+.justify-content-center { justify-content: center; }
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+
+/* ========== Scrollbar Styling ========== */
+.osidirdigger-wt-table::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.osidirdigger-wt-table::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+.osidirdigger-wt-table::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.osidirdigger-wt-table::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* ========== Responsive Adjustments ========== */
+@media (max-width: 768px) {
+    .osidirdigger-wtmenu {
+        width: 180px;
+    }
+    
+    .osidirdigger-wt-table {
+        width: calc(100% - 186px);
+    }
+    
+    .osidirdigger-file-elem {
+        min-width: 80px;
+        max-width: 90px;
+        min-height: 100px;
+        max-height: 110px;
+    }
+    
+    .file-icon {
+        font-size: 32px;
+    }
+}

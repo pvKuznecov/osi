@@ -88,6 +88,7 @@
                     // 'OSICalendar': () => import('@/apps/system/OSICalendar/OSICalendar.vue'),
                     'OSIAppManager': () => import('@/apps/system/OSIAppManager/OSIAppManager.vue'),
                     'OSIPicta': () => import('@/apps/system/OSIPicta/OSIPicta.vue'),
+                    'OSIDirDigger': () => import('@/apps/system/OSIDirDigger/OSIDirDigger.vue'),
                 };
 
                 if (this.appName && componentMap[this.appName]) {

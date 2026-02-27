@@ -41,7 +41,8 @@ async function getDefaultApps() {
 // описание схемы БД
 DB.version(db_version).stores({
     users: '++id, name, login, password, apps, data, config, systemconfig, systemdata, createdAt, updatedAt',
-    settings: '++id, key, value, updatedAt',
+    // settings: '++id, key, value, updatedAt',
+    dfiles: '++id, name, userid, parentid, [userid+parentid], type, size, mimetype, data, private, protect, createdAt, updatedAt',
 });
 
 // ========Default configs========
@@ -75,12 +76,163 @@ export class User {
         this.config = data.config || Def_userConfig;
         this.systemconfig = data.systemconfig || Def_userSystemconfig;
         this.systemdata = data.systemdata || Def_systemdata;
+        this.protect = data.protect || false;
         this.createdAt = data.createdAt || new Date();
         this.updatedAt = data.updatedAt || new Date();
         // автоматическое присваение id (вариант для "совместимости")
         if (data.id) this.id = data.id;
     }
 }
+
+export class DFile {
+    // Статическое свойство для обозначения корня
+    static ROOT_PARENT = 0;
+
+    constructor(data = {}) {
+        // автоматическое присваение id (вариант для "совместимости")
+        if (data.id) this.id = data.id;
+
+        this.name = data.name || 'Unknown';
+        this.userid = data.userid || null;                      // владелец (связь с users.id)
+        this.parentid = data.parentid ?? DFile.ROOT_PARENT;     // родительская папка
+        this.type = data.type || '';                            // тип
+        this.size = data.size || 0;                             // размер в байтах
+        this.mimetype = data.mimetype || '';                    // MIME-тип
+        this.private = data.private || false;                   // приватный/публичный
+        this.protect = data.protect || false;                   // защищенный от удаления
+        this.createdAt = data.createdAt || new Date();
+        this.updatedAt = data.updatedAt || new Date();
+
+        // Типозависимые поля
+        this.extension = data.extension || this.getExtensionFromName();
+
+        // Для папок
+        if (this.type === 'folder') {
+            this.children = data.children || [];        // массив ID дочерних элементов
+            this.isExpanded = data.isExpanded || false; //UI метка "открытая\закрытая папка"
+            this.metadata = {}; // пустой metadata для папок
+        } else {
+            // Для файлов - содержимое в blob
+            this.blob = data.blob || data.data || null;
+            
+            // Сохраняем метаданные в metadata объект (ЕДИНСТВЕННОЕ МЕСТО)
+            this.metadata = {
+                duration: data.duration || 0,
+                artist: data.artist || '',
+                album: data.album || '',
+                title: data.title || this.name,
+                bitrate: data.bitrate || 0,
+                width: data.width || 0,
+                height: data.height || 0,
+                camera: data.camera || '',
+                dateTaken: data.dateTaken || null,
+                contains: data.contains || [],
+                compressedSize: data.compressedSize || 0,
+                appId: data.appId || ''
+            };
+        }
+    }
+
+    // Геттеры для удобного доступа к метаданным
+    get camera() { return this.metadata?.camera || ''; }
+    get width() { return this.metadata?.width || 0; }
+    get height() { return this.metadata?.height || 0; }
+    get duration() { return this.metadata?.duration || 0; }
+    get artist() { return this.metadata?.artist || ''; }
+    get album() { return this.metadata?.album || ''; }
+    get title() { return this.metadata?.title || this.name; }
+    get dateTaken() { return this.metadata?.dateTaken || null; }
+    get contains() { return this.metadata?.contains || []; }
+    get compressedSize() { return this.metadata?.compressedSize || 0; }
+    get appId() { return this.metadata?.appId || ''; }
+    
+    // Сеттеры для обновления метаданных
+    set camera(value) { 
+        if (!this.metadata) this.metadata = {};
+        this.metadata.camera = value; 
+    }
+    
+    set width(value) { 
+        if (!this.metadata) this.metadata = {};
+        this.metadata.width = value; 
+    }
+    
+    set height(value) { 
+        if (!this.metadata) this.metadata = {};
+        this.metadata.height = value; 
+    }
+    
+    set duration(value) { 
+        if (!this.metadata) this.metadata = {};
+        this.metadata.duration = value; 
+    }
+    
+    set artist(value) { 
+        if (!this.metadata) this.metadata = {};
+        this.metadata.artist = value; 
+    }
+    
+    set album(value) { 
+        if (!this.metadata) this.metadata = {};
+        this.metadata.album = value; 
+    }
+    
+    set title(value) { 
+        if (!this.metadata) this.metadata = {};
+        this.metadata.title = value; 
+    }
+
+    getExtensionFromName() {
+        const parts = this.name.split('.');
+        return parts.length > 1 ? parts.pop().toLowerCase() : '';
+    }
+
+    // Вспомогательный метод для получения иконки
+    getIcon() {
+        const iconMap = {
+            folder: '📁',
+            audio: '🎵',
+            text: '📝',
+            image: '🖼️',
+            video: '🎬',
+            app: '⚙️',
+            archive: '📦',
+            file: '📄'
+        };
+        return iconMap[this.type] || '📄';
+    }
+    
+    // Проверка, является ли элемент папкой
+    isFolder() { return this.type === 'folder'; }
+    
+    // Получить путь к файлу
+    async getPath(db) {
+        if (!this.parentid || this.parentid === DFile.ROOT_PARENT) {
+            return [this];
+        } else {
+            const path = [];
+            let current = this;
+        
+            while (current.parentid && current.parentid !== DFile.ROOT_PARENT) {
+                const parent = await db.dfiles.get(current.parentid);
+                if (!parent) break;
+                path.unshift(parent);
+                current = parent;
+            }
+            
+            // Добавляем корень
+            if (current.parentid === DFile.ROOT_PARENT) {
+                const root = await db.dfiles
+                    .where('[userid+parentid]')
+                    .equals([this.userid, DFile.ROOT_PARENT])
+                    .first();
+                if (root) path.unshift(root);
+            }
+        
+            return path;
+        }
+    }
+}  
 
 export class Setting {
     constructor(key, value) {
@@ -1179,65 +1331,502 @@ export const usersTable = {
     },
 };
 
-export const settingsTable = {
-    // сохранение настройки
-    async save(key, value) {
-        try {
-            const existing = await DB.settings.where('key').equals(key).first();
+export const dFiles = {
+    // получить корневую папку пользователя
+    async getRoot(userId) {
+        if (!userId) throw new Error('User ID required');
 
-            if (existing) {
-                await DB.settings.update(existing.id, {
-                    value: value,
-                    updatedAt: new Date(),
+        try {
+            // пытаемся найти корень
+            let RootFolder = await DB.dfiles
+                .where('[userid+parentid]')
+                .equals([userId, DFile.ROOT_PARENT])
+                .and(item => item.type === 'folder' && item.name === 'root')
+                .first();
+            
+            // корня нет - создаем
+            if (!RootFolder) {
+                RootFolder = new DFile({
+                    name: 'root',
+                    userid: userId,
+                    parentid: DFile.ROOT_PARENT,
+                    type: 'folder',
+                    protect: true, // защищаем корень от удаления
+                    children: []
                 });
-                return existing.id;
-            } else {
-                return await DB.settings.add(new Setting(key, value));
+                
+                RootFolder.id = await DB.dfiles.add(RootFolder);
             }
+            
+            return RootFolder;
         } catch (error) {
-            console.error('Error operation (settings; save');
-            throw new Error(`Failed to save setting ${key}: ${error.message}`);
+            console.error('Error getting root folder:', error);
+            throw error;
         }
     },
 
-    // получить настройку
-    async get(key, defaultVal = null) {
+    // Получить содержимое папки
+    async getFolderContents(userId, folderId) {
+        if (!folderId) throw new Error('Folder ID required');
+        if (!userId) throw new Error('User ID required');
+        
         try {
-            const findSetting = DB.settings.where('key').equals(key).first();
-
-            return findSetting ? findSetting.value : defaultVal;
+            const folder = await DB.dfiles.get(folderId);
+            if (!folder) throw new Error('Folder not found');               //не нашли
+            if (folder.userid !== userId) throw new Error('Access denied'); //не принадлежит пользователю
+            if (folder.type !== 'folder') throw new Error('Not a folder');  //это не папка
+            
+            // Получаем все элементы с этим parentid
+            const contents = await DB.dfiles
+                .where('[userid+parentid]')
+                .equals([userId, folderId])
+                .toArray();
+            
+            // Сортируем: сначала папки, потом файлы
+            return contents.sort((a, b) => {
+                if (a.type === 'folder' && b.type !== 'folder') {
+                    return -1;
+                } else if (a.type !== 'folder' && b.type === 'folder') {
+                    return 1;
+                } else {
+                    return a.name.localeCompare(b.name);
+                }
+            });
         } catch (error) {
-            console.error('Error operation (settings; get');
-            throw new Error(`Failed to get setting ${key}: ${error.message}`);
+            console.error('Error getting folder contents:', error);
+            throw error;
         }
     },
 
-    // удалить настройку
-    async delete(key) {
+    // Создать новую папку
+    async createFolder(userId, parentId, folderName) {
+        if (!userId) throw new Error('User ID required');
+        if (!parentId) throw new Error('Parent ID required');
+        if (!folderName) throw new Error('Folder name required');
+        
         try {
-            const findSetting = await DB.settings.where('key').equals(key).first();
+            // Проверяем родительскую папку
+            const parent = await DB.dfiles.get(parentId);
+            if (!parent) throw new Error('Parent folder not found');
+            if (parent.userid !== userId) throw new Error('Access denied');
+            if (parent.type !== 'folder') throw new Error('Parent is not a folder');
+            
+            // Проверяем, нет ли уже папки с таким именем
+            const existing = await DB.dfiles
+                .where('[userid+parentid]')
+                .equals([userId, parentId])
+                .and(item => item.name === folderName && item.type === 'folder')
+                .first();
+            
+            if (existing) throw new Error('Folder with this name already exists');  //папка с таким именем уже существует (в родительской)
+            
+            // Создаем новую папку
+            const newFolder = new DFile({
+                name: folderName,
+                userid: userId,
+                parentid: parentId,
+                type: 'folder',
+                children: []
+            });
+            
+            const id = await DB.dfiles.add(newFolder);
+            
+            // Обновляем список детей в родительской папке
+            if (!parent.children) parent.children = []; //если список детей в родителе пуст - создаем пустой
 
-            if (findSetting) {
-                return await DB.settings.delete(findSetting.id);
-            } else {
-                return null;
+            parent.children.push(id);
+
+            await DB.dfiles.update(parentId, {
+                children: parent.children,
+                updatedAt: new Date()
+            });
+            
+            return { ...newFolder, id };
+        } catch (error) {
+            console.error('Error creating folder:', error);
+            throw error;
+        }
+    },
+
+    // Добавить файл (из загрузки)
+    async addFile(userId, parentId, fileData, blob) {
+        if (!userId) throw new Error('User ID required');
+        if (!parentId) throw new Error('Parent ID required');
+        if (!fileData) throw new Error('File data required');
+        
+        try {
+            // Определяем тип файла
+            const type = this.getFileType(fileData.type, fileData.name);
+            
+            // Создаем объект для сохранения
+            const fileObj = {
+                name: fileData.name,
+                userid: userId,
+                parentid: parentId,
+                type: type,
+                size: fileData.size,
+                mimetype: fileData.type,
+                blob: blob,  // Сохраняем как blob, не data!
+                extension: fileData.name.split('.').pop(),
+                // Метаданные сохраняем как отдельные поля
+                width: fileData.metadata?.width || 0,
+                height: fileData.metadata?.height || 0,
+                duration: fileData.metadata?.duration || 0,
+                artist: fileData.metadata?.artist || '',
+                album: fileData.metadata?.album || '',
+                title: fileData.metadata?.title || fileData.name
+            };
+            
+            const id = await DB.dfiles.add(fileObj);
+            
+            // Обновляем родительскую папку
+            const parent = await DB.dfiles.get(parentId);
+            if (parent) {
+                if (!parent.children) parent.children = [];
+                parent.children.push(id);
+                await DB.dfiles.update(parentId, {
+                    children: parent.children,
+                    updatedAt: new Date()
+                });
             }
+            
+            return { ...fileObj, id };
         } catch (error) {
-            console.error('Error operation (settings; delete');
-            throw new Error(`Failed to delete setting ${key}: ${error.message}`);
+            console.error('Error adding file:', error);
+            throw error;
         }
     },
 
-    // получить все настройки
-    async getAll() {
-        try {
-            return await DB.settings.toArray();
-        } catch (error) {
-            console.error('Error operation (settings; getAll');
-            throw new Error(`Failed to get all settings`);
+    // Определение типа файла
+    getFileType(mimeType, fileName) {
+        const ext = fileName.split('.').pop().toLowerCase();
+        
+        // По MIME типу
+        if (mimeType) {
+            if (mimeType.startsWith('audio/')) return 'audio';
+            if (mimeType.startsWith('image/')) return 'image';
+            if (mimeType.startsWith('video/')) return 'video';
+            if (mimeType.startsWith('text/')) return 'text';
+        }
+        
+        // По расширению
+        const audioExt = ['mp3', 'wav', 'ogg', 'flac', 'm4a'];
+        const imageExt = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+        const videoExt = ['mp4', 'avi', 'mkv', 'mov', 'wmv'];
+        const textExt = ['txt', 'md', 'json', 'xml', 'html', 'css', 'js'];
+        const archiveExt = ['zip', 'rar', '7z', 'tar', 'gz'];
+        
+        if (audioExt.includes(ext)) {
+            return 'audio';
+        } else if (imageExt.includes(ext)) {
+            return 'image';
+        } else if (videoExt.includes(ext)) {
+            return 'video';
+        } else if (textExt.includes(ext)) {
+            return 'text';
+        } else if (archiveExt.includes(ext)) {
+            return 'archive';
+        } else {
+            return 'file';
         }
     },
+
+    // Удалить элемент (файл или папку)
+    async delete(userId, itemId, recursive = false) {
+        if (!userId) throw new Error('User ID required');
+        if (!itemId) throw new Error('Item ID required');
+        
+        try {
+            const item = await DB.dfiles.get(itemId);
+
+            if (!item) throw new Error('Item not found');   //эл-т не найден
+            if (item.userid !== userId) throw new Error('Access denied');   //эл-т "чужой"
+            if (item.protect) throw new Error('Item is protected'); //эл-т защищен от удаления
+            
+            // Если это папка и recursive = false, проверяем что она пуста
+            if (item.type === 'folder' && !recursive) {
+                const contents = await DB.dfiles
+                    .where('parentid')
+                    .equals(itemId)
+                    .count();
+                
+                if (contents > 0) {
+                    throw new Error('Folder is not empty. Use recursive delete to remove all contents.');
+                }
+            }
+            
+            // Рекурсивное удаление
+            if (item.type === 'folder' && recursive) {
+                const contents = await DB.dfiles
+                    .where('parentid')
+                    .equals(itemId)
+                    .toArray();
+                
+                for (const child of contents) {
+                    await this.delete(userId, child.id, true);
+                }
+            }
+            
+            // Удаляем себя из родительской папки
+            if (item.parentid) {
+                const parent = await DB.dfiles.get(item.parentid);
+                if (parent && parent.children) {
+                    parent.children = parent.children.filter(id => id !== itemId);
+                    await DB.dfiles.update(item.parentid, {
+                        children: parent.children,
+                        updatedAt: new Date()
+                    });
+                }
+            }
+            
+            // Удаляем сам элемент
+            await DB.dfiles.delete(itemId);
+            
+            return { success: true, itemId };
+        } catch (error) {
+            console.error('Error deleting item:', error);
+            throw error;
+        }
+    },
+    
+    // Переименовать элемент
+    async rename(userId, itemId, newName) {
+        if (!userId) throw new Error('User ID required');
+        if (!itemId) throw new Error('Item ID required');
+        if (!newName) throw new Error('New name required');
+        
+        try {
+            const item = await DB.dfiles.get(itemId);
+            if (!item) throw new Error('Item not found');
+            if (item.userid !== userId) throw new Error('Access denied');
+            
+            // Проверяем, нет ли в этой папке элемента с таким именем
+            if (item.parentid) {
+                const existing = await DB.dfiles
+                    .where('[userid+parentid]')
+                    .equals([userId, item.parentid])
+                    .and(i => i.name === newName && i.id !== itemId)
+                    .first();
+                
+                if (existing) {
+                    throw new Error('Item with this name already exists in this folder');
+                }
+            }
+            
+            item.name = newName;
+            item.updatedAt = new Date();
+            
+            await DB.dfiles.update(itemId, {
+                name: newName,
+                updatedAt: item.updatedAt
+            });
+            
+            return { success: true, item };
+        } catch (error) {
+            console.error('Error renaming item:', error);
+            throw error;
+        }
+    },
+    
+    // Переместить элемент
+    async move(userId, itemId, newParentId) {
+        if (!userId) throw new Error('User ID required');
+        if (!itemId) throw new Error('Item ID required');
+        
+        try {
+            const item = await DB.dfiles.get(itemId);
+            if (!item) throw new Error('Item not found');
+            if (item.userid !== userId) throw new Error('Access denied');
+            
+            // Если newParentId не указан или null - перемещаем в корень
+            let targetParentId = newParentId ?? DFile.ROOT_PARENT;
+            
+            if (targetParentId !== DFile.ROOT_PARENT) {
+                const newParent = await DB.dfiles.get(targetParentId);
+                if (!newParent) throw new Error('Target folder not found');
+                if (newParent.userid !== userId) throw new Error('Access denied to target folder');
+                if (newParent.type !== 'folder') throw new Error('Target is not a folder');
+                
+                // Проверяем, не пытаемся ли переместить папку в саму себя
+                if (item.type === 'folder') {
+                    let current = newParent;
+                    while (current && current.id !== DFile.ROOT_PARENT) {
+                        if (current.id === itemId) {
+                            throw new Error('Cannot move folder into itself or its descendant');
+                        }
+                        current = current.parentid ? await DB.dfiles.get(current.parentid) : null;
+                    }
+                }
+            }
+            
+            // Проверяем, нет ли в целевой папке элемента с таким именем
+            const existing = await DB.dfiles
+                .where('[userid+parentid]')
+                .equals([userId, targetParentId])
+                .and(i => i.name === item.name && i.id !== itemId)
+                .first();
+            
+            if (existing) {
+                throw new Error('Item with this name already exists in target folder');
+            }
+            
+            // Удаляем из старой родительской папки
+            if (item.parentid && item.parentid !== DFile.ROOT_PARENT) {
+                const oldParent = await DB.dfiles.get(item.parentid);
+                if (oldParent && oldParent.children) {
+                    oldParent.children = oldParent.children.filter(id => id !== itemId);
+                    await DB.dfiles.update(item.parentid, {
+                        children: oldParent.children,
+                        updatedAt: new Date()
+                    });
+                }
+            }
+            
+            // Добавляем в новую родительскую папку
+            if (targetParentId !== DFile.ROOT_PARENT) {
+                const newParent = await DB.dfiles.get(targetParentId);
+                if (newParent) {
+                    if (!newParent.children) newParent.children = [];
+                    newParent.children.push(itemId);
+                    await DB.dfiles.update(targetParentId, {
+                        children: newParent.children,
+                        updatedAt: new Date()
+                    });
+                }
+            }
+            
+            // Обновляем сам элемент
+            item.parentid = targetParentId;
+            item.updatedAt = new Date();
+            
+            await DB.dfiles.update(itemId, {
+                parentid: targetParentId,
+                updatedAt: item.updatedAt
+            });
+            
+            return { success: true, item };
+        } catch (error) {
+            console.error('Error moving item:', error);
+            throw error;
+        }
+    },
+    
+    // Поиск файлов
+    async search(userId, query, type = null) {
+        if (!userId) throw new Error('User ID required');
+        if (!query) throw new Error('Search query required');
+        
+        try {
+            let collection = DB.dfiles
+                .where('userid')
+                .equals(userId)
+                .and(item => item.name.toLowerCase().includes(query.toLowerCase()));
+            
+            if (type) {
+                collection = collection.and(item => item.type === type);
+            }
+            
+            return await collection.toArray();
+        } catch (error) {
+            console.error('Error searching files:', error);
+            throw error;
+        }
+    },
+    
+    // Получить информацию о файле/папке
+    async getInfo(itemId) {
+        if (!itemId) throw new Error('Item ID required');
+        
+        try {
+            const item = await DB.dfiles.get(itemId);
+            if (!item) throw new Error('Item not found');
+            
+            // Для папок считаем общий размер и количество элементов
+            if (item.type === 'folder') {
+                const contents = await DB.dfiles
+                    .where('parentid')
+                    .equals(itemId)
+                    .toArray();
+                
+                const totalSize = contents.reduce((sum, child) => sum + (child.size || 0), 0);
+                const fileCount = contents.filter(c => c.type !== 'folder').length;
+                const folderCount = contents.filter(c => c.type === 'folder').length;
+                
+                return {
+                    ...item,
+                    totalSize,
+                    fileCount,
+                    folderCount,
+                    itemCount: contents.length
+                };
+            }
+            
+            return item;
+        } catch (error) {
+            console.error('Error getting item info:', error);
+            throw error;
+        }
+    }
 };
+// export const settingsTable = {
+//     // сохранение настройки
+//     async save(key, value) {
+//         try {
+//             const existing = await DB.settings.where('key').equals(key).first();
+
+//             if (existing) {
+//                 await DB.settings.update(existing.id, {
+//                     value: value,
+//                     updatedAt: new Date(),
+//                 });
+//                 return existing.id;
+//             } else {
+//                 return await DB.settings.add(new Setting(key, value));
+//             }
+//         } catch (error) {
+//             console.error('Error operation (settings; save');
+//             throw new Error(`Failed to save setting ${key}: ${error.message}`);
+//         }
+//     },
+
+//     // получить настройку
+//     async get(key, defaultVal = null) {
+//         try {
+//             const findSetting = DB.settings.where('key').equals(key).first();
+
+//             return findSetting ? findSetting.value : defaultVal;
+//         } catch (error) {
+//             console.error('Error operation (settings; get');
+//             throw new Error(`Failed to get setting ${key}: ${error.message}`);
+//         }
+//     },
+
+//     // удалить настройку
+//     async delete(key) {
+//         try {
+//             const findSetting = await DB.settings.where('key').equals(key).first();
+
+//             if (findSetting) {
+//                 return await DB.settings.delete(findSetting.id);
+//             } else {
+//                 return null;
+//             }
+//         } catch (error) {
+//             console.error('Error operation (settings; delete');
+//             throw new Error(`Failed to delete setting ${key}: ${error.message}`);
+//         }
+//     },
+
+//     // получить все настройки
+//     async getAll() {
+//         try {
+//             return await DB.settings.toArray();
+//         } catch (error) {
+//             console.error('Error operation (settings; getAll');
+//             throw new Error(`Failed to get all settings`);
+//         }
+//     },
+// };
 
 
 // -=-=-=-=-=-=-Служебное-=-=-=-=-=-=-
@@ -1245,7 +1834,7 @@ export const settingsTable = {
 // инициализация БД с тестовыми данными
 export async function initDatabase() {
     try {
-        // проверка, пустая ли база
+        // проверка, пустая ли таблица users
         const userCount = await usersTable.count();
 
         if (userCount === 0) {
@@ -1270,21 +1859,21 @@ export async function initDatabase() {
             console.log('Default user created.');
         }
 
-        // инициализация базовых настроек 
-        const defaultSettings = [
-            ['theme', 'dark'],
-            ['avatarDefault', 'cat'],
-        ];
+        // // инициализация базовых настроек 
+        // const defaultSettings = [
+        //     ['theme', 'dark'],
+        //     ['avatarDefault', 'cat'],
+        // ];
 
-        for (const [key, value] of defaultSettings) {
-            const existing = await settingsTable.get(key);
+        // for (const [key, value] of defaultSettings) {
+        //     const existing = await settingsTable.get(key);
 
-            if (existing === null) {
-                await settingsTable.set(key, value);
-            }
-        }
+        //     if (existing === null) {
+        //         await settingsTable.set(key, value);
+        //     }
+        // }
 
-        console.log('Database initialized successfully');
+        // console.log('Database initialized successfully');
         return true;
     } catch (error) {
         console.error('Error initializing DB:', error);
@@ -1300,7 +1889,7 @@ export async function clearDatabase() {
     try {
         await Promise.all([
             DB.users.clear(),
-            DB.settings.clear()
+            // DB.settings.clear()
         ]);
         console.log('Database cleared');
     } catch (error) {
@@ -1336,9 +1925,10 @@ export { DB, IDBWindows, activeWindowId };
 export default {
     DB,
     User,
+    DFile,
     Window,
     usersTable,
-    settingsTable,
+    // settingsTable,
     initDatabase,
     clearDatabase
 };

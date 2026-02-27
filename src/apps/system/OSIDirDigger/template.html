@@ -1,0 +1,94 @@
+<div class="osidirdigger-app">
+    <!-- Верхнее меню -->
+    <div class="osidirdigger-tmenu">
+        <div class="osidirdigger-tmenu-btnpanel d-flex justify-content-center align-items-center">
+            <input type="file" ref="fileInput" multiple @change="handleFileUpload" style="display: none">
+            <span :title="LangData.uploadfile" @click="uploadFiles" class="text-ico-green"><i class="bi-file-arrow-up-fill me-1"></i> {{LangData.uploadfile}}</span>
+            <span :title="LangData.createnewfolder" @click="createNewFolder" class="text-ico-green"><i class="bi-folder-plus me-1"></i> {{LangData.newfolder}}</span>
+            <span @click="loadRootFolder" class="text-ico-info"><i class="bi-hdd-fill me-1"></i> {{LangData.home}}</span>
+        </div>
+        
+        <!-- Хлебные крошки -->
+        <div class="osidirdigger-tmenu-breadpanel d-flex align-items-center">
+            <span v-for="(item, index) in currentPath" :key="item.id" class="breadcrumb-item">
+                <a href="#" @click.prevent="navigateTo(item)" :class="{ 'current': index === currentPath.length - 1 }">
+                    {{ item.name }}
+                </a>
+                <span v-if="index < currentPath.length - 1" class="separator"> / </span>
+            </span>
+        </div>        
+    </div>
+    
+    <!-- Рабочая область -->
+    <div class="osidirdigger-worktable">
+        <!-- Левое меню (быстрый доступ) -->
+        <div class="osidirdigger-wtmenu">
+            <div class="quick-access">
+                <div class="quick-item" @click="loadRootFolder">
+                    <span class="bi-hdd-fill"></span> {{LangData.home}}
+                </div>
+                <div class="quick-item" @click="showImagesOnly">
+                    <span class="bi-image-fill"></span> {{ LangData.images}}
+                </div>
+                <div class="quick-item" @click="showAudioOnly">
+                    <span class="bi-file-music-fill"></span> {{LangData.audio}}
+                </div>
+                <div class="quick-item" @click="showTextOnly">
+                    <span class="bi-file-text-fill"></span> {{ LangData.text}}
+                </div>
+                
+            </div>
+        </div>
+        
+        <!-- Таблица с файлами -->
+        <div class="osidirdigger-wt-table">
+            <div class="d-flex flex-wrap">
+                <div v-for="item in filteredContents" :key="item.id" class="osidirdigger-file-elem" @click="selectItem(item)" @dblclick="openItem(item)"
+                     :class="{ 'selected': selectedItem?.id === item.id, 'folder': item.type === 'folder' }">
+                    <!-- Для изображений показываем превью -->
+                    <div v-if="item.type === 'image' && getImageUrl(item)" class="file-preview">
+                        <img :src="getImageUrl(item)" :alt="item.name" class="preview-img">
+                    </div>                    
+                    <!-- Для остальных - иконку -->
+                    <div v-else class="file-icon">{{ getFileIcon(item) }}</div>                    
+                    <!-- Имя файла -->
+                    <div class="file-name">{{ truncateName(item.name) }}</div>                    
+                    <!-- Размер -->
+                    <div class="file-size">{{ formatSize(item.size) }}</div>                    
+                    <!-- Дополнительная информация -->
+                    <div v-if="item.type === 'image'" class="file-meta">
+                        {{ item.width }}x{{ item.height }}
+                    </div>
+                    <div v-if="item.type === 'audio'" class="file-meta">
+                        {{ item.artist || 'Неизвестный' }}
+                    </div>
+                </div>
+                
+                <!-- Сообщение, если папка пуста -->
+                <div v-if="filteredContents.length === 0" class="empty-folder">
+                    {{ LangData.empty || 'Папка пуста' }}
+                </div>
+            </div>            
+        </div>
+    </div>
+    
+    <!-- Нижнее меню (статус бар) -->
+    <div class="osidirdigger-bmenu d-flex align-items-center">
+        <span v-if="selectedItem">
+            {{ selectedItem.name }} | 
+            {{ formatSize(selectedItem.size) }} |
+            <span v-if="selectedItem.type === 'image'">
+                {{ selectedItem.width }}x{{ selectedItem.height }}
+            </span>
+            <span v-else-if="selectedItem.type === 'audio'">
+                {{ selectedItem.artist }} - {{ selectedItem.title }}
+            </span>
+            <span v-else>
+                {{ new Date(selectedItem.updatedAt).toLocaleString() }}
+            </span>
+        </span>
+        <span v-else>
+            {{ filteredContents.length }} {{ LangData.items || 'элементов' }}
+        </span>
+    </div>
+</div>
