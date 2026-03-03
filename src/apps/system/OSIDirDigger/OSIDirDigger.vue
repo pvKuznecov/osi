@@ -20,50 +20,176 @@
                 contents: [],
                 selectedItem: null,
                 fileInput: null,
-                filterType: null, // для фильтрации по типу
+                filterType: null,       // для фильтрации по типу
+                visibleMode: 'tile',    //tile || table
+                contentSortMode: 'asc',    // 'asc' или 'desc' (вместо 'up'/'down')
+                contentSortKey: 'name',
+                sortKeys: ['name', 'type', 'extension', 'size', 'createdAt', 'updatedAt'],
+                // Кэш для ObjectURL чтобы избежать утечек памяти
+                objectUrls: new Map(),
+                selectedRows: new Set(),
+                allSelected: false,
+                contextMenu: {
+                    visible: false,
+                    x: 0,
+                    y: 0,
+                    item: null
+                },
             }
         },
 
         computed: {
             // Отфильтрованное содержимое
             filteredContents() {
-                if (!this.filterType) return this.contents;
-                return this.contents.filter(item => item.type === this.filterType);
+                let items = [...this.contents];
+                
+                // Фильтрация по типу
+                if (this.filterType) items = items.filter(item => item.type === this.filterType);
+                
+                // Сортировка
+                return this.sortItems(items);
             },
         },
 
         methods: {
+            showContextMenu(event, item) {
+                this.contextMenu = {
+                    visible: true,
+                    x: event.clientX,
+                    y: event.clientY,
+                    item: item
+                };
+                
+                // Закрываем меню при клике вне его
+                setTimeout(() => {
+                    document.addEventListener('click', this.closeContextMenu, { once: true });
+                }, 0);
+            },
+
+            // Скачивание файла
+            async downloadFile(item) {
+                try {
+                    // Получаем полную информацию о файле из БД
+                    const fileInfo = await dFiles.getInfo(item.id);
+                    
+                    if (!fileInfo || !fileInfo.blob) throw new Error('Файл не найден или не содержит данных');
+                    
+                    // Создаем URL из Blob
+                    const url = window.URL.createObjectURL(fileInfo.blob);                    
+                    // Создаем временную ссылку для скачивания
+                    const link = document.createElement('a');
+                    
+                    link.href = url;
+                    link.download = fileInfo.name; // Имя файла для скачивания
+                    
+                    // Добавляем в DOM, кликаем и удаляем
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Освобождаем URL
+                    window.URL.revokeObjectURL(url);
+                    
+                    // Показываем уведомление об успехе
+                    this.showMessage(`Файл "${fileInfo.name}" скачивается...`, 'success');
+                    
+                } catch (error) {
+                    console.error('Error downloading file:', error);
+                    this.showError(`Ошибка при скачивании: ${error.message}`);
+                }
+            },
+    
+            // Показать сообщение (можно заменить на вашу систему уведомлений)
+            showMessage(message, type = 'info') {
+                console.log(`[${type}] ${message}`);
+                // Можно эмиттить событие для глобального уведомления
+                this.$emit('notification', { message, type });
+            },
+            
+            closeContextMenu() { this.contextMenu.visible = false; },
+
+            sortBy(key) {
+                if (this.contentSortKey === key) {
+                    this.toggleSortMode();
+                } else {
+                    this.contentSortKey = key;
+                    this.contentSortMode = 'asc';
+                }
+            },
+    
+            getSortIcon(key) {
+                if (this.contentSortKey !== key) return '';
+
+                return this.contentSortMode === 'asc' ? 'bi-sort-up' : 'bi-sort-down';
+            },
+    
+            toggleSelectRow(item) {
+                if (this.selectedRows.has(item.id)) {
+                    this.selectedRows.delete(item.id);
+                } else {
+                    this.selectedRows.add(item.id);
+                }
+            },
+            
+            selectAll(event) {
+                if (event.target.checked) {
+                    this.filteredContents.forEach(item => this.selectedRows.add(item.id));
+                } else {
+                    this.selectedRows.clear();
+                }
+            },
+
+            // Эмиттить событие для глобального обработчика
+            showError(message) { this.$emit('error', message); },
+            
             // Загрузка корневой папки
             async loadRootFolder() {
+                this.treeLoading = true;
                 try {
                     const Root = await dFiles.getRoot(this.USERID);
+
                     this.currentFolder = Root;
                     this.filterType = null;
                     
                     await this.loadFolderContents(Root.id);
                     this.currentPath = [Root];
                     this.selectedItem = null;
+
+                    // Строим дерево папок рекурсивно
+                    await this.buildFolderTree();
+                    
                 } catch (error) {
-                    console.error('Error loading root:', error);
-                    alert('Ошибка загрузки корневой папки');
+                    this.showError(`Ошибка загрузки: ${error.message}`);
+                } finally {
+                    this.treeLoading = false;
+                }
+            },            
+
+            // Получение информации о файле/папке
+            async getFileInfo(itemId) {
+                try {
+                    // Если передан объект с id, используем его
+                    const id = typeof itemId === 'object' ? itemId.id : itemId;
+                    return await dFiles.getInfo(id);
+                } catch (error) {
+                    console.error('Error getting file info:', error);
+                    this.showError(`Ошибка получения данных: ${error.message}`);
+                    return null;
                 }
             },
 
-            // Загрузка содержимого папки
-            // async loadFolderContents(folderId) {
-            //     try {
-            //         const items = await dFiles.getFolderContents(this.USERID, folderId);
-            //         // Оборачиваем в DFile для доступа к методам
-            //         this.contents = items.map(item => new DFile(item));
-            //     } catch (error) {
-            //         console.error('Error loading contents:', error);
-            //     }
-            // },
-            // async loadFolderContents(folderId) {
-            //     const items = await dFiles.getFolderContents(this.USERID, folderId);
-            //     // Оборачиваем в DFile для доступа к геттерам
-            //     this.contents = items.map(item => new DFile(item));
-            // },
+            Converter_dateTime(inpDate) {
+                if (!inpDate) return '';
+                
+                const date = new Date(inpDate);
+                return date.toLocaleString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            },
 
             // Навигация по папкам
             async navigateTo(folder) {
@@ -101,11 +227,7 @@
             },
 
             // Загрузка файлов
-            uploadFiles() {
-                if (this.fileInput) {
-                    this.fileInput.click();
-                }
-            },
+            uploadFiles() { if (this.fileInput) this.fileInput.click(); },
 
             async handleFileUpload(event) {
                 const files = Array.from(event.target.files);
@@ -142,6 +264,7 @@
                 if (file.type.startsWith('image/')) {
                     return new Promise((resolve) => {
                         const img = new Image();
+
                         img.onload = () => {
                             resolve({
                                 width: img.width,
@@ -158,9 +281,7 @@
             },
 
             // Выбор элемента
-            selectItem(item) {
-                this.selectedItem = item;
-            },
+            selectItem(item) { this.selectedItem = item; },
 
             // Открытие элемента (папки или файла)
             async openItem(item) {
@@ -186,23 +307,11 @@
             getAppForFile(file) {
                 const appMap = {
                     'audio': 'osimplayer',
-                    'text': 'ositexteditor',
+                    // 'text': 'ositexteditor',
                     'image': 'osipicta'
                 };
                 return appMap[file.type] || null;
             },
-
-            // // Получение иконки для файла
-            // getFileIcon(item) {
-            //     if (item.type === 'folder') return '📁';
-            //     if (item.type === 'audio') return '🎵';
-            //     if (item.type === 'image') return '🖼️';
-            //     if (item.type === 'video') return '🎬';
-            //     if (item.type === 'text') return '📝';
-            //     if (item.type === 'app') return '⚙️';
-            //     if (item.type === 'archive') return '📦';
-            //     return '📄';
-            // },
 
             // Обрезка длинных имен
             truncateName(name, maxLength = 15) {
@@ -226,19 +335,11 @@
                     c.type === 'folder' && c.name === 'Documents'
                 );
                 
-                if (docsFolder) {
-                    await this.navigateTo(docsFolder);
-                }
+                if (docsFolder) await this.navigateTo(docsFolder);
             },
 
-            // Для отображения изображения
-             getImageUrl(item) {
-                if (item.blob) {
-                    // Создаем URL из Blob
-                    return URL.createObjectURL(item.blob);
-                }
-                return null;
-            },
+            // Для отображения изображения (Используем закэшированный URL)
+            getImageUrl(item) { return this.objectUrls.get(item.id) || null; },
             
             // Освобождаем URL когда они больше не нужны
             revokeImageUrl(item) {
@@ -248,59 +349,161 @@
                 }
             },
             
-            // Загрузка содержимого папки с обработкой URL
+            // Обновленная загрузка содержимого папки
             async loadFolderContents(folderId) {
-                const items = await dFiles.getFolderContents(this.USERID, folderId);
-                
-                // Освобождаем старые URL
-                if (this.contents) {
-                    this.contents.forEach(item => this.revokeImageUrl(item));
+                try {
+                    // Очищаем старые ObjectURL
+                    this.objectUrls.forEach((url) => URL.revokeObjectURL(url));
+                    this.objectUrls.clear();
+                    
+                    const items = await dFiles.getFolderContents(this.USERID, folderId);
+                    
+                    this.contents = items.map(item => {
+                        const dFile = new DFile(item);
+                        
+                        // Создаем URL только для изображений и сохраняем в Map
+                        if (dFile.type === 'image' && dFile.blob) {
+                            const url = URL.createObjectURL(dFile.blob);
+                            this.objectUrls.set(dFile.id, url);
+                        }
+                        
+                        return dFile;
+                    });
+                    
+                    this.selectedItem = null;
+                } catch (error) {
+                    this.showError('Ошибка загрузки содержимого папки');
                 }
-                
-                // Оборачиваем в DFile и создаем URL для изображений
-                this.contents = items.map(item => {
-                    const dFile = new DFile(item);
-                    if (dFile.type === 'image' && dFile.blob) {
-                        // Сохраняем URL для превью
-                        dFile._objectUrl = URL.createObjectURL(dFile.blob);
-                    }
-                    return dFile;
-                });
             },
             
             // Получение иконки в зависимости от типа
             getFileIcon(item) {
-                const iconMap = {
-                    folder: '📁',
-                    audio: '🎵',
-                    text: '📝',
-                    image: '🖼️',
-                    video: '🎬',
-                    app: '⚙️',
-                    archive: '📦',
-                    file: '📄'
+                const iconClassMap = {
+                    folder: 'bi-folder-fill',
+                    image: 'bi-image-fill',
+                    audio: 'bi-file-music-fill',
+                    archive: 'bi-file-earmark-zip-fill',
+                    video: 'bi-film',
+                    file: 'bi-file-earmark-fill',
+                    app: 'bi-gear-wide-connected'
                 };
-                return iconMap[item.type] || '📄';
+                
+                return iconClassMap[item] || '';
             },
             
-            // Фильтрация содержимого (для левого меню)
-            showImagesOnly() {
-                this.filterType = 'image';
-            },
-            
-            showTextOnly() {
-                this.filterType = 'text';
+            // сброс фильтра отображения
+            showAll() { this.filterType = null; },
+            // Фильтрация содержимого
+            showImagesOnly() { this.filterType = 'image'; },            
+            showTextOnly() { this.filterType = 'text'; },
+            showAudioOnly() { this.filterType = 'audio'; },
+
+            // смена режима отображения содержимого папки
+            Chng_visibleMode() { this.visibleMode = (this.visibleMode == 'tile') ? 'table' : 'tile'; },
+
+            // получить строковое наименование типа
+            Get_strFileTypeName(typeVal) {
+                switch(typeVal) {
+                    case 'folder':
+                        return this.LangData.typefilefolder;
+                    case 'audio':
+                        return this.LangData.typefileaudion;
+                    case 'image':
+                        return this.LangData.typefileimage;
+                    case 'video':
+                        return this.LangData.typefilevideo;
+                    case 'archive':
+                        return this.LangData.typefilearchive;
+                    case 'file':
+                        return this.LangData.typefilefile;
+                    default:
+                        return typeVal;
+                }
             },
 
-            showAudioOnly() {
-                this.filterType = 'audio';
+            // функция сортировки
+            sortItems(items) {
+                if (!items.length) return items;
+                
+                // Создаем копию для избежания мутаций
+                const itemsCopy = [...items];
+                const sortKey = this.contentSortKey;
+                const sortMode = this.contentSortMode;
+                const multiplier = sortMode === 'asc' ? 1 : -1;
+                
+                return itemsCopy.sort((a, b) => {
+                    // Папки всегда сверху (кроме сортировки по имени)
+                    if (sortKey !== 'name') {
+                        if (a.type === 'folder' && b.type !== 'folder') return -1;
+                        if (a.type !== 'folder' && b.type === 'folder') return 1;
+                    }
+                    
+                    let aVal = this.getSortValue(a, sortKey);
+                    let bVal = this.getSortValue(b, sortKey);
+                    
+                    // Естественная сортировка для строк
+                    if (typeof aVal === 'string' && typeof bVal === 'string') {
+                        return this.naturalCompare(aVal, bVal) * multiplier;
+                    }
+                    
+                    // Числовое сравнение
+                    if (aVal < bVal) return -1 * multiplier;
+                    if (aVal > bVal) return 1 * multiplier;
+                    return 0;
+                });
             },
+
+            getSortValue(item, key) {
+                if (key === 'createdAt' || key === 'updatedAt') return item[key] ? new Date(item[key]).getTime() : 0;                
+                if (key === 'name') return item.name?.toLowerCase() || '';                
+                if (key === 'size') return item.type === 'folder' ? -1 : (item.size || 0);
+                
+                return item[key] || '';
+            },
+            
+            naturalCompare(a, b) {
+                // Поддержка чисел в строках (file1, file2, file10)
+                return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+            },
+
+            // Переключение направления сортировки
+            toggleSortMode() { this.contentSortMode = this.contentSortMode === 'asc' ? 'desc' : 'asc'; },
+
+            // Применение сортировки (вызывается при изменении ключа)
+            applySorting() {
+                // computed свойство filteredContents обновится автоматически
+                // Этот метод можно использовать для дополнительной логики
+                console.log(`Sorting by ${this.contentSortKey} in ${this.contentSortMode} order`);
+            },
+            
+            // // переименовать файл
+            // renameItem(inpVal) {},
+
+            // удалить файл
+            async deleteItem(inpVal) {
+                if (confirm(`Удалить ${inpVal.name}?`)) {
+                    try {
+                        await dFiles.delete(this.USERID, inpVal.id, true);
+                        await this.navigateTo(this.currentFolder);
+                    } catch (error) {
+                        this.showError('Ошибка при удалении');
+                    }
+                }               
+            },
+
+            // // копировать файл
+            // copyItem(inpVal) {},
+
+            // // вырезать файл
+            // cutItem(inpVal) {},
             
             // Очистка перед уничтожением компонента
             beforeDestroy() {
-                if (this.contents) {
-                    this.contents.forEach(item => this.revokeImageUrl(item));
-                }
+                // Очищаем все ObjectURL
+                this.objectUrls.forEach((url) => {
+                    URL.revokeObjectURL(url);
+                });
+                this.objectUrls.clear();
             }
         },
 

@@ -26,31 +26,58 @@
             <div class="quick-access">
                 <div class="quick-item" @click="loadRootFolder">
                     <span class="bi-hdd-fill"></span> {{LangData.home}}
-                </div>
-                <div class="quick-item" @click="showImagesOnly">
-                    <span class="bi-image-fill"></span> {{ LangData.images}}
-                </div>
-                <div class="quick-item" @click="showAudioOnly">
-                    <span class="bi-file-music-fill"></span> {{LangData.audio}}
-                </div>
-                <div class="quick-item" @click="showTextOnly">
-                    <span class="bi-file-text-fill"></span> {{ LangData.text}}
-                </div>
-                
+                </div>                
             </div>
         </div>
         
         <!-- Таблица с файлами -->
         <div class="osidirdigger-wt-table">
-            <div class="d-flex flex-wrap">
-                <div v-for="item in filteredContents" :key="item.id" class="osidirdigger-file-elem" @click="selectItem(item)" @dblclick="openItem(item)"
-                     :class="{ 'selected': selectedItem?.id === item.id, 'folder': item.type === 'folder' }">
+            <!-- панель фильтров -->
+            <div class="osidirdigger-wt-filterarea d-flex flex-wrap">
+                <div class="osidirdigger-wt-filterelem ms-3 me-3">
+                    <span :class="(visibleMode == 'tile') ? 'bi-table' : 'bi-tablet-fill'" @click="Chng_visibleMode()"></span>
+                </div>
+                <div class="osidirdigger-wt-separator"></div>
+                <div class="osidirdigger-wt-filterelem me-1">
+                    <span class="me-2" :class="[(contentSortMode == 'asc') ? 'bi-caret-up-square-fill' : 'bi-caret-down-square-fill', 'sort-indicator']" 
+                        @click="toggleSortMode()" :title="contentSortMode == 'asc' ? 'По возрастанию' : 'По убыванию'">
+                    </span>
+                    <select name="sort-select" id="sort-select" v-model="contentSortKey" @change="applySorting"class="sort-select">
+                        <option v-for="opt in sortKeys" :key="opt" :value="opt">
+                            {{LangData[opt] || opt}}
+                        </option>
+                    </select>
+                </div>
+                <div class="osidirdigger-wt-separator"></div>
+                <span style="color: rgb(41, 41, 41); margin: 3px 5px;">Фильтр отображения:</span>
+                <div class="osidirdigger-wt-filterelem" @click="showAll" :class="{ 'osidirdigger-wt-selectfilter': !filterType}">Все</div>
+                <div class="osidirdigger-wt-separator"></div>
+                <div class="osidirdigger-wt-filterelem" @click="showImagesOnly" :class="{ 'osidirdigger-wt-selectfilter': filterType == 'image' }">
+                    <span class="bi-image-fill"></span> {{ LangData.images}}
+                </div>
+                <div class="osidirdigger-wt-separator"></div>
+                <div class="osidirdigger-wt-filterelem" @click="showAudioOnly" :class="{ 'osidirdigger-wt-selectfilter': filterType == 'audio' }">
+                    <span class="bi-file-music-fill"></span> {{LangData.audio}}
+                </div>
+                <div class="osidirdigger-wt-separator"></div>
+                <div class="osidirdigger-wt-filterelem" @click="showTextOnly" :class="{ 'osidirdigger-wt-selectfilter': filterType == 'text' }">
+                    <span class="bi-file-text-fill"></span> {{ LangData.text}}
+                </div>
+                <div class="osidirdigger-wt-separator"></div>                
+            </div>
+            <div v-if="visibleMode == 'tile'" class="d-flex flex-wrap">
+                <div v-for="item in filteredContents" 
+                    :key="item.id" class="osidirdigger-file-elem" 
+                    @click="selectItem(item)" 
+                    @dblclick="openItem(item)"
+                    @contextmenu.prevent="showContextMenu($event, item)"
+                    :class="{ 'selected': selectedItem?.id === item.id, 'folder': item.type === 'folder' }">
                     <!-- Для изображений показываем превью -->
                     <div v-if="item.type === 'image' && getImageUrl(item)" class="file-preview">
                         <img :src="getImageUrl(item)" :alt="item.name" class="preview-img">
                     </div>                    
                     <!-- Для остальных - иконку -->
-                    <div v-else class="file-icon">{{ getFileIcon(item) }}</div>                    
+                    <div v-else class="file-icon" :class="getFileIcon(item.type)"></div>                    
                     <!-- Имя файла -->
                     <div class="file-name">{{ truncateName(item.name) }}</div>                    
                     <!-- Размер -->
@@ -63,12 +90,71 @@
                         {{ item.artist || 'Неизвестный' }}
                     </div>
                 </div>
+                <!-- Контекстное меню -->
+                <div v-if="contextMenu.visible" class="context-menu" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
+                    <div class="context-menu-item" @click="downloadFile(contextMenu.item)">
+                        <i class="bi-cloud-arrow-down-fill me-2"></i> Скачать
+                    </div>
+                    <!-- <div class="context-menu-item" @click="renameItem(contextMenu.item)">
+                        <i class="bi-pencil me-2"></i> Переименовать
+                    </div> -->
+                    <div class="context-menu-item" @click="deleteItem(contextMenu.item)">
+                        <i class="bi-trash me-2"></i> Удалить
+                    </div>
+                    <!-- <div class="context-menu-item" @click="copyItem(contextMenu.item)">
+                        <i class="bi-files me-2"></i> Копировать
+                    </div> -->
+                    <!-- <div class="context-menu-item" @click="cutItem(contextMenu.item)">
+                        <i class="bi-scissors me-2"></i> Вырезать
+                    </div> -->
+                    
+                </div>
                 
                 <!-- Сообщение, если папка пуста -->
                 <div v-if="filteredContents.length === 0" class="empty-folder">
                     {{ LangData.empty || 'Папка пуста' }}
                 </div>
-            </div>            
+            </div>
+            <div v-else class="d-flex flex-wrap">
+                <table class="osidirdigger-wt-filetable">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" @change="selectAll" v-model="allSelected"></th>
+                            <th @click="sortBy('name')" class="sortable">
+                                {{LangData.name}}
+                                <span v-if="contentSortKey === 'name'" :class="getSortIcon('name')"></span>
+                            </th>
+                            <th @click="sortBy('type')" class="sortable">
+                                {{LangData.type}}
+                                <span v-if="contentSortKey === 'type'" :class="getSortIcon('type')"></span>
+                            </th>
+                            <th>{{LangData.extension}}</th>
+                            <th>{{LangData.size}}</th>
+                            <th>{{LangData.private}}</th>
+                            <th>{{LangData.protected}}</th>
+                            <th>{{LangData.created}}</th>
+                            <th>{{LangData.updated}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in filteredContents" :key="item.id" @click="toggleSelectRow(item)" :class="{ 'selected-row': selectedRows.has(item.id) }">
+                            <td><input type="checkbox" v-model="selectedRows" :value="item.id" @click.stop></td>
+                            <td>
+                                <span class="me-2" :class="getFileIcon(item.type)"></span>
+                                <span>{{item.name}}</span>
+                            </td>
+                            <td>{{Get_strFileTypeName(item.type)}}</td>
+                            <td>{{item.extension}}</td>
+                            <td>{{(item.type !== 'folder') ? item.size : ''}}</td>
+                            <td><span :class="(item.private) ? 'bi-person-fill-lock' : ''"></span></td>
+                            <td><span :class="(item.protect) ? 'bi-lock-fill' : 'bi-unlock-fill'"></span></td>
+                            <td>{{Converter_dateTime(item.createdAt)}}</td>
+                            <td>{{Converter_dateTime(item.updatedAt)}}</td>
+                            
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     
