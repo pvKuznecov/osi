@@ -1341,13 +1341,13 @@ export const dFiles = {
             let RootFolder = await DB.dfiles
                 .where('[userid+parentid]')
                 .equals([userId, DFile.ROOT_PARENT])
-                .and(item => item.type === 'folder' && item.name === 'root')
+                .and(item => item.type === 'folder' && item.name === 'core')
                 .first();
             
             // корня нет - создаем
             if (!RootFolder) {
                 RootFolder = new DFile({
-                    name: 'root',
+                    name: 'core',
                     userid: userId,
                     parentid: DFile.ROOT_PARENT,
                     type: 'folder',
