@@ -1,22 +1,35 @@
+<div v-if="operFormRename && renameTarget" class="osidirdigger-rename-area" @click="CloseForm_renameItem()">
+    <div class="osidirdigger-rename-form" @click.stop>
+        <div style="float: right; margin: 5px 10px;">
+            <div class="btn-exit bi-x-square-fill" @click="CloseForm_renameItem()"></div>
+        </div>
+        <h3>Переименовать</h3>
+        <input type="text" v-model="renameTarget_newName" autofocus  @keyup.enter="renameItem()">
+        <div class="d-flex justify-content-center align-items-center mt-2 osidirdigger-rename-bbuttons">
+            <span class="text-ico-green" @click="renameItem()">Применить</span>
+            <span @click="CloseForm_renameItem()" class="text-ico-red">Отмена</span>
+        </div>
+    </div>
+</div>
 <div class="osidirdigger-app">
     <!-- Верхнее меню -->
     <div class="osidirdigger-tmenu">
         <div class="osidirdigger-tmenu-btnpanel d-flex justify-content-center align-items-center">
             <input type="file" ref="fileInput" multiple @change="handleFileUpload" style="display: none">
             <span :title="LangData.uploadfile" @click="uploadFiles" class="text-ico-green"><i class="bi-file-arrow-up-fill me-1"></i> {{LangData.uploadfile}}</span>
-            <span :title="LangData.createnewfolder" @click="createNewFolder" class="text-ico-green"><i class="bi-folder-plus me-1"></i> {{LangData.newfolder}}</span>
+            <span :title="LangData.createnewfolder" @click="createNewFolder" class="text-ico-green">
+                <i class="bi-folder-plus me-1"></i> {{LangData.newfolder}}
+            </span>
             <span @click="loadRootFolder" class="text-ico-info"><i class="bi-hdd-fill me-1"></i> {{LangData.home}}</span>
         </div>
-        
         <!-- Хлебные крошки -->
-        <div class="osidirdigger-tmenu-breadpanel d-flex align-items-center">
-            <span v-for="(item, index) in currentPath" :key="item.id" class="breadcrumb-item">
-                <a href="#" @click.prevent="navigateTo(item)" :class="{ 'current': index === currentPath.length - 1 }">
-                    {{ item.name }}
-                </a>
-                <span v-if="index < currentPath.length - 1" class="separator"> / </span>
-            </span>
-        </div>        
+        <div class="osidirdigger-tmenu-breadpanel">
+            <ul class="breadcrumb-ul" ref="breadcrumbList">
+                <li v-for="(item, index) in currentPath" :key="item.id">
+                    <a href="#" @click.prevent="navigateTo(item)" :class="{ 'current': index === currentPath.length - 1 }">{{ item.name }}</a>
+                </li>
+            </ul>
+        </div>
     </div>
     
     <!-- Рабочая область -->
@@ -26,7 +39,12 @@
             <div class="quick-access">
                 <div class="quick-item" @click="loadRootFolder">
                     <span class="bi-hdd-fill"></span> {{LangData.home}}
-                </div>                
+                </div>
+                <ul>
+                    <li v-for="ftElem in foldersTree" class="quick-item" @click="openSubMainFolder(ftElem)">
+                        <span class="bi-folder"></span> {{ftElem.name}}
+                    </li>
+                </ul>
             </div>
         </div>
         
@@ -34,7 +52,11 @@
         <div class="osidirdigger-wt-table">
             <!-- панель фильтров -->
             <div class="osidirdigger-wt-filterarea d-flex flex-wrap">
-                <div class="osidirdigger-wt-filterelem ms-3 me-3">
+                <div v-if="currentPath && currentPath.length > 1" class="osidirdigger-wt-filterelem ms-3 me-1" @click="ToBackFolder()" title="Вернуться к предыдущей папке">
+                    <span class="bi bi-chevron-double-left"></span>
+                </div>
+                <div v-if="currentPath && currentPath.length > 1" class="osidirdigger-wt-separator"></div>
+                <div class="osidirdigger-wt-filterelem ms-2 me-1">
                     <span :class="(visibleMode == 'tile') ? 'bi-table' : 'bi-tablet-fill'" @click="Chng_visibleMode()"></span>
                 </div>
                 <div class="osidirdigger-wt-separator"></div>
@@ -42,26 +64,21 @@
                     <span class="me-2" :class="[(contentSortMode == 'asc') ? 'bi-caret-up-square-fill' : 'bi-caret-down-square-fill', 'sort-indicator']" 
                         @click="toggleSortMode()" :title="contentSortMode == 'asc' ? 'По возрастанию' : 'По убыванию'">
                     </span>
-                    <select name="sort-select" id="sort-select" v-model="contentSortKey" @change="applySorting"class="sort-select">
-                        <option v-for="opt in sortKeys" :key="opt" :value="opt">
-                            {{LangData[opt] || opt}}
-                        </option>
+                    <select name="sort-select" id="sort-select" v-model="contentSortKey" @change="applySorting" class="sort-select">
+                        <option v-for="opt in sortKeys" :key="opt" :value="opt">{{LangData[opt] || opt}}</option>
                     </select>
                 </div>
                 <div class="osidirdigger-wt-separator"></div>
                 <span style="color: rgb(41, 41, 41); margin: 3px 5px;">Фильтр отображения:</span>
                 <div class="osidirdigger-wt-filterelem" @click="showAll" :class="{ 'osidirdigger-wt-selectfilter': !filterType}">Все</div>
-                <div class="osidirdigger-wt-separator"></div>
-                <div class="osidirdigger-wt-filterelem" @click="showImagesOnly" :class="{ 'osidirdigger-wt-selectfilter': filterType == 'image' }">
-                    <span class="bi-image-fill"></span> {{ LangData.images}}
+                <div class="osidirdigger-wt-filterelem" @click="showImagesOnly" :class="{ 'osidirdigger-wt-selectfilter': filterType == 'image' }" :title="LangData.images">
+                    <span class="bi-image-fill"></span>
                 </div>
-                <div class="osidirdigger-wt-separator"></div>
-                <div class="osidirdigger-wt-filterelem" @click="showAudioOnly" :class="{ 'osidirdigger-wt-selectfilter': filterType == 'audio' }">
-                    <span class="bi-file-music-fill"></span> {{LangData.audio}}
+                <div class="osidirdigger-wt-filterelem" @click="showAudioOnly" :class="{ 'osidirdigger-wt-selectfilter': filterType == 'audio' }" :title="LangData.audio">
+                    <span class="bi-file-music-fill"></span>
                 </div>
-                <div class="osidirdigger-wt-separator"></div>
-                <div class="osidirdigger-wt-filterelem" @click="showTextOnly" :class="{ 'osidirdigger-wt-selectfilter': filterType == 'text' }">
-                    <span class="bi-file-text-fill"></span> {{ LangData.text}}
+                <div class="osidirdigger-wt-filterelem" @click="showTextOnly" :class="{ 'osidirdigger-wt-selectfilter': filterType == 'text' }" :title="LangData.text">
+                    <span class="bi-file-text-fill"></span>
                 </div>
                 <div class="osidirdigger-wt-separator"></div>                
             </div>
@@ -81,7 +98,7 @@
                     <!-- Имя файла -->
                     <div class="file-name">{{ truncateName(item.name) }}</div>                    
                     <!-- Размер -->
-                    <div class="file-size">{{ formatSize(item.size) }}</div>                    
+                    <div v-if="item.type !== 'folder'" class="file-size">{{ formatSize(item.size) }}</div>                    
                     <!-- Дополнительная информация -->
                     <div v-if="item.type === 'image'" class="file-meta">
                         {{ item.width }}x{{ item.height }}
@@ -92,12 +109,12 @@
                 </div>
                 <!-- Контекстное меню -->
                 <div v-if="contextMenu.visible" class="context-menu" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
-                    <div class="context-menu-item" @click="downloadFile(contextMenu.item)">
+                    <div class="context-menu-item" @click="OpenForm_renameItem(contextMenu.item)">
+                        <i class="bi-pencil me-2"></i> Переименовать
+                    </div>
+                    <div v-if="contextMenu.item.type !== 'folder'" class="context-menu-item" @click="downloadFile(contextMenu.item)">
                         <i class="bi-cloud-arrow-down-fill me-2"></i> Скачать
                     </div>
-                    <!-- <div class="context-menu-item" @click="renameItem(contextMenu.item)">
-                        <i class="bi-pencil me-2"></i> Переименовать
-                    </div> -->
                     <div class="context-menu-item" @click="deleteItem(contextMenu.item)">
                         <i class="bi-trash me-2"></i> Удалить
                     </div>
@@ -112,7 +129,7 @@
                 
                 <!-- Сообщение, если папка пуста -->
                 <div v-if="filteredContents.length === 0" class="empty-folder">
-                    {{ LangData.empty || 'Папка пуста' }}
+                    {{LangData.folderisempty}}
                 </div>
             </div>
             <div v-else class="d-flex flex-wrap">
@@ -161,20 +178,21 @@
     <!-- Нижнее меню (статус бар) -->
     <div class="osidirdigger-bmenu d-flex align-items-center">
         <span v-if="selectedItem">
-            {{ selectedItem.name }} | 
-            {{ formatSize(selectedItem.size) }} |
-            <span v-if="selectedItem.type === 'image'">
+            <i>{{ selectedItem.name }} | </i> 
+            <i v-if="selectedItem.type !== 'folder'">{{ formatSize(selectedItem.size) }} | </i>
+            <i v-if="selectedItem.type === 'image'">
                 {{ selectedItem.width }}x{{ selectedItem.height }}
-            </span>
-            <span v-else-if="selectedItem.type === 'audio'">
+            </i>
+            <i v-else-if="selectedItem.type === 'audio'">
                 {{ selectedItem.artist }} - {{ selectedItem.title }}
-            </span>
-            <span v-else>
+            </i>
+            <i v-else>
                 {{ new Date(selectedItem.updatedAt).toLocaleString() }}
-            </span>
+            </i>
         </span>
         <span v-else>
             {{ filteredContents.length }} {{ LangData.items || 'элементов' }}
         </span>
     </div>
 </div>
+
