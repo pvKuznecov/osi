@@ -35,6 +35,11 @@
                     y: 0,
                     item: null
                 },
+                treeLoading: false,
+                foldersTree: [],
+                operFormRename: false,
+                renameTarget: null,
+                renameTarget_newName: '',
             }
         },
 
@@ -49,6 +54,17 @@
                 // Сортировка
                 return this.sortItems(items);
             },
+        },
+
+        watch: {
+            currentPath: {
+                handler() {
+                    this.$nextTick(() => {
+                        this.scrollToEnd();
+                    });
+                },
+                deep: true
+            }
         },
 
         methods: {
@@ -155,7 +171,7 @@
                     this.currentPath = [Root];
                     this.selectedItem = null;
 
-                    // Строим дерево папок рекурсивно
+                    // Строим дерево базовых папок
                     await this.buildFolderTree();
                     
                 } catch (error) {
@@ -163,7 +179,26 @@
                 } finally {
                     this.treeLoading = false;
                 }
-            },            
+            },
+            
+            async buildFolderTree() {
+                try {
+                    const Root = await dFiles.getRoot(this.USERID);
+                    const RootChilds = (Root && Root.children) ? Root.children : [];
+                    
+                    let resArr = [];
+
+                    for (const elementId of RootChilds) {
+                        const elementData = await dFiles.getInfo(elementId);
+                        
+                        if (elementData.type === 'folder') resArr.push({...elementData});
+                    }                    
+
+                    this.foldersTree = resArr;
+                } catch (error) {
+                    this.showError(`Ошибка загрузки: ${error.message}`);
+                }
+            },
 
             // Получение информации о файле/папке
             async getFileInfo(itemId) {
@@ -209,7 +244,7 @@
 
             // Создание новой папки
             async createNewFolder() {
-                const folderName = prompt(this.LangData.enter_folder_name || 'Введите имя папки:');
+                const folderName = prompt(this.LangData.enterfoldername);
                 if (!folderName) return;
                 
                 try {
@@ -220,6 +255,7 @@
                     );
                     
                     await this.loadFolderContents(this.currentFolder.id);
+                    await this.buildFolderTree();
                 } catch (error) {
                     console.error('Error creating folder:', error);
                     alert(error.message);
@@ -291,6 +327,13 @@
                     // Здесь можно открыть файл в соответствующем приложении
                     console.log('Open file:', item);
                     this.openFileInApp(item);
+                }
+            },
+            // Открытие папки из главного списка
+            async openSubMainFolder(item) {
+                if (item.type === 'folder') {
+                    this.currentPath = [this.currentPath[0]];
+                    await this.navigateTo(item);
                 }
             },
 
@@ -475,9 +518,47 @@
                 // Этот метод можно использовать для дополнительной логики
                 console.log(`Sorting by ${this.contentSortKey} in ${this.contentSortMode} order`);
             },
-            
-            // // переименовать файл
-            // renameItem(inpVal) {},
+
+            // кнопка "вернуться на предыдущую папку"
+            ToBackFolder() {
+                if (this.currentPath && this.currentPath.length > 1) {
+                    const targetPathElem = this.currentPath[this.currentPath.length - 2];
+                    
+                    this.navigateTo(targetPathElem);
+                }                
+            },
+
+            // открыть форму переименования файла/папки
+            async OpenForm_renameItem(inpVal) {
+                console.log('inpVal', inpVal);
+                this.operFormRename = true;
+                this.renameTarget = inpVal;
+                this.renameTarget_newName = inpVal.name;                
+            },
+            CloseForm_renameItem() {
+                this.operFormRename = false;
+                this.renameTarget_newName = '';
+            },
+
+            // переименовать файл
+            async renameItem() {
+                if (!this.USERID) throw new Error('User ID required');
+                if (!this.renameTarget) throw new Error('Rename target required');
+                if (!this.renameTarget_newName) throw new Error('Rename target (new name) required');
+
+                try {
+                    if (this.renameTarget && this.renameTarget.id && this.renameTarget_newName && this.renameTarget_newName !== '') {
+                        await dFiles.rename(this.USERID, this.renameTarget.id, this.renameTarget_newName);
+                        await this.loadFolderContents(this.currentFolder.id);
+                        // обновляем дерево базовых папок
+                        await this.buildFolderTree();
+
+                        this.CloseForm_renameItem();
+                    }                    
+                } catch (error) {
+                    this.showError('Operation (renameItem) error:', error);
+                }                
+            },
 
             // удалить файл
             async deleteItem(inpVal) {
@@ -485,6 +566,7 @@
                     try {
                         await dFiles.delete(this.USERID, inpVal.id, true);
                         await this.navigateTo(this.currentFolder);
+                        await this.buildFolderTree();
                     } catch (error) {
                         this.showError('Ошибка при удалении');
                     }
@@ -496,6 +578,18 @@
 
             // // вырезать файл
             // cutItem(inpVal) {},
+
+            scrollToEnd() {
+                const breadcrumbUl = this.$refs.breadcrumbList;
+      
+                if (breadcrumbUl) {
+                    // Мягкая прокрутка с анимацией
+                    breadcrumbUl.scrollTo({
+                        left: breadcrumbUl.scrollWidth,
+                        behavior: 'smooth' // Плавная прокрутка
+                    });
+                }
+            },
             
             // Очистка перед уничтожением компонента
             beforeDestroy() {
@@ -516,6 +610,10 @@
             
             const LangPackData = LangPack;
             this.LangData = (userLangS && LangPackData && LangPackData[userLangS]) ? LangPackData[userLangS] : LangPackData.en;
+
+            this.$nextTick(() => {
+                this.scrollToEnd();
+            });
 
             // Сохраняем ссылку на fileInput
             this.fileInput = this.$refs.fileInput;

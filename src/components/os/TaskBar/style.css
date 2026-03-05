@@ -60,7 +60,16 @@
     background: linear-gradient(to bottom, rgb(112, 69, 231), rgb(92, 49, 211));
     transform: translateY(-1px); }
 
-.start-icon { font-size: 16px; }
+/* .start-icon { font-size: 16px; } */
+.start-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 5px;
+    background-image: url('../../../assets/icons/favicons/favicon.ico');
+    background-size: cover; /* Растянуть на весь блок */
+    background-position: center; /* Центрировать */
+    background-repeat: no-repeat; /* Не повторять */
+}
 
 .taskbar-apps {
     gap: 5px;
