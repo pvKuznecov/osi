@@ -5,18 +5,43 @@
             <div class="btn-exit bi-x-square-fill" @click="CloseForm_infoItem()"></div>
         </div>
         <h3>Свойства</h3>
-        <ul>
-            <li><i>{{LangData.name}}</i>: {{selectedItem.name}}</li>
-            <li><i>{{LangData.createdAt}}</i>: {{Converter_dateTime(selectedItem.createdAt)}}</li>
-            <li><i>{{LangData.updatedAt}}</i>: {{Converter_dateTime(selectedItem.updatedAt)}}</li>
-            <li><i>{{LangData.type}}</i>: {{selectedItem.type}}</li>
-            <li><i>{{LangData.mimetype}}</i>: {{selectedItem.mimetype}}</li>
-            <li><i>{{LangData.size}}</i>: {{selectedItem.size}}</li>
-            <li><i>{{LangData.private}}</i>: {{selectedItem.private}}</li>
-            <li><i>{{LangData.protected}}</i>: {{selectedItem.protect}}</li>
-            <li><i>{{LangData.owner}}</i>: {{selectedItem.userid}}</li>
-            <li><i>{{LangData.extension}}</i>: {{selectedItem.extension}}</li>
-        </ul>
+        <table class="osidirdigger-infoitem-table">
+            <tbody>
+                <tr>
+                    <td>
+                        <!-- Для изображений показываем превью -->
+                        <div v-if="selectedItem.type === 'image' && getImageUrl(selectedItem)" class="osidirdigger-preview-area">
+                            <img :src="getImageUrl(selectedItem)" :alt="selectedItem.name" class="preview-img">
+                        </div>
+                        <div v-else class="osidirdigger-preview-area">
+                            <div :class="getFileIcon(selectedItem.type)" class="preview-ico"></div>
+                        </div>
+                    </td>
+                    <td>
+                        <ul>
+                            <li><i>{{LangData.name}}</i>: {{selectedItem.name}}</li>
+                            <li><i>{{LangData.createdAt}}</i>: {{Converter_dateTime(selectedItem.createdAt)}}</li>
+                            <li><i>{{LangData.updatedAt}}</i>: {{Converter_dateTime(selectedItem.updatedAt)}}</li>
+                            <li><i>{{LangData.type}}</i>: {{selectedItem.type}}</li>
+                            <li><i>{{LangData.mimetype}}</i>: {{selectedItem.mimetype}}</li>
+                            <li><i>{{LangData.extension}}</i>: {{selectedItem.extension}}</li>
+                            <li><i>{{LangData.size}}</i>: {{selectedItem.size}}</li>
+                        </ul>
+                     </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <ul>
+                            <li><i>{{LangData.private}}</i>: {{selectedItem.private ? '+' : '-'}}</li>
+                            <li><i>{{LangData.protected}}</i>: {{selectedItem.protect ? '+' : '-'}}</li>
+                            <!-- <li><i>{{LangData.owner}}</i>: {{selectedItem.userid}}</li> -->
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+       
     </div>
 </div>
 <!-- "форма" переименовывания файла  -->
@@ -114,7 +139,7 @@
                     <!-- Для изображений показываем превью -->
                     <div v-if="item.type === 'image' && getImageUrl(item)" class="file-preview">
                         <img :src="getImageUrl(item)" :alt="item.name" class="preview-img">
-                    </div>                    
+                    </div>
                     <!-- Для остальных - иконку -->
                     <div v-else class="file-icon" :class="getFileIcon(item.type)"></div>                    
                     <!-- Имя файла -->
@@ -135,7 +160,7 @@
                         <i class="bi-pencil me-2"></i> Переименовать
                     </div>
                     <div class="context-menu-item" @click="OpenForm_infoItem(contextMenu.item)">
-                        <i class="bi-pencil me-2"></i> Свойства
+                        <i class="bi-info-circle-fill me-2"></i> Свойства
                     </div>
                     
                     <div v-if="contextMenu.item.type !== 'folder'" class="context-menu-item" @click="downloadFile(contextMenu.item)">
