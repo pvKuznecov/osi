@@ -735,3 +735,24 @@
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
 
+.osidirdigger-preview-area {
+    display: block;
+    width: 150px;
+    height: 150px;
+}
+
+.osidirdigger-preview-area .preview-ico,
+.osidirdigger-preview-area img {
+    display: block;
+    width: 130px;
+    height: 130px;
+    margin: 10px;
+    border: 1px solid gray;
+    text-align: center;
+    font-size: 82px;
+}
+
+.osidirdigger-infoitem-table {
+    display: block;
+    width: 100%;
+}
