@@ -40,6 +40,7 @@
                 operFormRename: false,
                 renameTarget: null,
                 renameTarget_newName: '',
+                showItemInfo: false,
             }
         },
 
@@ -538,6 +539,15 @@
             CloseForm_renameItem() {
                 this.operFormRename = false;
                 this.renameTarget_newName = '';
+            },
+
+            // открыть форму информация о файле
+            OpenForm_infoItem(inpVal) {
+                this.selectedItem = inpVal;
+                this.showItemInfo = true;
+            },
+            CloseForm_infoItem() {
+                this.showItemInfo = false;
             },
 
             // переименовать файл

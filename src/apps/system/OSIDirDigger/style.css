@@ -673,7 +673,7 @@
     padding-bottom: 10px;
 }
 
-.osidirdigger-rename-area {
+.osidirdigger-blackcover-area {
     display: block;
     /* display: flex; */
     /* flex-direction: column; */
@@ -686,23 +686,33 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 10000;
 }
+.osidirdigger-infoitem-form,
 .osidirdigger-rename-form {
     display: block;
-    width: 600px;
-    height: 100px;
     background-color: white;
-    margin-top: 20%;
     margin-left: auto;
     margin-right: auto;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
-
+.osidirdigger-rename-form {
+    width: 600px;
+    height: 100px;
+    margin-top: 20%; }
+.osidirdigger-infoitem-form {
+    width: 400px;
+    min-height: 200px;
+    max-height: 600px;
+    margin-top: 10%; }
+.osidirdigger-infoitem-form .btn-exit,
 .osidirdigger-rename-form .btn-exit {
     color: red;
     font-size: 16px;
     opacity: .75;
     cursor: pointer; }
+.osidirdigger-infoitem-form .btn-exit:hover,
 .osidirdigger-rename-form .btn-exit:hover { opacity: 1; }
+
+.osidirdigger-infoitem-form h3,
 .osidirdigger-rename-form h3 { margin: 5px; }
 .osidirdigger-rename-form input {
     display: block;
@@ -724,3 +734,4 @@
     text-align: center;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
+
