@@ -18,30 +18,60 @@
                         </div>
                     </td>
                     <td>
-                        <ul>
-                            <li><i>{{LangData.name}}</i>: {{selectedItem.name}}</li>
-                            <li><i>{{LangData.createdAt}}</i>: {{Converter_dateTime(selectedItem.createdAt)}}</li>
-                            <li><i>{{LangData.updatedAt}}</i>: {{Converter_dateTime(selectedItem.updatedAt)}}</li>
-                            <li><i>{{LangData.type}}</i>: {{selectedItem.type}}</li>
-                            <li><i>{{LangData.mimetype}}</i>: {{selectedItem.mimetype}}</li>
-                            <li><i>{{LangData.extension}}</i>: {{selectedItem.extension}}</li>
-                            <li><i>{{LangData.size}}</i>: {{selectedItem.size}}</li>
-                        </ul>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td><i>{{LangData.name}}</i>:</td>
+                                    <td>{{selectedItem.name}}</td>
+                                </tr>
+                                <tr>
+                                    <td><i>{{LangData.createdAt}}</i>:</td>
+                                    <td>{{Converter_dateTime(selectedItem.createdAt)}}</td>
+                                </tr>
+                                <tr>
+                                    <td><i>{{LangData.updatedAt}}</i>:</td>
+                                    <td>{{Converter_dateTime(selectedItem.updatedAt)}}</td>
+                                </tr>
+                                <tr>
+                                    <td><i>{{LangData.type}}</i>:</td>
+                                    <td>{{LangData[selectedItem.type]}}</td>
+                                </tr>
+                                <tr v-if="selectedItem.type !== 'folder'">
+                                    <td><i>{{LangData.mimetype}}</i>:</td>
+                                    <td>{{selectedItem.mimetype}}</td>
+                                </tr>
+                                <tr v-if="selectedItem.type !== 'folder'">
+                                    <td><i>{{LangData.extension}}</i>:</td>
+                                    <td>{{selectedItem.extension}}</td>
+                                </tr>
+                                <tr v-if="selectedItem.type !== 'folder'">
+                                    <td><i>{{LangData.size}}</i>:</td>
+                                    <td>{{formatSize(selectedItem.size)}}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <hr>
+                                        <b>Дополнительно:</b>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><i class="ms-3">{{LangData.private}}:</i></td>
+                                    <td>
+                                        <span class="ms-2">{{selectedItem.private ? 'Да' : 'Нет'}}</span>
+                                    </td>
+                                </tr>    
+                                <tr>
+                                    <td><i class="ms-3">{{LangData.protected}}:</i></td>
+                                    <td>
+                                        <span class="ms-2">{{selectedItem.protect ? 'Да' : 'Нет'}}</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                      </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <ul>
-                            <li><i>{{LangData.private}}</i>: {{selectedItem.private ? '+' : '-'}}</li>
-                            <li><i>{{LangData.protected}}</i>: {{selectedItem.protect ? '+' : '-'}}</li>
-                            <!-- <li><i>{{LangData.owner}}</i>: {{selectedItem.userid}}</li> -->
-                        </ul>
-                    </td>
                 </tr>
             </tbody>
         </table>
-        
-       
     </div>
 </div>
 <!-- "форма" переименовывания файла  -->
