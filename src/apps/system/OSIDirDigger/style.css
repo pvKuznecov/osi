@@ -752,7 +752,10 @@
     font-size: 82px;
 }
 
-.osidirdigger-infoitem-table {
-    display: block;
-    width: 100%;
-}
+.osidirdigger-infoitem-table { width: 100%; }
+.osidirdigger-infoitem-table i { color: gray; }
+
+/* .osidirdigger-infoitem-table table {
+    width: 96%;
+    margin-left: auto;
+    margin-right: auto; } */
