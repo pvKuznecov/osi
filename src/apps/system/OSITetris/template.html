@@ -1,0 +1,143 @@
+<div class="tetris-app">
+    <!-- Заставка с анимированным логотипом -->
+    <div v-if="showSplash" class="tetris-splash">
+        <div class="splash-logo">
+            <div class="logo-grid" ref="logoGrid">
+                <!-- Первая строка ТЕТРИС -->
+                <!-- T -->
+                <div class="logo-cell filled" style="background-color: #4CAF50; animation-delay: 0.1s;">T</div>
+                <div class="logo-cell filled" style="background-color: #4CAF50; animation-delay: 0.2s;"></div>
+                <div class="logo-cell filled" style="background-color: #4CAF50; animation-delay: 0.3s;"></div>
+                <!-- E -->
+                <div class="logo-cell filled" style="background-color: #FF9800; animation-delay: 0.4s;">E</div>
+                <div class="logo-cell filled" style="background-color: #FF9800; animation-delay: 0.5s;"></div>
+                <div class="logo-cell filled" style="background-color: #FF9800; animation-delay: 0.6s;"></div>
+                <!-- T -->
+                <div class="logo-cell filled" style="background-color: #4CAF50; animation-delay: 0.7s;">T</div>
+                <div class="logo-cell filled" style="background-color: #4CAF50; animation-delay: 0.8s;"></div>
+                <div class="logo-cell filled" style="background-color: #4CAF50; animation-delay: 0.9s;"></div>
+                <!-- R -->
+                <div class="logo-cell filled" style="background-color: #2196F3; animation-delay: 1.0s;">R</div>
+                <div class="logo-cell filled" style="background-color: #2196F3; animation-delay: 1.1s;"></div>
+                <div class="logo-cell filled" style="background-color: #2196F3; animation-delay: 1.2s;"></div>
+                <!-- I -->
+                <div class="logo-cell filled" style="background-color: #f44336; animation-delay: 1.3s;">I</div>
+                <div class="logo-cell filled" style="background-color: #f44336; animation-delay: 1.4s;"></div>
+                <div class="logo-cell filled" style="background-color: #f44336; animation-delay: 1.5s;"></div>
+                <!-- S -->
+                <div class="logo-cell filled" style="background-color: #9C27B0; animation-delay: 1.6s;">S</div>
+                <div class="logo-cell filled" style="background-color: #9C27B0; animation-delay: 1.7s;"></div>
+                <div class="logo-cell filled" style="background-color: #9C27B0; animation-delay: 1.8s;"></div>
+            </div>            
+        </div>
+        <div class="splash-subtitle">Создано с помощью ИИ</div>
+    </div>
+
+    <div class="tetris-header">
+        <h2>Тетрис</h2>
+        <div class="tetris-stats">
+            <div class="score">Счет: {{ score }}</div>
+            <div class="level">Уровень: {{ level }}</div>
+            <div class="lines">Линии: {{ lines }}</div>
+        </div>
+    </div>
+
+    <!-- Основная игровая зона -->
+    <div class="tetris-main-area">
+        <!-- Первая колонка (вертикально) -->
+        <div class="tetris-column-left">
+            <div class="tetris-controls">
+                <button
+                    v-if="!isPlaying && !gameOver"
+                    @click="startGame"
+                    class="btn btn-primary"
+                >
+                    Новая игра
+                </button>
+                
+                <button
+                    v-if="isPlaying && !gameOver"
+                    @click="togglePause"
+                    class="btn btn-secondary"
+                >
+                    {{ isPaused ? 'Продолжить' : 'Пауза' }}
+                </button>
+                
+                <button
+                    v-if="gameOver"
+                    @click="startGame"
+                    class="btn btn-success"
+                >
+                    Играть снова
+                </button>
+            </div>
+
+            <!-- Предпросмотр следующей фигуры -->
+            <div class="tetris-next-piece">
+                <h3>Следующая:</h3>
+                <div class="next-piece-display">
+                    <div
+                        v-for="(row, y) in nextPiece?.shape"
+                        :key="y"
+                        class="next-row"
+                    >
+                        <div
+                            v-for="(cell, x) in row"
+                            :key="x"
+                            :class="{
+                                'next-cell': true,
+                                'filled': cell && cell !== 0,
+                                [`piece-${nextPiece?.type}`]: cell && cell !== 0
+                            }"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Инструкции -->
+            <div class="tetris-instructions">
+                <h3>Управление:</h3>
+                <ul>
+                    <li><kbd>←</kbd> <kbd>→</kbd> - движение влево/вправо</li>
+                    <li><kbd>↓</kbd> - ускорить падение</li>
+                    <li><kbd>↑</kbd> - поворот фигуры</li>
+                    <li><kbd>Пробел</kbd> - быстрое падение</li>
+                    <li><kbd>P</kbd> - пауза</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Вторая колонка: игровое поле -->
+        <div class="tetris-column-right">
+            <div class="tetris-board">
+                <div
+                    v-for="(row, y) in displayBoard"
+                    :key="y"
+                    class="board-row"
+                >
+                    <div
+                        v-for="(cell, x) in row"
+                        :key="x"
+                        :class="{
+                            'board-cell': true,
+                            'filled': cell !== 0,
+                            [`piece-${cell}`]: cell !== 0
+                        }"
+                    ></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сообщения -->
+    <div v-if="gameOver" class="tetris-game-over">
+        <h2>Игра окончена!</h2>
+        <p>Финальный счет: {{ score }}</p>
+        <button @click="startGame" class="btn btn-success">Новая игра</button>
+    </div>
+
+    <!-- Пауза -->
+    <div v-if="isPaused && isPlaying" class="tetris-pause-overlay">
+        <h2>Пауза</h2>
+    </div>
+</div>

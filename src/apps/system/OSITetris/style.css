@@ -1,0 +1,842 @@
+.tetris-app {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.tetris-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+}
+
+.tetris-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+    color: #4CAF50;
+}
+
+.tetris-stats {
+    display: flex;
+    gap: 20px;
+    font-size: 1.1em;
+}
+
+/* Основная игровая область */
+.tetris-main-area {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 10px; /* Увеличено расстояние между колонками для лучшего визуального разделения */
+    width: 100%;
+    height: calc(100% - 80px);
+}
+
+/* Левая колонка (элементы сверху вниз) */
+.tetris-column-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 10px; /* Уменьшено расстояние между элементами для более плотной компоновки */
+    min-width: 140px;
+    max-width: 180px;
+}
+
+/* Элементы управления */
+.tetris-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Уменьшено расстояние между кнопками */
+    align-items: center;
+}
+
+/* Предпросмотр фигуры */
+.tetris-next-piece {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 200px;
+    gap: 10px;
+    padding: 10px; /* Добавлен небольшой отступ для красоты */
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+}
+
+.tetris-next-piece h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.1em;
+    color: #4CAF50;
+    text-align: center;
+}
+
+.next-piece-display {
+    width: 120px;
+    height: 120px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0; /* Убраны внутренние отступы */
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.next-cell {
+    width: 24px;
+    height: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+}
+
+.next-cell.filled {
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.3),
+                0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.next-row {
+    display: flex;
+    height: 24px;
+}
+
+/* Инструкции по управлению */
+.tetris-instructions {
+    background: rgba(0, 0, 0, 0.3); /* Уменьшена прозрачность для лучшей читаемости */
+    padding: 12px; /* Немного увеличен внутренний отступ */
+    border-radius: 8px;
+    margin-top: 5px;
+    text-align: left; /* Прижатие к левому краю */
+}
+
+.tetris-instructions h3 {
+    margin-top: 0;
+    color: #4CAF50;
+    font-size: 1.1em;
+    text-align: center;
+}
+
+/* Убираем выравнивание по центру для списка */
+.tetris-instructions ul {
+    margin: 10px 0;
+    padding-left: 20px;
+    text-align: left; /* Прижатие к левому краю */
+}
+
+.tetris-instructions li {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+    text-align: left; /* Прижатие к левому краю */
+}
+
+/* Инструкции по управлению */
+.tetris-instructions {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.tetris-instructions h3 {
+    margin-top: 0;
+    color: #4CAF50;
+    font-size: 1.1em;
+    text-align: center;
+}
+
+.tetris-instructions ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.tetris-instructions li {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+}
+
+.kbd {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+/* Правая колонка: игровое поле */
+.tetris-column-right {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* Игровое поле */
+.tetris-board {
+    width: fit-content;
+    height: fit-content;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #FF9800;
+    color: white;
+}
+
+.btn-success {
+    background-color: #2196F3;
+    color: white;
+}
+
+/* Заставка с анимированным логотипом */
+.tetris-splash {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+
+.tetris-splash.fade-out {
+    opacity: 0;
+}
+
+.splash-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -30px; /* Чтобы логотип оказался по центру */
+}
+
+.logo-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-gap: 4px;
+    width: 200px;
+    height: 90px;
+}
+    
+.logo-cell {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 14px;
+    color: white;
+    animation: splashAppear 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+.splash-subtitle {
+    margin-top: 20px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+}
+
+@keyframes splashAppear {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tetris-game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 1000;
+    border: 2px solid #4CAF50;
+}
+
+.tetris-game-over h2 {
+    color: #f44336;
+    margin-top: 0;
+}
+
+.tetris-pause-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 1000;
+    border: 2px solid #FF9800;
+}
+
+.tetris-pause-overlay h2 {
+    color: #FF9800;
+    margin-top: 0;
+}
+
+/* Расположение элементов на десктопе */
+@media (min-width: 769px) {
+    .tetris-main-area {
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+    }
+    
+    /* Управление слева от игрового поля */
+    .tetris-controls {
+        display: flex;
+        margin-right: 50px;
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+        min-width: 120px;
+        flex-shrink: 0;
+    }
+    
+    /* Игровое поле по центру */
+    .tetris-board {
+        flex-shrink: 0;
+        margin-right: 20px;
+    }
+    
+    /* Предпросмотр следующей фигуры справа сверху */
+    .tetris-next-piece {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        min-width: 120px;
+        margin-left: 20px;
+        flex-shrink: 0;
+    }
+    
+    /* Инструкции справа от предпросмотра */
+    .tetris-instructions {
+        background: rgba(0, 0, 0, 0.5);
+        padding: 15px;
+        border-radius: 8px;
+        min-width: 200px;
+        max-width: 250px;
+        margin-left: 20px;
+        align-self: flex-start;
+        margin-top: 0;
+    }
+}
+
+/* Основная игровая область */
+.tetris-main-area {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    height: calc(100% - 80px);
+    gap: 50px;
+}
+
+/* Первая колонка: инструкции */
+.tetris-column-1 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 200px;
+    max-width: 250px;
+}
+
+.tetris-instructions {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.tetris-instructions h3 {
+    margin-top: 0;
+    color: #4CAF50;
+    font-size: 1.1em;
+    text-align: center;
+}
+
+.tetris-instructions ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.tetris-instructions li {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+}
+
+.kbd {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+/* Вторая колонка: кнопки и игровое поле */
+.tetris-column-2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.tetris-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Игровое поле */
+.tetris-board {
+    width: fit-content;
+    height: fit-content;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    padding: 0; /* Убраны внутренние отступы */
+    box-sizing: border-box;
+}
+
+/* Третья колонка: предпросмотр фигуры */
+.tetris-column-3 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 120px;
+}
+
+.tetris-next-piece {
+    display: flex;
+    width: 200px;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.tetris-next-piece h3 {
+    margin: 0 0 10px 0;
+    color: #4CAF50;
+}
+
+.next-piece-display {
+    width: 180px;
+    height: 180px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.next-cell {
+    width: 24px;
+    height: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+    border-radius: 3px; /* Добавлено скругление для клеточек */
+}
+
+.next-cell.filled {
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.3),
+                0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.next-row {
+    display: flex;
+    height: 24px;
+}
+
+.score, .level, .lines {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 8px 15px;
+    border-radius: 5px;
+    min-width: 100px;
+    text-align: center;
+}
+
+/* Улучшенные стили для игрового поля */
+.tetris-board .board-row {
+    width: 100%;
+    height: 30px;
+    display: flex;
+}
+
+.board-cell {
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    border-radius: 3px; /* Добавлено скругление для клеточек фигур в основном поле */
+}
+
+/* Стили для пустых клеток */
+.board-cell:not(.filled) {
+    /* Пустые клетки будут иметь фон, но без заполнения цветом */
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.board-cell.filled {
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    z-index: 2;
+    box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.3),
+                0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Убедимся, что фигуры отображаются правильно */
+.board-cell.filled {
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    z-index: 2;
+    box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.3),
+                0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Цвета фигур */
+.piece-I {
+    background-color: cyan !important;
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    box-sizing: border-box;
+}
+.piece-J {
+    background-color: blue !important;
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    box-sizing: border-box;
+}
+.piece-L {
+    background-color: orange !important;
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    box-sizing: border-box;
+}
+.piece-O {
+    background-color: yellow !important;
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    box-sizing: border-box;
+}
+.piece-S {
+    background-color: green !important;
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    box-sizing: border-box;
+}
+.piece-T {
+    background-color: purple !important;
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    box-sizing: border-box;
+}
+.piece-Z {
+    background-color: red !important;
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    box-sizing: border-box;
+}
+
+.tetris-next-piece {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-width: 150px;
+}
+
+.tetris-next-piece h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2em;
+    color: #4CAF50;
+}
+
+.next-piece-display {
+    width: 180px;
+    height: 180px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.next-cell {
+    width: 24px;
+    height: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+}
+
+.next-cell.filled {
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.3),
+                0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.next-row {
+    display: flex;
+    height: 24px;
+}
+
+.tetris-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    min-width: 150px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #FF9800;
+    color: white;
+}
+
+.btn-success {
+    background-color: #2196F3;
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tetris-instructions {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+    min-width: 200px;
+    max-width: 250px;
+}
+
+.tetris-instructions h3 {
+    margin-top: 0;
+    color: #4CAF50;
+    font-size: 1.1em;
+    text-align: center;
+}
+
+.tetris-instructions ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.tetris-instructions li {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+}
+
+.kbd {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+/* Заставка с анимированным логотипом */
+.tetris-splash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+
+.tetris-splash.fade-out {
+    opacity: 0;
+}
+
+.splash-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -30px; /* Чтобы логотип остался по центру */
+}
+
+.logo-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-gap: 4px;
+    width: 200px;
+    height: 90px;
+}
+    
+.logo-cell {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 14px;
+    color: white;
+    animation: splashAppear 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes splashAppear {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.tetris-game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 1000;
+    border: 2px solid #4CAF50;
+}
+
+.tetris-game-over h2 {
+    color: #f44336;
+    margin-top: 0;
+}
+
+.tetris-pause-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 1000;
+    border: 2px solid #FF9800;
+}
+
+.tetris-pause-overlay h2 {
+    color: #FF9800;
+    margin-top: 0;
+}
+
+/* Расположение элементов на десктопе */
+@media (min-width: 769px) {
+    .tetris-main-area {
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    /* Левая колонка */
+    .tetris-column-left {
+        min-width: 150px;
+        max-width: 200px;
+    }
+
+    /* Правая колонка: игровое поле */
+    .tetris-column-right {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+}
