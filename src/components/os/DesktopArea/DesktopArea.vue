@@ -16,6 +16,8 @@
                 USERApps: [],
                 USER: null,
                 desktopStyle: {},
+                dappPreventInfo: null,
+                deskPreventInfo: null,
             }
         },
 
@@ -136,6 +138,52 @@
                     };
                 }, 300);            
             },
+
+            CloseDeskPrevMenu() { this.deskPreventInfo = null; },
+            CloseAppInfo() { this.dappPreventInfo = null; },
+
+            ShowDeskPrevMenu(event) {
+                const val_deskPreventInfo = this.deskPreventInfo;
+                let {clientX: cursor_x, clientY: cursor_y} = event;
+                console.log('event', event);
+
+                if (!val_deskPreventInfo && cursor_x && cursor_y) {
+                    this.CloseAppInfo();
+                    this.deskPreventInfo = {
+                        cursor_x: cursor_x,
+                        cursor_y: cursor_y,
+                    }
+                } else {
+                    this.CloseDeskPrevMenu();
+                }
+
+                setTimeout(() => {
+                    this.CloseDeskPrevMenu();
+                }, 5000);
+            },
+
+            ShowAppInfo(event, app) {
+                if (!app) return null;
+
+                let {clientX: cursor_x, clientY: cursor_y} = event;
+                let {label, description} = app;
+
+                if (cursor_x && cursor_y) {
+                    this.dappPreventInfo = {
+                        cursor_x: cursor_x,
+                        cursor_y: cursor_y,
+                        label: label,
+                        description: description,
+                    }
+                }
+                
+                // Закрываем меню при клике вне его
+                setTimeout(() => {
+                    document.addEventListener('click', this.CloseAppInfo, { once: true });
+                }, 0);
+            },
+
+            
         },
 
         async mounted() {

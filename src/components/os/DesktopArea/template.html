@@ -1,8 +1,15 @@
-<div id="desktop-area" class="desktop-area" @click="activateDesktop" :style="desktopStyle">
+<div id="desktop-area" class="desktop-area" @click="activateDesktop" :style="desktopStyle" @contextmenu.prevent="ShowDeskPrevMenu($event)">
+    <div v-if="deskPreventInfo" class="desk-prevent-info" :style="{ top: deskPreventInfo.cursor_y + 'px', left: deskPreventInfo.cursor_x + 'px' }">
+        <p>Заготовка контекстного меню.</p>
+    </div>
     <div class="desktop-icons">
-        <div v-for="app in deskApps" :key="app.name" class="desktop-icon" @dblclick="launchApp(app)">
-            <div class="icon" :class="!app.icon ? app.iconclass : ''" :style="app.iconclass ? 'color: white' : ''">{{app.icon}}</div>
-            <span class="label">{{ app.label }}</span>
+        <div v-for="app in deskApps" :key="app.name" class="desktop-icon" @dblclick="launchApp(app)" @contextmenu.prevent="ShowAppInfo($event, app)">
+            <div v-if="dappPreventInfo" class="deskapp-prevent-info" :style="{ top: dappPreventInfo.cursor_y + 'px', left: dappPreventInfo.cursor_x + 'px' }">
+                <span class="app-title">{{dappPreventInfo.label}}</span>
+                <span class="app-info">{{dappPreventInfo.description}}</span>
+            </div>
+            <div class="icon" :class="!app.icon ? app.iconclass : ''" :style="app.iconclass ? 'color: white' : ''" @contextmenu.prevent="ShowAppInfo($event, app)">{{app.icon}}</div>
+            <span class="label" @contextmenu.prevent="ShowAppInfo($event, app)">{{ app.label }}</span>
         </div>
     </div>    
     <!-- Slot from windows -->
