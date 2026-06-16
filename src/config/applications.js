@@ -30,7 +30,7 @@ const applications = [
     // new OSIApp({
     //     id: 'osihelper', name: 'OSIHelper',
     //     label: 'OSI помощник', category: 'system', description: 'Справочная система и помощь по OSI.',
-    //     iconclass: 'bi-info-square-fill text-ico-info',        
+    //     iconclass: 'bi-info-square-fill text-ico-info',
     //     defWidth: 600, defHeight: 700,
     //     resizable: true, canMinimize: true, showOnDesktop: true, showInStartMenu: true,
     // }),
@@ -43,7 +43,7 @@ const applications = [
     new OSIApp({
         id: 'osicalculator', name: 'OSICalculator',
         label: 'Калькулятор', category: 'utilities', description: 'Простой калькулятор для базовых вычислений.',
-        iconclass: 'bi-calculator-fill text-ico-purpure',        
+        iconclass: 'bi-calculator-fill text-ico-purpure',
         defWidth: 400, defHeight: 670,
         canMinimize: true, showOnDesktop: true, showInStartMenu: true,
     }),
@@ -72,6 +72,14 @@ const applications = [
         iconclass: 'bi-hdd-fill text-ico-purpure',
         defWidth: 850, defHeight: 600,
         resizable: true, isMaximized: true, canMinimize: true, showInStartMenu: true, showOnDesktop: true,
+    }),
+    new OSIApp({
+        id: 'ositetris', name: 'OSITetris',
+        label: 'Тетрис', category: 'games', description: 'Классическая игра Тетрис.',
+        iconclass: 'bi-puzzle-fill text-ico-game',
+        defWidth: 600, defHeight: 770,
+        canMinimize: true, showOnDesktop: true, showInStartMenu: true,
+        // minWidth: 600, minHeight: 770e
     }),
 ];
 

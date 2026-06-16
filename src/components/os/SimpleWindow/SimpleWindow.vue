@@ -89,6 +89,7 @@
                     'OSIAppManager': () => import('@/apps/system/OSIAppManager/OSIAppManager.vue'),
                     'OSIPicta': () => import('@/apps/system/OSIPicta/OSIPicta.vue'),
                     'OSIDirDigger': () => import('@/apps/system/OSIDirDigger/OSIDirDigger.vue'),
+                    'OSITetris': () => import('@/apps/system/OSITetris/OSITetris.vue'),
                 };
 
                 if (this.appName && componentMap[this.appName]) {
