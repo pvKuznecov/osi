@@ -1,17 +1,25 @@
 <div id="desktop-area" class="desktop-area" @click="activateDesktop" :style="desktopStyle" @contextmenu.prevent="ShowDeskPrevMenu($event)">
+    <!-- Контекстное меню рабочего стола -->
     <div v-if="deskPreventInfo" class="desk-prevent-info" :style="{ top: deskPreventInfo.cursor_y + 'px', left: deskPreventInfo.cursor_x + 'px' }">
-        <p>Заготовка контекстного меню.</p>
+        <template v-if="deskContextApps && deskContextApps.length > 0">
+            <i class="desk-context-sub-title">Быстрый запуск:</i>
+            <div v-for="dCApp in deskContextApps" class="desk-prevent-oper-elem" @click="SubMenu_launchApp(dCApp)">
+                <span>{{dCApp.label}}</span>
+            </div>
+        </template>    
     </div>
+    <!-- Поле отображения иконок приложений -->
     <div class="desktop-icons">
         <div v-for="app in deskApps" :key="app.name" class="desktop-icon" @dblclick="launchApp(app)" @contextmenu.prevent="ShowAppInfo($event, app)">
+            <!-- Контекстное меню иконки приложения -->
             <div v-if="dappPreventInfo" class="deskapp-prevent-info" :style="{ top: dappPreventInfo.cursor_y + 'px', left: dappPreventInfo.cursor_x + 'px' }">
-                <span class="app-title">{{dappPreventInfo.label}}</span>
-                <span class="app-info">{{dappPreventInfo.description}}</span>
+                <span class="app-title"><b>{{dappPreventInfo.label}}</b>: {{dappPreventInfo.description}}</span>
+                <span class="app-oper-elem" @mousedown.stop="SubMenu_launchApp(app)">Запустить</span>
             </div>
             <div class="icon" :class="!app.icon ? app.iconclass : ''" :style="app.iconclass ? 'color: white' : ''" @contextmenu.prevent="ShowAppInfo($event, app)">{{app.icon}}</div>
             <span class="label" @contextmenu.prevent="ShowAppInfo($event, app)">{{ app.label }}</span>
         </div>
     </div>    
-    <!-- Slot from windows -->
+    <!-- Slot для окон приложений -->
     <slot></slot>    
 </div>

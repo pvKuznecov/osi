@@ -17,6 +17,7 @@ class OSIApp {
         this.canMinimize = data.canMinimize || false;           // Возможность сворачивать окно
         this.showOnDesktop = data.showOnDesktop || false;       // Отображать на рабочем столе
         this.showInStartMenu = data.showInStartMenu || false;   // Отображать в меню "Пуск"
+        this.deskContextMenu = data.deskContextMenu || false;   // Отображать в контекстном меню рабочего стола
     }
 }
 
@@ -25,7 +26,7 @@ const applications = [
         id: 'osisettings', name: 'OSISettings',
         label: 'Настройки', category: 'system', description: 'Настройки системы OSI.',
         iconclass: 'bi-gear-fill text-ico-tech',
-        resizable: true, canMinimize: true, showOnDesktop: true, showInStartMenu: true,
+        resizable: true, canMinimize: true, showOnDesktop: true, showInStartMenu: true, deskContextMenu: true,
     }),
     // new OSIApp({
     //     id: 'osihelper', name: 'OSIHelper',
@@ -58,7 +59,7 @@ const applications = [
         id: 'osiappmanager', name: 'OSIAppManager',
         label: 'AppManager', category: 'system', description: 'Менеджер приложений OSI.',
         iconclass: 'bi-grid-3x3-gap-fill text-ico-tech',
-        isMaximized: true, showInStartMenu: true,
+        isMaximized: true, showInStartMenu: true, deskContextMenu: true,
     }),
     new OSIApp({
         id: 'osipicta', name: 'OSIPicta',

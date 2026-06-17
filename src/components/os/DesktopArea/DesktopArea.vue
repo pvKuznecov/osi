@@ -16,6 +16,7 @@
                 USERApps: [],
                 USER: null,
                 desktopStyle: {},
+                deskContextApps: [],
                 dappPreventInfo: null,
                 deskPreventInfo: null,
             }
@@ -105,6 +106,13 @@
                 }
             },
 
+            SubMenu_launchApp(appData) {
+                console.log('apps', this.apps);
+                this.CloseDeskPrevMenu();
+                this.CloseAppInfo();
+                this.launchApp(appData);
+            },
+
             async changeWallpaper(inpName) {
                 try {
                     this.findUser();
@@ -143,19 +151,13 @@
             CloseAppInfo() { this.dappPreventInfo = null; },
 
             ShowDeskPrevMenu(event) {
-                const val_deskPreventInfo = this.deskPreventInfo;
                 let {clientX: cursor_x, clientY: cursor_y} = event;
-                console.log('event', event);
+                
+                if (this.dappPreventInfo && event.target !== this) return;
 
-                if (!val_deskPreventInfo && cursor_x && cursor_y) {
-                    this.CloseAppInfo();
-                    this.deskPreventInfo = {
-                        cursor_x: cursor_x,
-                        cursor_y: cursor_y,
-                    }
-                } else {
-                    this.CloseDeskPrevMenu();
-                }
+                this.CloseDeskPrevMenu();
+                this.CloseAppInfo();
+                this.deskPreventInfo = {cursor_x: cursor_x, cursor_y: cursor_y};
 
                 setTimeout(() => {
                     this.CloseDeskPrevMenu();
@@ -163,23 +165,24 @@
             },
 
             ShowAppInfo(event, app) {
-                if (!app) return null;
+                if (!app) return;
 
                 let {clientX: cursor_x, clientY: cursor_y} = event;
                 let {label, description} = app;
 
                 if (cursor_x && cursor_y) {
+                    this.CloseDeskPrevMenu();
                     this.dappPreventInfo = {
                         cursor_x: cursor_x,
                         cursor_y: cursor_y,
                         label: label,
                         description: description,
-                    }
+                    };
                 }
                 
                 // Закрываем меню при клике вне его
                 setTimeout(() => {
-                    document.addEventListener('click', this.CloseAppInfo, { once: true });
+                    document.addEventListener('mousedown', this.CloseAppInfo, { once: true });
                 }, 0);
             },
 
@@ -197,6 +200,13 @@
 
             this.apps = defAppsList;
             this.USERApps = (findUserApps) ? findUserApps : defAppsList;
+
+            let deskContextApps_res = [];
+            defAppsList.forEach(element => {
+                if (element.deskContextMenu) deskContextApps_res.push(element);
+            });
+
+            this.deskContextApps = deskContextApps_res;
         },
     }
 </script>
