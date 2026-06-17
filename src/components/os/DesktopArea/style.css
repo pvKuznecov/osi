@@ -39,7 +39,7 @@
 .desk-prevent-info,
 .deskapp-prevent-info {
     position: fixed;
-    width: 200px;
+    min-width: 200px;
     z-index: 1000;
     background-color: white;
     animation: contextMenuFadeIn 0.15s ease;
@@ -47,6 +47,7 @@
     border-radius: 5px;
     box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); }
 
+.desk-prevent-info hr { width: 90%; margin-left: auto; margin-right: auto; }
 .desk-prevent-info p {
     display: block;
     width: 98%;
@@ -65,9 +66,51 @@
     margin-top: 3px;
     background: linear-gradient(to bottom, rgba(103, 55, 235, 0.1), rgba(80, 33, 209, 0.1));
     /* color: white; */
-    font-size: larger;
-    font-weight: 500;
+    font-size: small;
     border-radius: 5px;
     padding: 1px 5px; }
 
-.deskapp-prevent-info .app-info { font-size: small; }
+.deskapp-prevent-info .app-oper-elem { font-size: small; }
+
+.app-oper-elem {
+    display: block;
+    width: 96%;
+    height: 20px;
+    margin-bottom: 3px;
+    text-align: right;
+    margin-right: 1%; }
+
+.app-oper-elem:hover { margin-right: 3%;}
+
+.desk-prevent-oper-elem {
+    display: block;
+    width: 96%;
+    min-height: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 3px; }
+.desk-prevent-oper-elem:last-child {
+    margin-bottom: 5px;
+    border-bottom: 1px solid lightgray;
+    padding-bottom: 10px;
+}
+
+.desk-prevent-oper-elem span { padding: 1px 5px; cursor: pointer;}
+.desk-prevent-oper-elem span:hover {
+    background: linear-gradient(to bottom, rgba(103, 55, 235, 0.05), rgba(80, 33, 209, 0.05));
+    padding: 2px 5px;
+    border-radius: 5px;
+}
+
+.desk-context-sub-title {
+    display: block;
+    width: 96%;
+    margin-left: auto;
+    margin-right: auto;
+    background: linear-gradient(to bottom, rgba(103, 55, 235, 0.1), rgba(80, 33, 209, 0.1));
+    font-weight: 600;
+    margin-top: 2px;
+    /* padding-left: 5px; */
+    padding: 1px 5px;
+    border-radius: 5px;
+}

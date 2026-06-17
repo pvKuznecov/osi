@@ -75,10 +75,12 @@ export const JSH = {
         en: {
             cattype_utilities: 'Utilities',
             cattype_system: 'System',
+            cattype_games: 'Games',
         },
         ru: {
             cattype_utilities: 'Утилиты',
             cattype_system: 'Система',
+            cattype_games: 'Игры',
         },
     },
     system: {

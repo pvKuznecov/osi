@@ -27,6 +27,8 @@
                 @minimize="minimizeWindow"
                 @toggleMaximize="toggleMaximizeWindow"
                 @focus="activateWindow"
+
+                @contextmenu.stop.prevent="() => {}"
             />
         </DesktopArea>
         <TaskBar :USERID="USERID" />
