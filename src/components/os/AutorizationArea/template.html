@@ -34,7 +34,7 @@
                 <div v-if="isNeedPass">
                     <div class="d-flex justify-content-center align-items-center mt-3">
                         <label for="introUser_password">{{LangData.password}}:</label>
-                        <input type="password" id="introUser_password" v-model="introPass" :placeholder="LangData.enteryourpassword">
+                        <input type="password" id="introUser_password" ref="passwordInput" v-model="introPass" :placeholder="LangData.enteryourpassword">
                     </div>
                 </div>
                 <div class="mt-3 d-flex justify-content-center align-items-center">

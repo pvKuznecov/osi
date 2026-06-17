@@ -58,6 +58,13 @@
         methods: {
             // // Перезагрузить текущую страницу
             // reloadPage() { document.location.reload(); },
+            focusPasswordInput() {
+                this.$nextTick(() => {
+                    if (this.$refs.passwordInput) {
+                        this.$refs.passwordInput.focus();
+                    }
+                });
+            },
 
             pre_selectUser(userData) {
                 this.selectedUser = userData;
@@ -65,6 +72,8 @@
                 this.introErrorTxt = false;
 
                 if (this.isNeedPass) {
+                    // Фокусируем поле ввода пароля
+                    this.focusPasswordInput();
                     return true;
                 } else {
                     this.selectUser(userData);
