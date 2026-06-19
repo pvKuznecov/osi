@@ -18,6 +18,7 @@ class OSIApp {
         this.showOnDesktop = data.showOnDesktop || false;       // Отображать на рабочем столе
         this.showInStartMenu = data.showInStartMenu || false;   // Отображать в меню "Пуск"
         this.deskContextMenu = data.deskContextMenu || false;   // Отображать в контекстном меню рабочего стола
+        this.suppFormats = data.suppFormats || [];              // Перечень поддерживаемых приложением форматов
     }
 }
 
@@ -54,6 +55,7 @@ const applications = [
         iconclass: 'bi-cassette-fill text-ico-purpure',
         defWidth: 850, defHeight: 400,
         showOnDesktop: true, showInStartMenu: true,
+        suppFormats: ["audio"],
     }),
     new OSIApp({
         id: 'osiappmanager', name: 'OSIAppManager',
@@ -66,6 +68,7 @@ const applications = [
         label: 'Picta', category: 'utilities', description: 'Просмотр изображений.',
         iconclass: 'bi-easel-fill text-ico-purpure',
         isMaximized: true, canMinimize: true, showInStartMenu: true, showOnDesktop: true,
+        suppFormats: ["image"],
     }),
     new OSIApp({
         id: 'osidirdigger', name: 'OSIDirDigger',

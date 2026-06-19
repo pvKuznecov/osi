@@ -1,3 +1,28 @@
+const userLang = navigator.language || navigator.userLanguage;
+const userLangS = userLang.split('-')[0];
+const LangPack = {
+        en: {
+            cattype_utilities: 'Utilities',
+            cattype_system: 'System',
+            cattype_games: 'Games',
+            image: 'Image',
+            file: 'File',
+            audio: 'Audio file',
+            unknown_type: 'Unknown type',
+        },
+        ru: {
+            cattype_utilities: 'Утилиты',
+            cattype_system: 'Система',
+            cattype_games: 'Игры',
+            image: 'Изображение',
+            file: 'Файл',
+            audio: 'Аудио файл',
+            unknown_type: 'Неизвестный тип',
+        },
+    };
+
+const LangData = (userLangS && LangPack && LangPack[userLangS]) ? LangPack[userLangS] : LangPack.en;
+
 export const JSH = {
     browser: {
         detectBrowser: () => {
@@ -71,18 +96,7 @@ export const JSH = {
         }
     },
     // "системный" языковой объект
-    lang: {
-        en: {
-            cattype_utilities: 'Utilities',
-            cattype_system: 'System',
-            cattype_games: 'Games',
-        },
-        ru: {
-            cattype_utilities: 'Утилиты',
-            cattype_system: 'Система',
-            cattype_games: 'Игры',
-        },
-    },
+    lang: LangPack,
     system: {
         getImageList: () => {
             const imagesContext = require.context(
@@ -132,4 +146,18 @@ export const JSH = {
             });
         },
     },
+    support: {
+        getFileGlobalType: (inpFile = false) => {
+            console.log('inpFile', inpFile);
+            if (!inpFile) return false;
+
+            const type = inpFile.type;
+            const title = (LangData && Object.hasOwn(LangData, type)) ? LangData[type] : LangData.unknown_type;
+            
+            return {
+                type: type,
+                title: title,
+            };
+        },
+    }
 }

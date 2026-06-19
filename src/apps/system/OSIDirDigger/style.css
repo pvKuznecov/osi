@@ -687,33 +687,44 @@
     z-index: 10000;
 }
 .osidirdigger-infoitem-form,
-.osidirdigger-rename-form {
+.osidirdigger-rename-form,
+.osidirdigger-appselector-form {
     display: block;
     background-color: white;
     margin-left: auto;
     margin-right: auto;
     border-radius: 5px;
+    margin-top: 20%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
-.osidirdigger-rename-form {
-    width: 600px;
-    height: 100px;
-    margin-top: 20%; }
+
+.osidirdigger-rename-form {width: 600px; min-height: 100px; }
+
+.osidirdigger-appselector-form {
+    width: 400px;
+    min-height: 100px;
+    max-height: 400px;
+    overflow: hidden; }
+
 .osidirdigger-infoitem-form {
     width: 400px;
     min-height: 200px;
     max-height: 600px;
     margin-top: 10%; }
 .osidirdigger-infoitem-form .btn-exit,
-.osidirdigger-rename-form .btn-exit {
+.osidirdigger-rename-form .btn-exit,
+.osidirdigger-appselector-form .btn-exit {
     color: red;
     font-size: 16px;
     opacity: .75;
     cursor: pointer; }
 .osidirdigger-infoitem-form .btn-exit:hover,
-.osidirdigger-rename-form .btn-exit:hover { opacity: 1; }
+.osidirdigger-rename-form .btn-exit:hover,
+.osidirdigger-appselector-form .btn-exit:hover { opacity: 1; }
 
 .osidirdigger-infoitem-form h3,
-.osidirdigger-rename-form h3 { margin: 5px; }
+.osidirdigger-rename-form h3,
+.osidirdigger-appselector-form h3 { margin: 10px 5px 5px 5px; }
+
 .osidirdigger-rename-form input {
     display: block;
     width: 96%;
@@ -723,6 +734,21 @@
     font-size: 14px;
     padding: 2px 5px;
     border-radius: 5px; }
+
+.osidirdigger-appselector-form .content-area {
+    display: block;
+    width: calc(98% - 10px);
+    min-height: 20px;
+    max-height: 300px;
+    margin-top: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+    background-color: #f3f3f3;
+    border-radius: 5px;
+    padding: 5px;
+    overflow: hidden;
+    overflow-y: auto; }
 
 .osidirdigger-rename-bbuttons {
     color: white;
@@ -759,3 +785,29 @@
     width: 96%;
     margin-left: auto;
     margin-right: auto; } */
+.startapp_elem {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    width: calc(98% - 10px);
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    margin-bottom: 3px;
+    background-color: white;
+    border-radius: 5px;
+    padding: 5px;
+    cursor: pointer; }
+.startapp_elem + .startapp_elem { margin-top: 3px; }
+.startapp_elem:hover {box-shadow: 1px 1px 3px lightgray;}
+
+.startapp_elem_icon {
+    display: flex;    
+    align-items: center;
+    font-size: 24px;
+    min-width: 32px;
+    max-width: 32px;
+    height: 32px;
+    padding: 4px;
+    margin-right: 5px;
+}

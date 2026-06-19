@@ -63,8 +63,7 @@
                 }
             },
     
-            async launchApp(appData) {          
-                console.log('appData', appData);
+            async launchApp(appData) {                
                 if (!this.USERID) {
                     console.error('USERID not set');
                     return;
@@ -76,33 +75,37 @@
                     
                     // окно есть и оно свернуто
                     if (existWindow_byConfig && existWindow_byConfig.isMinimized) {                        
-                        // Вариант 1: Используем activate (рекомендуется, если activate снимает свернутость)
                         await usersTable.windows.activate(this.USERID, existWindow_byConfig.id);
-                        
-                        // Вариант 2: Если есть отдельный метод restore
-                        // if (usersTable.windows.restore) {
-                        //     await usersTable.windows.restore(this.USERID, existWindow_byConfig.id);
-                        // } else {
-                        //     await usersTable.windows.activate(this.USERID, existWindow_byConfig.id);
-                        // }
                     } else if (existWindow_byConfig) {  // окно есть и оно НЕ свернуто
                         await usersTable.windows.activate(this.USERID, existWindow_byConfig.id);
-                    } else {    // окна нет - создаем новое                        
+                    } else {
+                        // окна нет - создаем новое                        
+                        // Создаем "чистую" копию fileData без прокси
+                        const cleanFileData = appData.fileData ? {
+                            id: appData.fileData.id,
+                            name: appData.fileData.name,
+                            type: appData.fileData.type,
+                            size: appData.fileData.size,
+                            parentid: appData.fileData.parentid,
+                            userid: appData.fileData.userid,
+                            blob: appData.fileData.blob || null,
+                        } : null;
+                        
                         // Создаем новое окно с параметрами из appData
-                        await usersTable.windows.create(this.USERID, { 
+                        const newWindow = { 
                             ...appData,
-                            id: false,
-                            isMinimized: false, // Новое окно не свернуто
-                            // isMaximized: appData.isMaximized,
-                        });
+                            id: `win_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+                            isMinimized: false,
+                            fileData: cleanFileData  // Сохраняем чистую копию
+                        };
+                        
+                        await usersTable.windows.create(this.USERID, newWindow);
                     }
                     
                     // Обновляем список окон для синхронизации
                     await usersTable.windows.reupdate(this.USERID);
-                    
-                    console.log('Launch app completed');                    
                 } catch (error) {
-                    console.error('Error in launchApp:', error);
+                    console.error('[FUNC ERR] launchApp::', error);
                 }
             },
 
@@ -194,7 +197,6 @@
             
             const defAppsList = appsConfig.getAllApps();
             const findUserApps = await usersTable.getApps(this.USERID);
-            console.log('findUserApps', findUserApps);
 
             await this.findUser();
 

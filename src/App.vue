@@ -1,7 +1,9 @@
 <template>
     <AutorizationArea v-if="!isAutorized" @selectUser="selectUser" />
     <div v-if="isAutorized" class="webos">
-        <DesktopArea :USERID="USERID">
+        <DesktopArea
+            ref="desktopArea"
+            :USERID="USERID">
             <SimpleWindow 
                 v-for="window in sortedWindows"
                 :key="window.id"
@@ -22,12 +24,18 @@
                 :USERID="USERID"
                 :positionx="window.positionx"
                 :positiony="window.positiony"
-                
+                :fileData="window.fileData"
+                :fileId="window.fileId"
+                :fileName="window.fileName"
+                :fileType="window.fileType"
+
                 @close="closeWindow"
                 @minimize="minimizeWindow"
                 @toggleMaximize="toggleMaximizeWindow"
                 @focus="activateWindow"
-
+                @startapp="GetStartApp"
+                @error="handleError"
+                @notification="handleNotification"
                 @contextmenu.stop.prevent="() => {}"
             />
         </DesktopArea>
@@ -41,6 +49,7 @@ import DesktopArea from './components/os/DesktopArea/DesktopArea.vue';
 import TaskBar from './components/os/TaskBar/TaskBar.vue';
 import SimpleWindow from './components/os/SimpleWindow/SimpleWindow.vue';
 import { usersTable, IDBWindows, activeWindowId } from './idb/db';
+import { appsConfig } from './config/applications';
 
 export default {
     name: 'App',
@@ -148,6 +157,50 @@ export default {
                 console.log('Cannot activate: USERID or usersTable missing');
             }
         },
+
+        async GetStartApp(payload) {
+            // Проверяем, что есть DesktopArea
+            if (!this.$refs.desktopArea) {
+                console.error('[FUNC ERR] GetStartApp:: DesktopArea не найдена');
+                return;
+            }
+
+            // Извлекаем данные из payload
+            const { file, app } = payload || {};
+
+            if (!file) {
+                console.error('[FUNC ERR] GetStartApp:: Нет данных файла');
+                return;
+            }
+
+            let appName = app;
+            const appConfig = appsConfig.getAppById(appName);
+            
+            if (!appConfig) {
+                console.error(`[FUNC ERR] GetStartApp:: Приложение ${appName} не найдено`);
+                this.$toast?.error(`Приложение ${appName} не найдено`);
+                return;
+            }
+            
+            // Формируем данные для launchApp (как в DesktopArea)
+            const appData = {
+                ...appConfig,
+                fileId: file.id,           // Сохраняем ID файла
+                fileName: file.name,       // Имя файла
+                fileType: file.type,       // Тип файла
+                fileData: {                // Сохраняем и полные данные (для прямого использования)
+                    id: file.id,
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    blob: file.blob || null
+                }
+            };
+            
+            // Вызываем launchApp у DesktopArea
+            await this.$refs.desktopArea.launchApp(appData);
+        },
+        
 
         async selectUser(userId) {
             this.USERID = userId;

@@ -9,7 +9,11 @@
     </div>
     <div class="window-content">
         <slot>
-            <component v-if="dynamicComponent" :is="dynamicComponent" :window-id="windowId" :USERID="USERID"/>
+            <component v-if="dynamicComponent" :is="dynamicComponent" :window-id="windowId" :USERID="USERID" :fileData="fileData" :fileId="fileId" :fileName="fileName" :fileType="fileType"
+                @startapp="(payload) => forwardEvent('startapp', payload)"
+                @error="(msg) => forwardEvent('error', msg)"
+                @notification="(data) => forwardEvent('notification', data)"
+            />
             <div v-else class="default-content">
                 <p>ID {{windowId}}</p>
                 <p>Это окно {{ isMaximized ? 'развернуто' : 'не развернуто' }}</p>

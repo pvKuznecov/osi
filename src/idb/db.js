@@ -32,9 +32,10 @@ async function getDefaultApps() {
         showInStartMenu: app.showInStartMenu || false,
         // Сохраняем только базовые данные, удаляем функции и компоненты
         path: app.path || '',
-        component: (app.component && app.component.name) ? app.component.name : 'Component',
+        // component: (app.component && app.component.name) ? app.component.name : 'Component',
         // Добавляем только примитивные типы данных
-        data: app.data && typeof app.data === 'object' ? JSON.parse(JSON.stringify(app.data)) : {}        
+        data: app.data && typeof app.data === 'object' ? JSON.parse(JSON.stringify(app.data)) : {},
+        suppFormats: app.suppFormats || [],
     }));
 }
 
@@ -268,6 +269,12 @@ export class Window {
         this.zIndex = data.zIndex || nextZIndex++;
         this.positionx = data.positionx || getRandomPosPixel();
         this.positiony = data.positiony || getRandomPosPixel();
+        
+        // ДОБАВЛЯЕМ fileData и fileId для передачи файлов
+        this.fileData = data.fileData || null;
+        this.fileId = data.fileId || null;
+        this.fileName = data.fileName || '';
+        this.fileType = data.fileType || '';
     }
 }
 
@@ -703,11 +710,15 @@ export const usersTable = {
                     targetWindow = {
                         ...targetWindow,
                         ...appData,
-                        id: windowId, // сохраняем ID
-                        // НЕ перезаписываем positionx и positiony, если они не переданы явно
+                        id: windowId,
                         positionx: appData.positionx !== undefined ? appData.positionx : targetWindow.positionx,
                         positiony: appData.positiony !== undefined ? appData.positiony : targetWindow.positiony,
-                        isMinimized: false
+                        isMinimized: false,
+                        // Сохраняем fileData если есть
+                        fileData: appData.fileData || targetWindow.fileData || null,
+                        fileId: appData.fileId || targetWindow.fileId || null,
+                        fileName: appData.fileName || targetWindow.fileName || '',
+                        fileType: appData.fileType || targetWindow.fileType || ''
                     };
                     
                     newWindows = [...currentWindows];
@@ -722,15 +733,19 @@ export const usersTable = {
                     
                     const newZIndex = maxZIndex + 1;
                     
-                    // Создаем новое окно с переданными координатами или рандомными
+                    // Создаем новое окно с переданными данными
                     targetWindow = new Window({
                         ...appData,
                         id: windowId,
                         zIndex: newZIndex,
                         isMinimized: false,
-                        // Если координаты переданы, используем их, иначе будут рандомные из конструктора
                         positionx: appData.positionx,
-                        positiony: appData.positiony
+                        positiony: appData.positiony,
+                        // Явно передаем fileData и fileId
+                        fileData: appData.fileData || null,
+                        fileId: appData.fileId || null,
+                        fileName: appData.fileName || '',
+                        fileType: appData.fileType || ''
                     });
                     
                     newWindows = [...currentWindows, targetWindow];
@@ -749,6 +764,8 @@ export const usersTable = {
 
                 // Обновляем реактивную переменную
                 IDBWindows.value = newWindows;
+                
+                console.log('✅ Окно создано с fileData:', targetWindow.fileData?.name || targetWindow.fileName);
                 
                 return targetWindow;
             } catch (error) {

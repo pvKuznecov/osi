@@ -23,9 +23,14 @@
             USERID: {type: Number, default: 0},
             positionx: {type: Number, default: 100},
             positiony: {type: Number, default: 100},
+            fileData: { type: Object, default: null },
+            fileId: { type: [String, Number], default: null },
+            fileName: { type: String, default: '' },
+            fileType: { type: String, default: '' }
         },
   
-        emits: ['close', 'minimize', 'focus', 'toggleMaximize'],
+        // emits: ['close', 'minimize', 'focus', 'toggleMaximize'],
+        emits: ['close', 'minimize', 'focus', 'toggleMaximize', 'startapp', 'error', 'notification'],
   
         data() {
             return {
@@ -244,6 +249,9 @@
             toggleMaximize() { this.$emit('toggleMaximize', this.windowId); },
     
             close() { this.$emit('close', this.windowId); },
+
+            // --- метод для проброса emit событий ---
+            forwardEvent(eventName, ...args) { this.$emit(eventName, ...args); },
             
             // Метод для дебаунса сохранения (чтобы не сохранять при каждом пикселе)
              debounceSavePosition() {
