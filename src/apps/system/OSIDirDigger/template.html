@@ -88,6 +88,28 @@
         </div>
     </div>
 </div>
+<!-- "форма" выбора приложения для работы с файлом -->
+<div v-if="appSelector && show_appSelector" class="osidirdigger-blackcover-area" @click="CloseForm_appSelector()">
+    <div class="osidirdigger-appselector-form" @click.stop>
+        <div style="float: right; margin: 5px 10px;">
+            <div class="btn-exit bi-x-square-fill" @click="CloseForm_appSelector()"></div>
+        </div>
+        <h3>Открыть с помощью</h3>
+        <div class="content-area">
+            <small>Тип: {{selector_fileType.title}}</small><br>
+            <small>Выберите приложение для запуска :</small>
+            <div v-for="uApp in appsFilteredByType()" class="startapp_elem" @click="openFileInApp(appSelector, uApp.id)">
+                <div class="startapp_elem_icon" :class="uApp.iconclass"></div>
+                <div>
+                    <span><b>{{uApp.label}}</b></span>
+                    <br>
+                    <span>{{uApp.description}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="osidirdigger-app">
     <!-- Верхнее меню -->
     <div class="osidirdigger-tmenu">
@@ -162,8 +184,8 @@
             <div v-if="visibleMode == 'tile'" class="d-flex flex-wrap">
                 <div v-for="item in filteredContents" 
                     :key="item.id" class="osidirdigger-file-elem" 
-                    @click="selectItem(item)" 
-                    @dblclick="openItem(item)"
+                    @click="selectItem(item)"
+                    @dblclick="OpenForm_appSelector(item)"                    
                     @contextmenu.prevent="showContextMenu($event, item)"
                     :class="{ 'selected': selectedItem?.id === item.id, 'folder': item.type === 'folder' }">
                     <!-- Для изображений показываем превью -->
@@ -186,6 +208,9 @@
                 </div>
                 <!-- Контекстное меню -->
                 <div v-if="contextMenu.visible" class="context-menu" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
+                    <div v-if="appSelector && appSelector.type !== 'folder'" class="context-menu-item" @click="OpenForm_appSelector(contextMenu.item)">
+                        <i class="bi-box-arrow-in-up-right me-2"></i> Открыть с помощью...
+                    </div>
                     <div class="context-menu-item" @click="OpenForm_renameItem(contextMenu.item)">
                         <i class="bi-pencil me-2"></i> Переименовать
                     </div>

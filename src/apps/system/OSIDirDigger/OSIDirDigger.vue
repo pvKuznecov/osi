@@ -1,8 +1,11 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
+    import { appsConfig } from '@/config/applications';
+    import { usersTable } from '@/idb/db';
     import { dFiles, DFile } from '@/idb/db';
     import { LangPack } from './lang';
+    import { JSH } from '@/core/helpers';
 
     export default {
         name: 'OSIDirDigger',
@@ -20,9 +23,9 @@
                 contents: [],
                 selectedItem: null,
                 fileInput: null,
-                filterType: null,       // для фильтрации по типу
-                visibleMode: 'tile',    //tile || table
-                contentSortMode: 'asc',    // 'asc' или 'desc' (вместо 'up'/'down')
+                filterType: null,           // для фильтрации по типу
+                visibleMode: 'tile',        // tile || table
+                contentSortMode: 'asc',     // 'asc' или 'desc' (вместо 'up'/'down')
                 contentSortKey: 'name',
                 sortKeys: ['name', 'type', 'extension', 'size', 'createdAt', 'updatedAt'],
                 // Кэш для ObjectURL чтобы избежать утечек памяти
@@ -41,6 +44,12 @@
                 renameTarget: null,
                 renameTarget_newName: '',
                 showItemInfo: false,
+                appSelector: null,          // Выбранный файл (blob), для которого надо выбрать приложение для запуска
+                selector_fileType: null,    // Тип выбранного файла (blob), для которого надо выбрать приложение для запуска
+                show_appSelector: false,
+                appsList: null,
+                USERApps: [],
+                USER: null,
             }
         },
 
@@ -69,6 +78,26 @@
         },
 
         methods: {
+            async findUser() {
+                try {                    
+                    this.USER = await usersTable.getbyId(this.USERID);
+                } catch (error) {
+                    console.error('Ошибка поиска пользователя:', error);
+                    this.$toast.error('Не удалось загрузить данные пользователя');
+                }
+            },
+
+            Chk_fileGlobalType(inpVal) { return JSH.support.getFileGlobalType(inpVal); },
+
+            appsFilteredByType() {
+                const UserApps = this.USERApps;
+                const selector_fType = this.selector_fileType;
+                const FType = (selector_fType) ? selector_fType.type : false;
+                let filterResult = UserApps.filter(eVal => eVal.suppFormats.includes(FType));
+
+                return filterResult;
+            },
+
             showContextMenu(event, item) {
                 this.contextMenu = {
                     visible: true,
@@ -76,6 +105,7 @@
                     y: event.clientY,
                     item: item
                 };
+                this.appSelector = item;
                 
                 // Закрываем меню при клике вне его
                 setTimeout(() => {
@@ -116,14 +146,16 @@
                 }
             },
     
-            // Показать сообщение (можно заменить на вашу систему уведомлений)
+            // Показать сообщение (можно заменить на систему уведомлений)
             showMessage(message, type = 'info') {
                 console.log(`[${type}] ${message}`);
                 // Можно эмиттить событие для глобального уведомления
                 this.$emit('notification', { message, type });
             },
             
-            closeContextMenu() { this.contextMenu.visible = false; },
+            closeContextMenu() {
+                this.contextMenu.visible = false;
+            },
 
             sortBy(key) {
                 if (this.contentSortKey === key) {
@@ -339,23 +371,33 @@
             },
 
             // Открытие файла в приложении
-            openFileInApp(file) {
-                // Эмитим событие для открытия файла в соответствующем приложении
-                this.$emit('open-file', {
-                    file: file,
-                    app: this.getAppForFile(file)
-                });
+            openFileInApp(file, app = false) {
+                if (!app) return;
+
+                this.$emit('startapp', {file: file, app: app });
+                // if (!app) {
+                //     console.log('emit point-1');
+                //     // Эмитим событие для открытия файла в соответствующем приложении
+                //     this.$emit('startapp', {
+                //         file: file,
+                //         app: this.getAppForFile(file)
+                //     });
+                // } else {
+                //     console.log('emit point-2');
+                //     // Эмитим событие для открытия файла в соответствующем приложении
+                //     this.$emit('startapp', {file: file, app: app });
+                // }
             },
 
-            // Определение приложения для файла
-            getAppForFile(file) {
-                const appMap = {
-                    'audio': 'osimplayer',
-                    // 'text': 'ositexteditor',
-                    'image': 'osipicta'
-                };
-                return appMap[file.type] || null;
-            },
+            // // Определение приложения для файла
+            // getAppForFile(file) {
+            //     const appMap = {
+            //         'audio': 'osimplayer',
+            //         // 'text': 'ositexteditor',
+            //         'image': 'osipicta'
+            //     };
+            //     return appMap[file.type] || null;
+            // },
 
             // Обрезка длинных имен
             truncateName(name, maxLength = 15) {
@@ -536,6 +578,22 @@
                 this.renameTarget = inpVal;
                 this.renameTarget_newName = inpVal.name;                
             },
+            // открыть форму выбора приложения для запуска
+            async OpenForm_appSelector(inpVal) {
+                if (inpVal.type === 'folder') {
+                    await this.navigateTo(inpVal);
+                } else {
+                    this.appSelector = inpVal;
+                    this.show_appSelector = true;
+                    this.selector_fileType = this.Chk_fileGlobalType(inpVal);
+                }                
+            },
+
+            CloseForm_appSelector() {
+                this.appSelector = null;
+                this.show_appSelector = false;
+            },
+
             CloseForm_renameItem() {
                 this.operFormRename = false;
                 this.renameTarget_newName = '';
@@ -620,6 +678,18 @@
             
             const LangPackData = LangPack;
             this.LangData = (userLangS && LangPackData && LangPackData[userLangS]) ? LangPackData[userLangS] : LangPackData.en;
+
+            const defAppsList = appsConfig.getAllApps();
+            const findUserApps = await usersTable.getApps(this.USERID);
+
+            await this.findUser();
+
+            console.log('defAppsList', defAppsList);
+            console.log('findUserApps', findUserApps);
+
+            this.appsList = defAppsList;
+            this.USERApps = (findUserApps) ? findUserApps : defAppsList;
+
 
             this.$nextTick(() => {
                 this.scrollToEnd();

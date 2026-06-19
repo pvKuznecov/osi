@@ -74,7 +74,7 @@
             </table>
         </div>
         <div class="mplayer-tracktimeline">
-            <audio id="main_audio" controls @ended="PlayerAction_NextTrack()" :src="(currentTrack) ? currentTrack.common.url : ''" style="display: none;" :volume="VolumeLvl" @timeupdate="onTimeUpdate" />
+            <!-- <audio id="main_audio" controls @ended="PlayerAction_NextTrack()" :src="(currentTrack) ? currentTrack.common.url : ''" style="display: none;" :volume="VolumeLvl" @timeupdate="onTimeUpdate" /> -->
             <input id="main_tracktime" type="range" class="mplayer-trackrangetime" min="0" :max="TrackTime.duration" value="0" @change="Chng_TrackRangeTime()">
         </div>
         <div class="mplayer-buttons-bpanel d-flex justify-content-center align-items-center">
