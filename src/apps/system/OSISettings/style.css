@@ -14,24 +14,39 @@
     color: white; }
 
 .osisettings-menu {
-    display: block;
-    width: 300px;
+    display: flex;
+    flex-direction: column;
+    min-width: 300px;
     height: calc(100% - 20px);
+    overflow: hidden;
+    overflow-y: auto;
     background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85));
     margin-left: 10px;
     margin-top: 10px;
-    border-radius: 5px;
-    padding: 5px; }
+    border-radius: 5px; }
 
-.osisettings-menu li {
+.main-left-menu-block {
+    display: block;
+    width: 96%;
+    margin-top: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    border-bottom: 1px solid lightgray;
+}
+
+.main-left-menu-block li {
     padding-bottom: 5px;
     margin-bottom: 5px;
-    /* border-bottom: 1px solid gray; */
+    background-color: white;
+    border-radius: 5px;
+    padding: 2px 5px;
+    color: black;
+    font-size: medium;
  }
 
 .osisettings-content {
     display: inline-block;
-    width: calc(100% - 330px);
+    min-width: calc(100% - 330px);
     height: calc(100% - 20px);
     margin-top: 10px;
     margin-left: 10px;
@@ -96,13 +111,8 @@ h2 {
     margin: 5px;
 }
 
-.osisettings-menu-elem {
-    font-weight: 600;
-    text-shadow: 1px 1px 2px black;
-    cursor: pointer; }
-
-.osisettings-menu-elem:hover {
-    color: rgb(179, 146, 240); }
+.osisettings-menu-elem { font-weight: 600; cursor: pointer; }
+.osisettings-menu-elem:hover { background-color: rgba(179, 146, 240, .3); }
 
 .osilogo {
     display: block;
@@ -111,11 +121,7 @@ h2 {
     margin-right: auto;
     margin-bottom: 20px; }
 
-.selected-menu-elem {
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 2px;
-    border-radius: 5px;
-    color: rgb(179, 146, 240); }
+.main-left-menu-block .selected-menu-elem { background-color: rgb(179, 146, 240); }
 
 .osisettings-elem-info-tab {
     width: 98%;
@@ -123,13 +129,9 @@ h2 {
     margin-left: auto;
     border-radius: 5px; }
 
-.osisettings-elem-info-tab td {
-    padding: 3px 5px;
-    border: 1px solid lightgray; }
+.osisettings-elem-info-tab td { padding: 3px 5px; border: 1px solid lightgray; }
 
-.tab-header {
-    background-color: lightgray;
-    text-align: center; }
+.tab-header { background-color: lightgray; text-align: center; }
 
 .wp-elem-min {
     display: inline-block;
@@ -147,8 +149,7 @@ h2 {
     background-repeat: 'no-repeat';
     background-color: rgba(0, 0, 0, 0.272);
     border-radius: 5px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-}
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); }
 
 .wp-elem-min-title {
     width: 80%;

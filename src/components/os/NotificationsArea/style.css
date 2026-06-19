@@ -1,73 +1,89 @@
-.notifs-area {
-    display: block;
+.notifs-area,
+.notifs-area-min {
+    display: flex;
+    flex-direction: column;
     position: absolute;
-    width: 400px;
-    height: auto;
+    min-width: 600px;
+    max-width: 600px;
+    max-height: 350px;
     float: right;
     right: 0;
     /* padding: 5px 10px; */
     bottom: 40px;
-    /* background-color: rgba(255, 255, 255, 0.1); */
     z-index: 5000;
-    border-radius: 5px 5px 0 0;
-}
+    overflow: hidden;
+    overflow-y: auto; }
 
-.notifs-elem {
-    width: calc(100% - 10px);
-    height: 135px;
-    background-color: rgba(0, 0, 0, 0.5);
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    padding: 5px;
-    font-size: small;
-    box-shadow: 0 6px 20px rgba(0, 120, 212, 0.25); }
+.notifs-area-min { width: 0px;  height: 0px; }
 
-.notifs-elem-logoarea {
+.notif-min-elem {
     display: flex;
     flex-direction: column;
+    width: calc(98% - 10px);
+    height: 100px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: rgba(202, 202, 202, 0.5);
+    /* color: white; */
+    font-size: medium;
+    backdrop-filter: blur(2px);
+    border-radius: 5px 0 0 5px;
+    box-shadow: 1px 1px 3px rgb(61, 61, 61); }
+.notif-min-elem:hover {box-shadow: 1px 1px 3px black;}
+
+.notif-min-elem .btn-close {
+    display: flex;
+    cursor: pointer;  
     align-items: center;
-    width: 105px;
-    height: 100%;
-    user-select: none;
-}
-
-.notifs-elem-icon {
-    font-size: 55px;
-    margin-bottom: 5px;
-}
-
-.notifs-elem-label {
-    color: white;
-    text-shadow: 1px 1px 2px black;
+    justify-content: center;
+    position: absolute;
+    float: right;
+    right: 10px;
+    top: 7px;
+    width: 14px;
+    height: 14px;
     font-size: 12px;
-    font-weight: 500;
-    text-align: center;
-    overflow: hidden;
-    text-shadow: 1px 1px 2px black; }
+    border-radius: 5px; }
+.notif-min-elem .btn-close:hover {box-shadow: 1px 1px black; background-color: white; }
 
-.notifs-elem-contentarea {
-    display: inline-block;
-    width: calc(100% - 110px);
-    height: 100%; }
-
-.notifs-elem-header {
-    width: 100%;
-    height: 20px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    color: white;
-    text-shadow: 1px 1px 2px black; }
-
-.notifs-elem-content {
+.notif-min-elem-title {
     display: block;
     width: 100%;
-    height: calc(100% - 25px);
-    padding: 3px 5px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    margin-top: 5px;
+    height: 25px;
+    padding: 2px 5px;
+    background: linear-gradient(to bottom, rgb(103, 55, 235), rgb(80, 33, 209));
     color: white;
-    text-shadow: 1px 1px 2px black; }
+    border-radius: 5px 0 0 5px;
+    font-size: medium;
+    font-weight: 600; }
+
+.notif-min-content-area {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    height: 60px;
+}
+
+.notif-min-content-area .content-app {
+    display: block;
+    width: 100px;
+    height: 100%;
+    margin-top: 5px;
+    background-color: rgba(59, 59, 59, 0.322);
+    border-radius: 5px;
+ }
+
+.notif-min-content-area .content-inner {
+    display: block;
+    width: 490px;
+    height: 100%;
+    max-height: 70px;
+    margin-top: 5px;
+    overflow: hidden;
+    padding: 3px 5px;
+    background-color: rgba(255, 255, 255, 0.89);
+    font-size: small;
+    /* border-radius: 5px 0 0 5px; */
+}

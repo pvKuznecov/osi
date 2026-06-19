@@ -1,16 +1,13 @@
-<div class="notifs-area">
-    <div v-for="notif in notifs" class="notifs-elem d-flex">
-        <div class="notifs-elem-logoarea">
-            <div class="notifs-elem-icon">{{Get_appIcon(false)}}</div>
-            <span class="notifs-elem-label">{{Get_appLabel(false)}}</span>
+<div v-if="fullMode" class="notifs-area">
+    <div v-for="notif in AllNotifs" class="notif-min-elem" :id="`notif_${notif.id}`">
+        <button class="btn-close bi-x-lg"></button>
+        <span class="notif-min-elem-title">{{notif.title}}</span>
+        <div class="notif-min-content-area">
+            <div class="content-app">{{notif.app}}</div>
+            <div class="content-inner" v-html="notif.content"></div>
         </div>        
-        <div class="notifs-elem-contentarea">
-            <div class="notifs-elem-header d-flex justify-content-center align-items-center">
-                header
-            </div>
-            <div class="notifs-elem-content">
-                Info text
-            </div>
-        </div>
     </div>
+</div>
+<div v-else class="notifs-area-min">
+    aaa
 </div>

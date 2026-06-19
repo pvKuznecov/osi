@@ -50,6 +50,7 @@
                 appsList: null,
                 USERApps: [],
                 USER: null,
+                UserLang: null,
             }
         },
 

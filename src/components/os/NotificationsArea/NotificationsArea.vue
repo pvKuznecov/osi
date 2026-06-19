@@ -1,36 +1,56 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
-    import { appsConfig } from '@/config/applications';
+    import { usersTable } from '@/idb/db';
 
     export default {
         name: 'NotificationsArea',
 
         props: {
-            notifs: {
-                type: Array,
-                default: () => []
-            }
+            USERID: {type: Number, default: 0}
         },
   
         data() {
             return {
+                USER: null,
+                UserLang: null,
+
+                AllNotifs: [],
+
+                fullMode: false,
             }
         },
 
         methods: {
-            Get_appIcon(appId) {
-                const appConfig = appsConfig.getAppById(appId);
-                console.log('(Get_appIcon)appConfig', appConfig);
+            async findUser() {
+                try {                    
+                    this.USER = await usersTable.getbyId(this.USERID);
 
-                return '🌀';
+                    if (this.USER) this.getAllNotifs();
+                } catch (error) {
+                    console.error('Ошибка поиска пользователя:', error);
+                    this.$toast.error('Не удалось загрузить данные пользователя');
+                }
             },
-            Get_appLabel(appId) {
-                const appConfig = appsConfig.getAppById(appId);
-                console.log('(Get_appLabel)appConfig', appConfig);
 
-                return 'OSI';
+            async getAllNotifs() {
+                try {
+                    const resArr = await usersTable.notifs.getAll(this.USERID);
+                    this.AllNotifs = resArr;
+
+                    if (this.AllNotifs && this.AllNotifs.length > 0) this.fullMode = true;
+                } catch (err) {
+                    console.error('[FUNC ERR] getAllNotifs::', err);
+                }                
             },
+        },
+        
+        async mounted() {
+            const userLang = navigator.language || navigator.userLanguage;
+            const userLangS = userLang.split('-')[0];
+            this.UserLang = userLangS;
+
+            this.findUser();
         },
     }
 </script>

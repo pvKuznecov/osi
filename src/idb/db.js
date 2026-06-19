@@ -41,7 +41,7 @@ async function getDefaultApps() {
 
 // описание схемы БД
 DB.version(db_version).stores({
-    users: '++id, name, login, password, apps, data, config, systemconfig, systemdata, createdAt, updatedAt',
+    users: '++id, name, login, password, apps, data, config, notifs, systemconfig, systemdata, createdAt, updatedAt',
     // settings: '++id, key, value, updatedAt',
     dfiles: '++id, name, userid, parentid, [userid+parentid], type, size, mimetype, data, private, protect, createdAt, updatedAt',
 });
@@ -54,6 +54,16 @@ const Def_userSystemconfig = {
     windows: [],
     activeWindowId: null,
 };
+
+const Def_notifs = [
+    {
+        id: 1,
+        app: null,
+        title: "Добро пожаловать в OSI!",
+        content: "Поздравляем! Ваша учетная запись успешно создана. Это Ваш первый вход в систему.",
+        autoclose: 20,
+    }
+];
 
 let nextZIndex = 100;
 const IDBWindows = ref([]);
@@ -75,6 +85,7 @@ export class User {
         this.apps = data.apps || [];
         this.data = data.data || {};
         this.config = data.config || Def_userConfig;
+        this.notifs = data.notifs || Def_notifs;
         this.systemconfig = data.systemconfig || Def_userSystemconfig;
         this.systemdata = data.systemdata || Def_systemdata;
         this.protect = data.protect || false;
@@ -652,6 +663,23 @@ export const usersTable = {
             
             return { success: true, userId, windowId, fallback: true, timeout: error.message === 'Transaction timeout after 5s' };
         }
+    },
+
+    notifs: {
+        // получить массив notifs учетной записи
+        async getAll(id) {
+            try {
+                const USER = await DB.users.get(id);
+                if (USER && USER.notifs) {
+                    return USER.notifs;
+                } else {
+                    console.error('Error operation (users; getNotifs).');
+                }
+            } catch (err) {
+                console.error('Error operation (users; getNotifs):', err);            
+                throw new Error(`Failed to get user by id ${id}: ${err.message}`);
+            }
+        },
     },
 
     windows: {

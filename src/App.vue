@@ -39,6 +39,7 @@
                 @contextmenu.stop.prevent="() => {}"
             />
         </DesktopArea>
+        <NotificationsArea :USERID="USERID"></NotificationsArea>
         <TaskBar :USERID="USERID" />
     </div>
 </template>
@@ -48,6 +49,7 @@ import AutorizationArea from './components/os/AutorizationArea/AutorizationArea.
 import DesktopArea from './components/os/DesktopArea/DesktopArea.vue';
 import TaskBar from './components/os/TaskBar/TaskBar.vue';
 import SimpleWindow from './components/os/SimpleWindow/SimpleWindow.vue';
+import NotificationsArea from './components/os/NotificationsArea/NotificationsArea.vue';
 import { usersTable, IDBWindows, activeWindowId } from './idb/db';
 import { appsConfig } from './config/applications';
 
@@ -58,7 +60,8 @@ export default {
         AutorizationArea,
         DesktopArea,
         TaskBar,
-        SimpleWindow
+        SimpleWindow,
+        NotificationsArea,
     },
 
     data() {

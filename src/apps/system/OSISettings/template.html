@@ -1,12 +1,15 @@
 <div class="osisettings-app">
     <div class="osisettings-menu">
-        <ul>
-            <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('all'))}"><span class="osisettings-menu-elem" @click="ChngArea('all')">{{ LangData.allsettings }}</span></li>
-            <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('description'))}"><span class="osisettings-menu-elem" @click="ChngArea('description')">{{ LangData.description }}</span></li>
-            <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('accounts'))}"><span class="osisettings-menu-elem" @click="ChngArea('accounts')">{{ LangData.accounts }}</span></li>
-            <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('design'))}"><span class="osisettings-menu-elem" @click="ChngArea('design')">{{ LangData.design }}</span></li>
-            <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('memmanagment'))}"><span class="osisettings-menu-elem" @click="ChngArea('memmanagment')">{{ LangData.memmanagment }}</span></li>
-        </ul>
+        <div class="main-left-menu-block">
+            <h3>Навигация:</h3>
+            <ul>
+                <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('all'))}"><span class="osisettings-menu-elem" @click="ChngArea('all')">{{ LangData.allsettings }}</span></li>
+                <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('description'))}"><span class="osisettings-menu-elem" @click="ChngArea('description')">{{ LangData.description }}</span></li>
+                <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('accounts'))}"><span class="osisettings-menu-elem" @click="ChngArea('accounts')">{{ LangData.accounts }}</span></li>
+                <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('design'))}"><span class="osisettings-menu-elem" @click="ChngArea('design')">{{ LangData.design }}</span></li>
+                <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('memmanagment'))}"><span class="osisettings-menu-elem" @click="ChngArea('memmanagment')">{{ LangData.memmanagment }}</span></li>
+            </ul>
+        </div>        
     </div>
     <div class="osisettings-content">        
         <!-- description area -->
