@@ -41,7 +41,7 @@ async function getDefaultApps() {
 
 // описание схемы БД
 DB.version(db_version).stores({
-    users: '++id, name, login, password, apps, data, config, systemconfig, systemdata, createdAt, updatedAt',
+    users: '++id, name, login, password, apps, data, config, notifs, systemconfig, systemdata, createdAt, updatedAt',
     // settings: '++id, key, value, updatedAt',
     dfiles: '++id, name, userid, parentid, [userid+parentid], type, size, mimetype, data, private, protect, createdAt, updatedAt',
 });
@@ -55,13 +55,53 @@ const Def_userSystemconfig = {
     activeWindowId: null,
 };
 
+const Def_notifs = [
+    {
+        id: 1,
+        app: null,
+        title: "Добро пожаловать в OSI!",
+        content: "Поздравляем! Ваша учетная запись успешно создана. Это Ваш первый вход в систему.",
+        create: new Date(),
+        type: "info",
+        icon: "I",
+        autoclose: 0,
+        createdAt: new Date(),
+    },
+    {
+        id: 2,
+        app: null,
+        title: "Первичные рекомендации",
+        content: 'Перед началом работы с системой, рекомендуется выполнить следующие настройки:<ul><li>настроить список приложений "под себя";</li><li>кастомизировать рабочий стол.</li></ul>',
+        create: new Date(),
+        type: "info",
+        icon: "I",
+        autoclose: 0,
+        createdAt: new Date(),
+    },
+];
+
+// const Def_notif_template = {
+//     id: null,                               // id уведомления
+//     app: null,                              // id приложения (от имени которого уведомление)
+//     title: "Уведомление",                   // Заголовок уведомления
+//     content: "<p>Текст уведомления.</p>",   // Текстовое модержание уведомления (текст или html)
+//     type: "info",                           // Value = ["info", "success", "warning", "error"]
+//     icon: null,                             // Данные по иконке (если пусто - надо подставлять логотип OSI)
+//     autoclose: 0,                           // Автозакрытие через n секунд (если 0 - не закрывать)
+//     read: false,                            // Метка "Прочитано"
+//     createdAt: null,                        // Дата + время создания
+//     endAt: null,                            // Дата + время истечения (не обязательное)
+//     actions: [],                            // Список доступных действий; Value = ["startapp", "close"]
+//     data: {}                                // Доп. параметры (TODO - продумать)
+// };
+
 let nextZIndex = 100;
 const IDBWindows = ref([]);
 const activeWindowId = ref(null);
 
 function getRandomPosPixel() {
-    const min = Math.ceil(50); // Округляем минимум вверх
-    const max = Math.floor(200); // Округляем максимум вниз
+    const min = Math.ceil(50);      // Округляем минимум вверх
+    const max = Math.floor(200);    // Округляем максимум вниз
 
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -75,6 +115,7 @@ export class User {
         this.apps = data.apps || [];
         this.data = data.data || {};
         this.config = data.config || Def_userConfig;
+        this.notifs = data.notifs || Def_notifs;
         this.systemconfig = data.systemconfig || Def_userSystemconfig;
         this.systemdata = data.systemdata || Def_systemdata;
         this.protect = data.protect || false;
@@ -275,6 +316,40 @@ export class Window {
         this.fileId = data.fileId || null;
         this.fileName = data.fileName || '';
         this.fileType = data.fileType || '';
+    }
+}
+
+export class Notification {
+    constructor(data = {}) {
+        this.id = data.id || Date.now();
+        this.app = data.app || null;
+        this.title = data.title || "Уведомление";
+        this.content = data.content || "";
+        this.type = data.type || "info";
+        this.icon = data.icon || "I";
+        this.autoclose = data.autoclose || 0;
+        this.read = data.read || false;
+        this.createdAt = data.createdAt || new Date();
+        this.endAt = data.endAt || null;
+        this.actions = data.actions || ["close"];
+        this.data = data.data || {};
+    }
+
+    // Форматирование времени
+    getTimeAgo() {
+        const now = new Date();
+        const diff = Math.floor((now - this.createdAt) / 1000);
+        
+        if (diff < 60) return 'только что';
+        if (diff < 3600) return `${Math.floor(diff / 60)} мин. назад`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)} ч. назад`;
+        return `${Math.floor(diff / 86400)} дн. назад`;
+    }
+    
+    // Проверка на истекшее уведомление
+    isExpired() {
+        if (!this.endAt) return false;
+        return new Date() > new Date(this.endAt);
     }
 }
 
@@ -652,6 +727,168 @@ export const usersTable = {
             
             return { success: true, userId, windowId, fallback: true, timeout: error.message === 'Transaction timeout after 5s' };
         }
+    },
+
+    notifs: {
+        // получить все уведомления пользователя
+        async getAll(id) {
+            try {
+                const USER = await DB.users.get(id);
+                
+                if (USER && USER.notifs) return USER.notifs.map(n => new Notification(n));
+                
+                return [];
+            } catch (err) {
+                console.error('Error operation (users.notifs; getNotifs):', err);            
+                throw new Error(`Failed to get notifications by user id ${id}: ${err.message}`);
+            }
+        },
+
+        // получить только непрочитанные уведомления пользователя
+        async getUnread(id) {
+            try {
+                const allNotifs = await this.getAll(id);
+
+                return allNotifs.filter(n => !n.read);
+            } catch(err) {
+                console.error('Error operation (users.notifs; getUnread):', err);            
+                throw new Error(`Failed to get unread notifications by user id ${id}: ${err.message}`);
+            }
+        },
+
+        // создать новое уведомление
+        async add(user_id = false, notif_data = false) {
+            if (!user_id) throw new Error('User Id required.');
+            if (!notif_data) throw new Error('Notification data required.');
+
+            try {
+                const user = await DB.users.get(user_id);
+                if (!user) throw new Error(`User not found: ${user_id}`);
+
+                const newNotif = new Notification(notif_data);
+                const notifs = user.notifs || [];
+                notifs.unshift(newNotif);
+
+                // ограничиваем кол-во уведомлений у пользователя (100)
+                if (notifs.length > 100) notifs.length = 100;
+
+                await DB.users.update(user_id, {
+                    notifs: notifs,
+                    updatedAt: new Date(),
+                });
+
+                return notifs;
+            } catch(err) {
+                console.error('Error adding new notification:', err);
+                throw new Error(`Failed to add notification: ${err.message}`);
+            }
+        },
+
+        // отметить уведомление как прочитанное (одно, по его ID)
+        async markAsRead(user_id = false, notif_id = false) {
+            if (!user_id) throw new Error('User ID required.');
+            if (!notif_id) throw new Error('Notification ID required.');
+
+            try {
+                const user = await DB.users.get(user_id);
+                if (!user) throw new Error(`User not found: ${user_id}`);
+
+                // получаем сущ. список, вычисляем нужное уведомление, помечаем его как прочитанное
+                const notifs = user.notifs || [];
+                const index = notifs.findIndex(n => n.id === notif_id);
+                if (index === -1) throw new Error(`Notification not found: ${notif_id}`);
+
+                notifs[index].read = true;
+
+                await DB.users.update(user_id, {
+                    notifs: notifs,
+                    updatedAt: new Date(),
+                });
+
+                return true;
+            } catch(err) {
+                console.error('Error marking notification as read:', err);
+                throw new Error(`Failed to mark notification as read: ${err.message}`);
+            }
+        },
+
+        // отметить все уведомления пользователя как прочитанные
+        async markAsReadAll(user_id = false) {
+            if (!user_id) throw new Error('User ID required.');
+
+            try {
+                const user = await DB.users.get(user_id);
+                if (!user) throw new Error(`User not found: ${user_id}`);
+
+                // находим все уведомления и сразу помечаем их как прочитанные
+                const notifs = (user.notifs || []).map(n => ({
+                    ...n,
+                    read: true
+                }));
+
+                await DB.users.update(user_id, {
+                    notifs: notifs,
+                    updatedAt: new Date(),
+                });
+
+                return true;
+            } catch(err) {
+                console.error('Error marking all notifications as read:', err);
+                throw new Error(`Failed to mark all notifications as read: ${err.message}`);
+            }
+        },
+
+        // удалить уведомление
+        async delete(user_id = false, notif_id = false) {
+            if (!user_id) throw new Error('User ID required.');
+            if (!notif_id) throw new Error('Notification ID required.');
+
+            try {
+                const user = await DB.users.get(user_id);
+                if (!user) throw new Error(`User not found: ${user_id}`);
+
+                // получаем массив с уведомлениями и сразу фильтруем (удаляем) необходимый
+                const notifs = (user.notifs || []).filter(n => n.id !== notif_id);
+
+                await DB.users.update(user_id, {
+                    notifs: notifs,
+                    updatedAt: new Date(),
+                });
+                
+                return true;
+            } catch(err) {
+                console.error('Error deleting notification:', err);
+                throw new Error(`Failed to delete notification: ${err.message}`);
+            }
+        },
+
+        // получить кол-во непрочитанных уведомлений
+        async getUnreadCount(user_id = false) {
+            if (!user_id) throw new Error('User ID required.');
+
+            try {
+                const unread = await this.getUnread(user_id);
+                return unread.length;
+            } catch(err) {
+                console.error('Error getting unread count: ', err);
+                return 0;
+            }
+        },
+
+        // создать системное уведомление
+        async addSystem(user_id = false, title = false, content = false, type = "info", autoclose = 5) {
+            if (!user_id) throw new Error('User ID required.');
+            if (!content) throw new Error('Content required.');
+
+            return await this.add(user_id, {
+                app: "system",
+                title: title || "Системное уведомление",
+                content: content,
+                type: type,
+                autoclose: autoclose,
+                icon: null
+            });
+        },
     },
 
     windows: {
@@ -1944,6 +2181,7 @@ export default {
     User,
     DFile,
     Window,
+    Notification,
     usersTable,
     // settingsTable,
     initDatabase,
