@@ -50,6 +50,7 @@ import DesktopArea from './components/os/DesktopArea/DesktopArea.vue';
 import TaskBar from './components/os/TaskBar/TaskBar.vue';
 import SimpleWindow from './components/os/SimpleWindow/SimpleWindow.vue';
 import NotificationsArea from './components/os/NotificationsArea/NotificationsArea.vue';
+import { useNotificationsStore } from './stores/notifications.js';
 import { usersTable, IDBWindows, activeWindowId } from './idb/db';
 import { appsConfig } from './config/applications';
 
@@ -202,8 +203,7 @@ export default {
             
             // Вызываем launchApp у DesktopArea
             await this.$refs.desktopArea.launchApp(appData);
-        },
-        
+        },        
 
         async selectUser(userId) {
             this.USERID = userId;
@@ -212,6 +212,10 @@ export default {
                 try {
                     // Загружаем пользователя
                     this.USER = await usersTable.getbyId(userId);
+
+                    const notificationsStore = useNotificationsStore();
+                    await notificationsStore.init(userId);
+
                     // Обновляем список окон
                     await usersTable.windows.reupdate(userId);
                 } catch (error) {

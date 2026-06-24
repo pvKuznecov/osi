@@ -1,13 +1,68 @@
-<div v-if="fullMode" class="notifs-area">
-    <div v-for="notif in AllNotifs" class="notif-min-elem" :id="`notif_${notif.id}`">
-        <button class="btn-close bi-x-lg"></button>
-        <span class="notif-min-elem-title">{{notif.title}}</span>
-        <div class="notif-min-content-area">
-            <div class="content-app">{{notif.app}}</div>
-            <div class="content-inner" v-html="notif.content"></div>
-        </div>        
+<div class="notifs_container">
+    <!-- Основная область уведомлений -->
+    <div v-if="isPanelOpen" class="notifs_area" @click.stop>
+        <h2>Уведомления:</h2>
+        <div v-for="notif in AllNotifs" :key="notif.id" :class="(notif !== fullModeNotif) ? 'notifelem_minimal' : 'notifelem'"  :id="`notif_${notif.id}`">
+            <!-- Блок "мини" отображения -->
+            <div v-if="notif !== fullModeNotif" class="minelem_content" @click="selectedNotif(notif)">
+                <div class="logo">{{ notif.app || 'OSI' }}</div>
+                <div class="min-title">{{ notif.title }}</div>
+                <div class="elem_content_btn_close bi bi-x-lg" @click.stop="removeNotif(notif.id)"></div>
+            </div>
+            <!-- Блок "полного" отображения -->
+            <div v-else class="elem_content">
+                <div class="title">
+                    <div class="logo">{{ notif.app || 'OSI' }}</div>
+                    {{ notif.title }}
+                    <div class="elem_content_btn_close bi bi-x-lg" @click="removeNotif(notif.id)"></div>
+                </div>
+                <div v-html="notif.content" class="content"></div>
+                <!-- блок доступных действий -->
+                <div v-if="notif.actions && notif.actions.length" class="notif_actions">
+                    <button v-for="action in notif.actions" :key="action.id" @click="handleAction(notif, action)" class="action_btn">
+                        {{ LangData[action] }}
+                    </button>
+                </div>
+                <!-- статус-бар под блоком -->
+                <div class="notif_footer">
+                    <div class="notif_status">
+                        <span v-if="!notif.read" class="unread-badge"><i class="bi bi-circle-fill"></i> Новое</span>
+                        <span v-if="notif.pinned" class="pinned-badge"><i class="bi bi-pin-fill"></i> Закреплено</span>
+                    </div>
+                    <div class="create_time">
+                        <span>{{ formatTime(notif.createdAt) }}</span>
+                    </div>
+                </div>                    
+            </div>
+        </div>
+        <!-- Блок "нет уведомлений"   -->
+        <div v-if="AllNotifs.length === 0 && !loading" class="empty-state">
+            <span><i class="bi bi-fullscreen"></i> Нет уведомлений</span>
+        </div>
+            
+            <div v-if="loading" class="empty-state">
+                <span><i class="bi bi-arrow-clockwise"></i>Загрузка...</span>
+            </div>
+        </div>
+
+        <!-- Затемнение -->
+        <div v-if="isPanelOpen" class="panel-overlay" @click="togglePanel"></div>
+
+        <!-- Всплывающие уведомления -->
+        <div class="floating-notifs">
+            <div v-for="notif in floatingNotifs" :key="notif.id" class="floating-notif" :class="notif.type" @click="openNotification(notif)">
+                <div class="floating-icon">{{ notif.icon || '📢' }}</div>
+                <div class="floating-content">
+                    <div class="floating-title">{{ notif.title }}</div>
+                    <div class="floating-body">{{ stripHtml(notif.content) }}</div>
+                </div>
+                <button class="floating-close" @click.stop="dismissFloating(notif.id)">✕</button>
+            </div>
+        </div>
+
+        <!-- Кнопка-триггер -->
+        <div class="notif_trigger" @click="togglePanel" :title="(unreadCount > 0) ? `У Вас ${unreadCount} непрочитанных уведомления` : 'Просмотр уведомлений'">
+            <i class="bell bi bi-bell-fill"></i>
+            <span v-if="unreadCount > 0" class="badge">{{ unreadCount }}</span>
+        </div>
     </div>
-</div>
-<div v-else class="notifs-area-min">
-    aaa
-</div>

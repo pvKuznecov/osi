@@ -86,15 +86,14 @@
             dynamicComponent() {
                 // маппинг имен компонентов (пока это никак не победить, ПОДУМАТЬ НАД ЭТИМ)
                 const componentMap = {
-                    // 'OSIHelper': () => import('@/apps/system/OSIHelper/OSIHelper.vue'),
                     'OSICalculator': () => import('@/apps/system/OSICalculator/OSICalculator.vue'),
                     'OSISettings': () => import('@/apps/system/OSISettings/OSISettings.vue'),
                     'OSIMPlayer': () => import('@/apps/system/OSIMPlayer/OSIMPlayer.vue'),
-                    // 'OSICalendar': () => import('@/apps/system/OSICalendar/OSICalendar.vue'),
                     'OSIAppManager': () => import('@/apps/system/OSIAppManager/OSIAppManager.vue'),
                     'OSIPicta': () => import('@/apps/system/OSIPicta/OSIPicta.vue'),
                     'OSIDirDigger': () => import('@/apps/system/OSIDirDigger/OSIDirDigger.vue'),
                     'OSITetris': () => import('@/apps/system/OSITetris/OSITetris.vue'),
+                    'OSINotificator': () => import('@/apps/system/OSINotificator/OSINotificator.vue'),
                 };
 
                 if (this.appName && componentMap[this.appName]) {

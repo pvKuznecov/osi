@@ -83,7 +83,14 @@ const applications = [
         iconclass: 'bi-puzzle-fill text-ico-game',
         defWidth: 600, defHeight: 770,
         canMinimize: true, showOnDesktop: true, showInStartMenu: true,
-        // minWidth: 600, minHeight: 770e
+        // minWidth: 600, minHeight: 770
+    }),
+    new OSIApp({
+        id: 'osinotificator', name: 'OSINotificator',
+        label: 'Менеджер уведомлений', category: 'utilities', description: 'Системный менеджер для работы с уведомлениями.',
+        iconclass: 'bi-bell-fill text-ico-purpure',
+        defWidth: 850, defHeight: 600,
+        resizable: true, isMaximized: true, canMinimize: true, showInStartMenu: true,
     }),
 ];
 

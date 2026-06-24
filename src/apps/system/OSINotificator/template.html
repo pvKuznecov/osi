@@ -1,0 +1,34 @@
+<div class="notif_app">
+    <!-- Блок отображения списка уведомлений -->
+    <div class="notifications_area">
+        <div v-if="SelectNotif" class="notifs_tab">
+            <div v-for="N in SortedNotifs" class="notifs_tab_elem" :class="(N.type) ? 'leftboard_' + N.type : ''">
+                <div :class="(N.type) ? 'title_' + N.type : 'title'">
+                    <span>{{N.title}}</span>
+                    <i>{{formatTime(N.createdAt)}}</i>
+                </div>
+                <div v-html="N.content" class="notifs_tab_elem_content"></div>
+                <!-- <div>
+                    {{N}}
+                </div> -->
+                <div class="notifs_tab_elem_operations">
+                    <button v-for="action in N.actions">{{LangData(action)}}</button>
+                    <span>|</span>
+                    <button><i class="bi bi-trash-fill"></i></button>
+                </div>                
+            </div>
+        </div>
+        <div v-if="!SelectNotif"></div>
+    </div>
+    <!-- Блок меню управления -->
+    <div class="menu_area">
+        <div class="notifmenu_block">
+            <span class="title">Фильтр поиска:</span>
+        </div>
+        <div class="notifmenu_block">
+            <span class="title">Действия:</span>
+            <button @click="addNotif_success('Тестовое уведомление', `<p>Вами была запущена операция отправки тестового уведомления.</p><p>Время запуска операции: ${new Date()}`)">{{LangData("add")}}</button>
+            <button>{{LangData("delete")}}</button>
+        </div>
+    </div>
+</div>
