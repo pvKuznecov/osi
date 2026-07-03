@@ -7,7 +7,13 @@
         props: {
             windowId: {type: String, required: true},
             USERID: {type: Number, default: 0},
+            fileData: { type: Object, default: null },
+            fileId: { type: [String, Number], default: null },
+            fileName: { type: String, default: '' },
+            fileType: { type: String, default: '' },
         },
+
+        emits: ['startapp', 'error', 'notification'],
         
         data() {
             return {

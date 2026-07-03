@@ -19,6 +19,7 @@ class OSIApp {
         this.showInStartMenu = data.showInStartMenu || false;   // Отображать в меню "Пуск"
         this.deskContextMenu = data.deskContextMenu || false;   // Отображать в контекстном меню рабочего стола
         this.suppFormats = data.suppFormats || [];              // Перечень поддерживаемых приложением форматов
+        this.loader = data.loader || null;                      // Функция lazy-load Vue-компонента
     }
 }
 
@@ -28,6 +29,7 @@ const applications = [
         label: 'Настройки', category: 'system', description: 'Настройки системы OSI.',
         iconclass: 'bi-gear-fill text-ico-tech',
         resizable: true, canMinimize: true, showOnDesktop: true, showInStartMenu: true, deskContextMenu: true,
+        loader: () => import('@/apps/system/OSISettings/OSISettings.vue'),
     }),
     // new OSIApp({
     //     id: 'osihelper', name: 'OSIHelper',
@@ -48,6 +50,7 @@ const applications = [
         iconclass: 'bi-calculator-fill text-ico-purpure',
         defWidth: 400, defHeight: 670,
         canMinimize: true, showOnDesktop: true, showInStartMenu: true,
+        loader: () => import('@/apps/system/OSICalculator/OSICalculator.vue'),
     }),
     new OSIApp({
         id: 'osimplayer', name: 'OSIMPlayer',
@@ -56,12 +59,14 @@ const applications = [
         defWidth: 850, defHeight: 400,
         showOnDesktop: true, showInStartMenu: true,
         suppFormats: ["audio"],
+        loader: () => import('@/apps/system/OSIMPlayer/OSIMPlayer.vue'),
     }),
     new OSIApp({
         id: 'osiappmanager', name: 'OSIAppManager',
         label: 'AppManager', category: 'system', description: 'Менеджер приложений OSI.',
         iconclass: 'bi-grid-3x3-gap-fill text-ico-tech',
         isMaximized: true, showInStartMenu: true, deskContextMenu: true,
+        loader: () => import('@/apps/system/OSIAppManager/OSIAppManager.vue'),
     }),
     new OSIApp({
         id: 'osipicta', name: 'OSIPicta',
@@ -69,6 +74,7 @@ const applications = [
         iconclass: 'bi-easel-fill text-ico-purpure',
         isMaximized: true, canMinimize: true, showInStartMenu: true, showOnDesktop: true,
         suppFormats: ["image"],
+        loader: () => import('@/apps/system/OSIPicta/OSIPicta.vue'),
     }),
     new OSIApp({
         id: 'osidirdigger', name: 'OSIDirDigger',
@@ -76,6 +82,7 @@ const applications = [
         iconclass: 'bi-hdd-fill text-ico-purpure',
         defWidth: 850, defHeight: 600,
         resizable: true, isMaximized: true, canMinimize: true, showInStartMenu: true, showOnDesktop: true,
+        loader: () => import('@/apps/system/OSIDirDigger/OSIDirDigger.vue'),
     }),
     new OSIApp({
         id: 'ositetris', name: 'OSITetris',
@@ -83,7 +90,7 @@ const applications = [
         iconclass: 'bi-puzzle-fill text-ico-game',
         defWidth: 600, defHeight: 770,
         canMinimize: true, showOnDesktop: true, showInStartMenu: true,
-        // minWidth: 600, minHeight: 770
+        loader: () => import('@/apps/system/OSITetris/OSITetris.vue'),
     }),
     new OSIApp({
         id: 'osinotificator', name: 'OSINotificator',
@@ -91,43 +98,17 @@ const applications = [
         iconclass: 'bi-bell-fill text-ico-purpure',
         defWidth: 850, defHeight: 600,
         resizable: true, isMaximized: true, canMinimize: true, showInStartMenu: true,
+        loader: () => import('@/apps/system/OSINotificator/OSINotificator.vue'),
     }),
 ];
 
-// const enrichedApplications = applications;
-
-// Функция для создания асинхронного импорта
-const createAsyncImport = (path) => {
-    return () => import(/* @vite-ignore */ path);
-};
-// Обогащаем конфигурацию функциями импорта (ОСТАВИЛ КАК ЗАГОТОВКУ ДЛЯ БУДУЩИХ НАРАБОТОК)
-const enrichedApplications = applications.map(app => ({
-    ...app,
-    // Автоматически создаем функцию импорта компонента
-    asyncImport: createAsyncImport(app.componentPath),
-    // Извлекаем имя компонента из пути (для отладки)
-    // componentName: app.componentPath.split('/').pop().replace('.vue', '')
-}));
-
-// Вспомогательные функции
 export const appsConfig = {
-    // Получить все приложения
-    getAllApps() { return enrichedApplications; },
-  
-    // Получить приложения для рабочего стола
-    getDesktopApps() { return enrichedApplications.filter(app => app.showOnDesktop !== false); },
-  
-    // Получить приложения для меню "Пуск"
-    getStartMenuApps() { return enrichedApplications.filter(app => app.showInStartMenu !== false); },
-  
-    // Получить приложение по ID
-    getAppById(id) { return enrichedApplications.find(app => app.id === id); },
-  
-    // Получить приложение по имени
-    getAppByName(name) { return enrichedApplications.find(app => app.name === name); },
-  
-    // Получить приложения по категории
-    getAppsByCategory(category) { return enrichedApplications.filter(app => app.category === category); },
+    getAllApps() { return applications; },
+    getDesktopApps() { return applications.filter(app => app.showOnDesktop !== false); },
+    getStartMenuApps() { return applications.filter(app => app.showInStartMenu !== false); },
+    getAppById(id) { return applications.find(app => app.id === id); },
+    getAppByName(name) { return applications.find(app => app.name === name); },
+    getAppsByCategory(category) { return applications.filter(app => app.category === category); },
   
     // Получить иконку приложения
     getAppIcon(appId) {
@@ -143,12 +124,11 @@ export const appsConfig = {
         return app?.window || { defWidth: 400, defHeight: 400, isMaximized: false };
     },
   
-    // Получить функцию импорта компонента
-    getAppImportFunction(appName) {
+    getAppLoader(appName) {
         const app = this.getAppByName(appName);
-        
-        return app?.asyncImport || null;
+
+        return app?.loader || null;
     }
 };
 
-export default enrichedApplications;
+export default applications;

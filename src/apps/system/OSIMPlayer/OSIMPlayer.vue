@@ -19,6 +19,8 @@
             fileType: { type: String, default: '' }
         },
 
+        emits: ['startapp', 'error', 'notification'],
+
         data() {
             return {
                 lang_data: {},
