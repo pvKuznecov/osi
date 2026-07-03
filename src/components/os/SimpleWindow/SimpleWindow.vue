@@ -2,6 +2,7 @@
 <style src="./style.css"></style>
 <script>
     import { usersTable } from '@/idb/db';
+    import { appsConfig } from '@/config/applications';
     import { defineAsyncComponent } from 'vue';
 
     export default {
@@ -84,23 +85,9 @@
   
         computed: {
             dynamicComponent() {
-                // маппинг имен компонентов (пока это никак не победить, ПОДУМАТЬ НАД ЭТИМ)
-                const componentMap = {
-                    'OSICalculator': () => import('@/apps/system/OSICalculator/OSICalculator.vue'),
-                    'OSISettings': () => import('@/apps/system/OSISettings/OSISettings.vue'),
-                    'OSIMPlayer': () => import('@/apps/system/OSIMPlayer/OSIMPlayer.vue'),
-                    'OSIAppManager': () => import('@/apps/system/OSIAppManager/OSIAppManager.vue'),
-                    'OSIPicta': () => import('@/apps/system/OSIPicta/OSIPicta.vue'),
-                    'OSIDirDigger': () => import('@/apps/system/OSIDirDigger/OSIDirDigger.vue'),
-                    'OSITetris': () => import('@/apps/system/OSITetris/OSITetris.vue'),
-                    'OSINotificator': () => import('@/apps/system/OSINotificator/OSINotificator.vue'),
-                };
+                const loader = appsConfig.getAppLoader(this.appName);
 
-                if (this.appName && componentMap[this.appName]) {
-                    return defineAsyncComponent(componentMap[this.appName]);                    
-                } else {
-                    return null;
-                }
+                return loader ? defineAsyncComponent(loader) : null;
             },
             windowStyles() {
                 const baseStyles = { zIndex: this.zIndex };

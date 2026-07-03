@@ -203,7 +203,13 @@ export default {
             
             // Вызываем launchApp у DesktopArea
             await this.$refs.desktopArea.launchApp(appData);
-        },        
+        },
+
+        // TODO: заглушка — доделать потом через notificationService / toast (ошибки из приложений в SimpleWindow)
+        handleError() {},
+
+        // TODO: заглушка — доделать потом через notificationService / NotificationsArea (уведомления из приложений)
+        handleNotification() {},
 
         async selectUser(userId) {
             this.USERID = userId;
