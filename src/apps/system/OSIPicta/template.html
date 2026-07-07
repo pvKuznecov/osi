@@ -54,7 +54,7 @@
             <div class="picta-img-list" ref="thumbnailList" @scroll="onThumbnailScroll">
                 <div v-for="(p, index) in images" :key="index" class="picta-thumbnail-wrapper" :class="{ 'selected': p == currentImage }" @click="MakeHandSelectImg(p)" :ref="el => { if (p == currentImage) setSelectedThumbnailRef(el) }">
                     <img :src="p.dataUrl" :alt="p.name" class="picta-thumbnail-img" :class="{ 'picta-img-selected': p == currentImage }">
-                    <span class="picta-del-elem-btn bi-x-lg" @click="DelElemImg(p)"></span>
+                    <span class="picta-del-elem-btn bi-x-lg" @click.stop="DelElemImg(p)"></span>
                 </div>
             </div>
 

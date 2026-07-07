@@ -236,7 +236,8 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s;
-    padding: 2px; }
+    padding: 2px;
+    position: relative; }
 
 .picta-thumbnail-wrapper:hover { transform: translateY(-2px); }
 
@@ -306,14 +307,19 @@
 .picta-info-content i { color: gray; }
 
 .picta-del-elem-btn {
-    width: 16px;
-    height: 16px;    
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 18px;
+    height: 18px;
     border-radius: 50px;
     color: white;
-    margin-left: 3px;
-    margin-top: -40px;
     text-align: center;
-    font-size: 10px; }
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35); }
 .picta-del-elem-btn:hover { color: rgb(255, 99, 71); box-shadow: 0 4px 12px rgba(255, 99, 71, 0.4); }
 
 /* ===== АДАПТИВНОСТЬ ===== */
