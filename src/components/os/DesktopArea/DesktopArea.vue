@@ -3,9 +3,12 @@
 <script>
     import { usersTable } from '@/idb/db';
     import { appsConfig } from '@/config/applications'
+    import AppIcon from '@/components/os/AppIcon/AppIcon.vue';
 
     export default {
         name: "DesktopArea",
+
+        components: { AppIcon },
 
         props: { USERID: {type: Number, default: 0} },
   

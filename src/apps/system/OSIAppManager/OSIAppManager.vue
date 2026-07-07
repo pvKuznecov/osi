@@ -3,9 +3,12 @@
 <script>
     import { appsConfig } from '@/config/applications';
     import { usersTable } from '@/idb/db';
+    import AppIcon from '@/components/os/AppIcon/AppIcon.vue';
 
     export default {
         name: 'OSIAppManager',
+
+        components: { AppIcon },
 
         props: {
             windowId: {type: String, required: true},
@@ -83,7 +86,7 @@
             await this.findUser();
 
             this.appsList = defAppsList;
-            this.USERApps = (findUserApps) ? findUserApps : defAppsList;
+            this.USERApps = appsConfig.enrichApps(findUserApps || defAppsList);
         },
 
         methods: {

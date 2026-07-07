@@ -6,9 +6,12 @@
     import { dFiles, DFile } from '@/idb/db';
     import { LangPack } from './lang';
     import { JSH } from '@/core/helpers';
+    import AppIcon from '@/components/os/AppIcon/AppIcon.vue';
 
     export default {
         name: 'OSIDirDigger',
+
+        components: { AppIcon },
 
         props: {
             windowId: {type: String, required: true},
@@ -695,7 +698,7 @@
             console.log('findUserApps', findUserApps);
 
             this.appsList = defAppsList;
-            this.USERApps = (findUserApps) ? findUserApps : defAppsList;
+            this.USERApps = appsConfig.enrichApps(findUserApps || defAppsList);
 
 
             this.$nextTick(() => {

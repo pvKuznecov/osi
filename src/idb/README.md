@@ -54,7 +54,7 @@ user.systemdata.migrationVersion
 ```
 User
 ├── login, name, password
-├── apps[]                    ← копия метаданных из applications.js + пользовательские флаги
+├── apps[]                    ← копия метаданных из applications.js + пользовательские флаги (в т.ч. iconImg как URL)
 ├── config                    ← avatar и др.
 ├── notifs[]                  ← уведомления
 ├── systemconfig
@@ -220,6 +220,8 @@ DB.version(2).stores({
 | `initDatabase()` | Старт БД + миграции |
 | `clearDatabase()` | Очистка `users` и `dfiles` |
 | `usersTable` | Пользователи, окна, уведомления, состояния (`delete` также удаляет все `dfiles` пользователя) |
+| `usersTable.setDesktopWallpaper(userId, name)` | Смена обоев без затирания `systemconfig.windows` |
+| `getIndexedDBStats()` | Статистика OSIDB для экрана настроек |
 | `dFiles` | Виртуальная ФС |
 | `IDBWindows`, `activeWindowId` | Реактивное состояние окон (Vue `ref`) |
 | `CURRENT_DATA_VERSION` | Актуальная версия миграции данных |
@@ -256,3 +258,5 @@ DB.version(2).stores({
 - [Dexie: upgrade()](https://dexie.org/docs/Version/Version.upgrade())
 - Конфиг приложений: `src/config/applications.js`
 - Версия OSI: `src/config/os.js`
+- IndexedDB (миграции, API): `src/idb/README.md`
+- Документация разработчика: `DevelopDocumentations/Documentation.md`

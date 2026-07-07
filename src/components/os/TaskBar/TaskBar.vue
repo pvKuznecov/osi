@@ -4,9 +4,12 @@
     import { usersTable, IDBWindows, activeWindowId } from '@/idb/db';
     import { JSH } from '@/core/helpers';
     import { appsConfig } from '@/config/applications';
+    import AppIcon from '@/components/os/AppIcon/AppIcon.vue';
 
     export default {
         name: "TaskBar",
+
+        components: { AppIcon },
 
         props: {
             USERID: { type: Number, default: 0 }
@@ -93,7 +96,9 @@
                 const findUserApps = await usersTable.getApps(this.USERID);                
 
                 this.apps = defAppsList;
-                this.USERApps = (findUserApps && Array.isArray(findUserApps)) ? findUserApps : defAppsList;
+                this.USERApps = appsConfig.enrichApps(
+                    (findUserApps && Array.isArray(findUserApps)) ? findUserApps : defAppsList
+                );
 
                 this.updateTime();
                 if (this.timer) clearInterval(this.timer);

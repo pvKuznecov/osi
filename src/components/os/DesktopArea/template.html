@@ -16,7 +16,9 @@
                 <span class="app-title"><b>{{dappPreventInfo.label}}</b>: {{dappPreventInfo.description}}</span>
                 <span class="app-oper-elem" @mousedown.stop="SubMenu_launchApp(app)">Запустить</span>
             </div>
-            <div class="icon" :class="!app.icon ? app.iconclass : ''" :style="app.iconclass ? 'color: white' : ''" @contextmenu.prevent="ShowAppInfo($event, app)">{{app.icon}}</div>
+            <div class="icon" @contextmenu.prevent="ShowAppInfo($event, app)">
+                <AppIcon :icon-img="app.iconImg" :iconclass="app.iconclass" :icon="app.icon" :alt="app.label" size="md"/>
+            </div>
             <span class="label" @contextmenu.prevent="ShowAppInfo($event, app)">{{ app.label }}</span>
         </div>
     </div>    
