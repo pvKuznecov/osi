@@ -39,6 +39,7 @@ h5 { font-size: 14px; }
 .text-ico-purpure { background: linear-gradient(to bottom, rgb(103, 55, 235), rgb(80, 33, 209)); }
 .text-ico-green { background: linear-gradient(180deg, #42b883, #2e865f); }
 .text-ico-red { background: linear-gradient(180deg, #b84242, #862e2e); }
+/* .text-ico-game { background: linear-gradient(180deg, #f5a623, #d4770a); } */
 
 .text-ico-tech:hover { opacity: .85; }
 .text-ico-info:hover { opacity: .85; }

@@ -23,6 +23,7 @@ async function getDefaultApps() {
         label: app.label,
         category: app.category || 'Other',
         icon: app.icon || '',
+        iconImg: app.iconImg || '',
         iconclass: app.iconclass || '',
         description: app.description || '',
         defWidth: app.defWidth || false,
@@ -302,6 +303,7 @@ export class Window {
         this.defWidth = data.defWidth || 850;
         this.description = data.description || '';
         this.icon = data.icon || '';
+        this.iconImg = data.iconImg || '';
         this.iconclass = data.iconclass || '';
         this.isMaximized = data.isMaximized || false;
         this.label = data.label || 'Unknown';

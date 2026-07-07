@@ -99,7 +99,15 @@
             <small>Тип: {{selector_fileType.title}}</small><br>
             <small>Выберите приложение для запуска :</small>
             <div v-for="uApp in appsFilteredByType()" class="startapp_elem" @click="openFileInApp(appSelector, uApp.id)">
-                <div class="startapp_elem_icon" :class="uApp.iconclass"></div>
+                <div class="startapp_elem_icon">
+                    <AppIcon
+                        :icon-img="uApp.iconImg"
+                        :iconclass="uApp.iconclass"
+                        :icon="uApp.icon"
+                        :alt="uApp.label"
+                        size="md"
+                    />
+                </div>
                 <div>
                     <span><b>{{uApp.label}}</b></span>
                     <br>
