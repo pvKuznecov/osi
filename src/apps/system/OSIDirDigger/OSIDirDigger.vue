@@ -384,6 +384,9 @@
             openFileInApp(file, app = false) {
                 if (!app) return;
 
+                this.appSelector = null;
+                this.show_appSelector = false;
+
                 this.$emit('startapp', {file: file, app: app });
                 // if (!app) {
                 //     console.log('emit point-1');

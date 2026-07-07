@@ -100,13 +100,7 @@
             <small>Выберите приложение для запуска :</small>
             <div v-for="uApp in appsFilteredByType()" class="startapp_elem" @click="openFileInApp(appSelector, uApp.id)">
                 <div class="startapp_elem_icon">
-                    <AppIcon
-                        :icon-img="uApp.iconImg"
-                        :iconclass="uApp.iconclass"
-                        :icon="uApp.icon"
-                        :alt="uApp.label"
-                        size="md"
-                    />
+                    <AppIcon :icon-img="uApp.iconImg" :iconclass="uApp.iconclass" :icon="uApp.icon" :alt="uApp.label" size="md"/>
                 </div>
                 <div>
                     <span><b>{{uApp.label}}</b></span>
@@ -190,8 +184,7 @@
                 <div class="osidirdigger-wt-separator"></div>                
             </div>
             <div v-if="visibleMode == 'tile'" class="d-flex flex-wrap">
-                <div v-for="item in filteredContents" 
-                    :key="item.id" class="osidirdigger-file-elem" 
+                <div v-for="item in filteredContents" :title="item.name" :key="item.id" class="osidirdigger-file-elem" 
                     @click="selectItem(item)"
                     @dblclick="OpenForm_appSelector(item)"                    
                     @contextmenu.prevent="showContextMenu($event, item)"
@@ -203,7 +196,7 @@
                     <!-- Для остальных - иконку -->
                     <div v-else class="file-icon" :class="getFileIcon(item.type)"></div>                    
                     <!-- Имя файла -->
-                    <div class="file-name">{{ truncateName(item.name) }}</div>                    
+                    <div class="file-name">{{ truncateName(item.name) }}</div>
                     <!-- Размер -->
                     <div v-if="item.type !== 'folder'" class="file-size">{{ formatSize(item.size) }}</div>                    
                     <!-- Дополнительная информация -->
