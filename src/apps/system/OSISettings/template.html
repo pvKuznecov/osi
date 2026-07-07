@@ -68,7 +68,7 @@
             <ul>
                 <li>
                     <h3>{{ LangData.desktopbgimg }}:</h3>
-                    <div v-for="wp in wpList" class="wp-elem-min" @click="ChangeWPImage(wp.nameExt)">
+                    <div v-for="wp in wpList" class="wp-elem-min" @mousedown.stop @click="ChangeWPImage(wp.nameExt)">
                         <img :src="wp.path" :alt="wp.name" :class="(USER.systemconfig.desktopWallpaper == wp.nameExt) ? 'selected-wp' : ''" />
                         <div class="wp-elem-min-title">{{ wp.name }}</div>
                     </div>
@@ -124,13 +124,86 @@
                     </tbody>
                 </table>                
             </div>
-            <h3 style="padding-left: 10px; margin-top: 10px;">IndexedDB:</h3>
-            <div v-if="indexedDBStatistic"></div>
+            <h3 style="padding-left: 10px; margin-top: 10px;">
+                IndexedDB:
+                <span
+                    v-if="!idbStatsLoading"
+                    class="osisettings-btn-neutral"
+                    style="margin-left: 10px; font-size: 12px;"
+                    @click="loadIndexedDBStatistic()"
+                >{{ LangData.idbRefresh }}</span>
+            </h3>
+            <div v-if="idbStatsLoading">
+                <table class="osisettings-elem-info-tab">
+                    <tbody>
+                        <tr>
+                            <td>{{ LangData.idbLoading }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div v-else-if="indexedDBStatistic">
+                <table class="osisettings-elem-info-tab">
+                    <tbody>
+                        <tr class="tab-header">
+                            <td colspan="3">{{ LangData.idbDatabase }}:</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">{{ LangData.name }}:</td>
+                            <td>{{ indexedDBStatistic.database.name }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">{{ LangData.idbSchemaVersion }}:</td>
+                            <td>{{ indexedDBStatistic.database.schemaVersion }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">{{ LangData.idbDataVersion }}:</td>
+                            <td>{{ indexedDBStatistic.database.dataVersion }}</td>
+                        </tr>
+                        <tr class="tab-header">
+                            <td colspan="3">{{ LangData.idbMemory }}:</td>
+                        </tr>
+                        <tr v-if="indexedDBStatistic.quota">
+                            <td colspan="2">{{ LangData.idbOriginLimit }}:</td>
+                            <td>{{ indexedDBStatistic.quota.quotaFormatted }}</td>
+                        </tr>
+                        <tr v-if="indexedDBStatistic.quota">
+                            <td colspan="2">{{ LangData.idbOriginUsed }}:</td>
+                            <td>{{ indexedDBStatistic.quota.usageFormatted }}</td>
+                        </tr>
+                        <tr v-if="indexedDBStatistic.quota">
+                            <td colspan="2">{{ LangData.idbOccupiedPercent }}:</td>
+                            <td>{{ indexedDBStatistic.quota.usedPercent }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">{{ LangData.idbEstimatedSize }}:</td>
+                            <td>{{ indexedDBStatistic.total.formatted }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">{{ LangData.idbOccupiedMB }}:</td>
+                            <td>{{ indexedDBStatistic.total.megabytes }}</td>
+                        </tr>
+                        <tr class="tab-header">
+                            <td colspan="3">{{ LangData.idbTables }}:</td>
+                        </tr>
+                        <tr>
+                            <td>№</td>
+                            <td>Наименование</td>
+                            <td>{{ LangData.idbRecords }} / размер</td>
+                        </tr>
+                        <tr v-for="(table, index) in indexedDBStatistic.tables" :key="table.name">
+                            <td>{{ index + 1 }}</td>
+                            <td>{{ table.name }}</td>
+                            <td>{{ table.count }} / {{ table.formatted }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
             <div v-else>
                 <table class="osisettings-elem-info-tab">
                     <tbody>
                         <tr>
-                            <td>Нет данных</td>
+                            <td>{{ LangData.idbNoData }}</td>
                         </tr>
                     </tbody>
                 </table>
