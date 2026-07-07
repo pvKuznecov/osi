@@ -37,6 +37,7 @@
                 isInitialized: false,
                 pendingFileData: null,
                 pendingFileId: null,
+                lastExternalFileId: null,
             }
         },
 
@@ -78,6 +79,11 @@
                     }
 
                     try {
+                        // Защита от повторных срабатываний при re-render/reupdate окон (например, number ↔ string)
+                        const normalizedId = String(newId);
+                        if (this.lastExternalFileId === normalizedId) return;
+                        this.lastExternalFileId = normalizedId;
+
                         const fileData = await dFiles.getInfo(newId);
                         if (fileData) await this.loadFileFromData(fileData, { replaceList: true });
                     } catch (error) {
@@ -93,6 +99,12 @@
                     if (!this.isInitialized) {
                         this.pendingFileData = newVal;
                         return;
+                    }
+
+                    if (newVal?.id !== undefined && newVal?.id !== null) {
+                        const normalizedId = String(newVal.id);
+                        if (this.lastExternalFileId === normalizedId) return;
+                        this.lastExternalFileId = normalizedId;
                     }
 
                     await this.loadFileFromData(newVal, { replaceList: true });
@@ -485,6 +497,12 @@
                 
                 if (index === -1) return;
                 
+                // Освобождаем blob: URL при удалении элемента
+                const removed = this.images[index];
+                if (removed?.dataUrl && typeof removed.dataUrl === 'string' && removed.dataUrl.startsWith('blob:')) {
+                    try { URL.revokeObjectURL(removed.dataUrl); } catch (e) { /* ignore */ }
+                }
+
                 // Удаляем изображение из массива
                 this.images.splice(index, 1);
                 
