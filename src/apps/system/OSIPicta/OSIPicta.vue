@@ -1,8 +1,8 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
+    import { usersTable, dFiles } from '@/idb/db';
     import { LangPack } from './lang';
-    import { usersTable } from '@/idb/db';
 
     export default {
         name: 'OSIPicta',
@@ -35,6 +35,8 @@
                 imageNaturalHeight: 0,
                 isZoomed: false,
                 isInitialized: false,
+                pendingFileData: null,
+                pendingFileId: null,
             }
         },
 
@@ -66,6 +68,40 @@
             }
         },
 
+        watch: {
+            fileId: {
+                async handler(newId) {
+                    if (!newId) return;
+                    if (!this.isInitialized) {
+                        this.pendingFileId = newId;
+                        return;
+                    }
+
+                    try {
+                        const fileData = await dFiles.getInfo(newId);
+                        if (fileData) await this.loadFileFromData(fileData, { replaceList: true });
+                    } catch (error) {
+                        console.error('Loading file Error:', error);
+                    }
+                },
+                immediate: true
+            },
+
+            fileData: {
+                async handler(newVal) {
+                    if (!newVal) return;
+                    if (!this.isInitialized) {
+                        this.pendingFileData = newVal;
+                        return;
+                    }
+
+                    await this.loadFileFromData(newVal, { replaceList: true });
+                },
+                immediate: true,
+                deep: false,
+            },
+        },
+
         methods: {
             // Инициализация из IDB
             async initFromIDB() {
@@ -91,9 +127,105 @@
                 
                 this.isInitialized = true;
                 console.log('OSIPicta initialized');
+
+                // Если окно было открыто "Открыть с помощью..." — догружаем файл после инициализации
+                try {
+                    if (this.pendingFileId) {
+                        const fileData = await dFiles.getInfo(this.pendingFileId);
+                        this.pendingFileId = null;
+                        if (fileData) await this.loadFileFromData(fileData, { replaceList: true });
+                    } else if (this.pendingFileData) {
+                        const fileData = this.pendingFileData;
+                        this.pendingFileData = null;
+                        await this.loadFileFromData(fileData, { replaceList: true });
+                    } else if (this.fileData && this.images.length === 0) {
+                        await this.loadFileFromData(this.fileData, { replaceList: true });
+                    }
+                } catch (error) {
+                    console.error('Failed to load initial file:', error);
+                }
             },
 
             LangData(key) { return this.lang_data[key] || ''; },
+
+            showError(message) {
+                alert(message);
+                console.error(message);
+            },
+
+            // Загрузка файла из переданных данных
+            async loadFileFromData(fileData, options = {}) {                
+                if (!fileData) {
+                    console.error('[FUNC ERR] loadFileFromData:: fileData пустой');
+                    this.showError('Нет данных файла');
+                    return;
+                }
+
+                try {
+                    this.isLoading = true;
+                    
+                    // Пытаемся извлечь файл из разных структур
+                    let imgFile = null;
+                    let imgBlob = null;
+
+                    // Вариант 1: fileData это сам файл (File или Blob)
+                    if (fileData instanceof File || fileData instanceof Blob) {
+                        imgFile = fileData;
+                        imgBlob = fileData;
+                    }
+                    // Вариант 2: fileData содержит blob (из DFile)
+                    else if (fileData.blob || fileData.data) {
+                        const blobLike = fileData.blob || fileData.data;
+                        const fileName = fileData.name || this.fileName || 'image';
+                        const fileType = fileData.type || this.fileType || 'image/*';
+
+                        if (blobLike instanceof Blob || blobLike instanceof File) {
+                            imgBlob = blobLike;
+                        } else {
+                            imgBlob = new Blob([blobLike], { type: fileType });
+                        }
+
+                        imgFile = new File([imgBlob], fileName, { type: fileType });
+                    } else if (fileData?.id) {
+                        // Вариант 3: есть только id (например, при запуске из DirDigger)
+                        const idbFile = await dFiles.getInfo(fileData.id);
+                        return await this.loadFileFromData(idbFile, options);
+                    }
+
+                    if (!imgFile) {
+                        this.showError('Не удалось получить данные изображения');
+                        return;
+                    }
+
+                    // При запуске "Открыть с помощью..." логично заменить текущий список
+                    if (options.replaceList) {
+                        this.clearImageList();
+                    }
+
+                    // Создаем URL для отображения
+                    const dataUrl = URL.createObjectURL(imgFile);
+                    this.images.push({
+                        file: imgFile,
+                        dataUrl,
+                        name: imgFile.name,
+                        type: imgFile.type,
+                        size: imgFile.size,
+                        lastModified: imgFile.lastModified || Date.now(),
+                    });
+
+                    this.currentIndex = 0;
+                    this.$nextTick(() => {
+                        this.onImageLoad();
+                    });
+                    this.throttledSaveState();
+
+                } catch (error) {
+                    console.error('[FUNC ERR] loadFileFromData:: Critical Error upload file:', error);
+                    this.showError(`Ошибка загрузки файла: ${error.message}`);
+                } finally {
+                    this.isLoading = false;
+                }
+            },
 
             throttledSaveState() {
                 if (this.saveTimeout) clearTimeout(this.saveTimeout);
