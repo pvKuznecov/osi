@@ -2,7 +2,7 @@
 <style src="./style.css"></style>
 <script>
     import { JSH } from '@/core/helpers';
-    import { usersTable } from '@/idb/db';
+    import { usersTable, getIndexedDBStats } from '@/idb/db';
     import { OSIDATA } from '@/config/os';
     import { LangPack } from './lang';
     // import { useOSIAppsStore } from '@/stores/os.apps.store';
@@ -43,6 +43,8 @@
                     newpassword: '',
                 },
                 avatarsList: JSH.system.getAvatarsList(),
+                indexedDBStatistic: null,
+                idbStatsLoading: false,
             }
         },
 
@@ -73,15 +75,7 @@
             // },
 
             storeStatistic() {
-                // let result = this.osStore.getLocalStorageUsage();
-                let result = JSH.browser.getLocalStorageUsage();
-                console.log("navigator", navigator);
-
-                return result;
-            },
-
-            indexedDBStatistic() {
-                return false;
+                return JSH.browser.getLocalStorageUsage();
             },
         },
 
@@ -157,8 +151,28 @@
                 }
             },
 
-            ChngArea(areaVal) {                
+            ChngArea(areaVal) {
                 this.SelectArea = areaVal;
+
+                if (areaVal === 'memmanagment' || areaVal === 'all') {
+                    this.loadIndexedDBStatistic();
+                }
+            },
+
+            async loadIndexedDBStatistic() {
+                if (this.idbStatsLoading) return;
+
+                this.idbStatsLoading = true;
+
+                try {
+                    this.indexedDBStatistic = await getIndexedDBStats();
+                } catch (error) {
+                    console.error('Ошибка загрузки статистики IndexedDB:', error);
+                    this.indexedDBStatistic = null;
+                    this.$toast?.error('Не удалось загрузить статистику IndexedDB');
+                } finally {
+                    this.idbStatsLoading = false;
+                }
             },
 
             Chng_showPanel(key) {

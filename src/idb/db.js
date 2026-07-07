@@ -5,6 +5,8 @@ import { appsConfig } from "@/config/applications";
 // конфигураторы БД
 const db_name = 'OSIDB';
 const db_version = 1;
+/** Версия структуры данных внутри документов users (не путать с db_version Dexie). */
+const CURRENT_DATA_VERSION = 1;
 
 // инициализация БД
 const DB = new Dexie(db_name);
@@ -48,7 +50,7 @@ DB.version(db_version).stores({
 
 // ========Default configs========
 const Def_userConfig = { avatar: "cat.jpg" };
-const Def_systemdata = {windowsstates: {}};
+const Def_systemdata = { windowsstates: {}, migrationVersion: CURRENT_DATA_VERSION };
 const Def_userSystemconfig = {
     desktopWallpaper: "nwall.jpg",
     windows: [],
@@ -119,8 +121,8 @@ export class User {
         this.systemconfig = data.systemconfig || Def_userSystemconfig;
         this.systemdata = data.systemdata || Def_systemdata;
         this.protect = data.protect || false;
-        this.createdAt = data.createdAt || new Date();
-        this.updatedAt = data.updatedAt || new Date();
+        this.createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
+        this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : new Date();
         // автоматическое присваение id (вариант для "совместимости")
         if (data.id) this.id = data.id;
     }
@@ -461,7 +463,8 @@ export const usersTable = {
     // поиск учетной записи по id
     async getbyId(id) {
         try {
-            return await DB.users.get(id);
+            const user = await DB.users.get(id);
+            return user ? new User(user) : user;
         } catch (error) {
             console.error('Error operation (users; getbyId):', error);            
             throw new Error(`Failed to get user by id ${id}: ${error.message}`);
@@ -471,7 +474,8 @@ export const usersTable = {
     // поиск учетной записи по login
     async getbyLogin(login) {
         try {
-            return await DB.users.where('login').equals(login).first();
+            const user = await DB.users.where('login').equals(login).first();
+            return user ? new User(user) : user;
         } catch (error) {
             console.error('Error operation (users; getbyLogin):', error);
             throw new Error(`Failed to get user by login ${login}: ${error.message}`);
@@ -481,7 +485,8 @@ export const usersTable = {
     // получить массив всех учетных записей
     async getAll() {
         try {
-            return await DB.users.toArray();
+            const users = await DB.users.toArray();
+            return users.map(user => new User(user));
         } catch (error) {
             console.error('Error operation (users; getAll):', error);
             throw new Error(`Failed to get all users`);
@@ -533,6 +538,25 @@ export const usersTable = {
         }
     },
 
+    // смена обоев рабочего стола (без затрагивания списка окон)
+    async setDesktopWallpaper(userId, wallpaperName) {
+        if (!userId) throw new Error('User ID required');
+        if (!wallpaperName) throw new Error('Wallpaper name required');
+
+        try {
+            await DB.users.where('id').equals(userId).modify(user => {
+                if (!user.systemconfig) user.systemconfig = { ...Def_userSystemconfig };
+                user.systemconfig.desktopWallpaper = wallpaperName;
+                user.updatedAt = new Date();
+            });
+
+            return await this.getbyId(userId);
+        } catch (error) {
+            console.error('Error operation (users; setDesktopWallpaper):', error);
+            throw new Error(`Failed to set desktop wallpaper: ${error.message}`);
+        }
+    },
+
     // обновление конфигуратора приложений в учетной записи
     async updateAppSetting(userId, appId, key, value) {
         if (!userId) throw new Error('User ID required');
@@ -574,9 +598,10 @@ export const usersTable = {
         }
     },
 
-    // удалить учетную запись
+    // удалить учетную запись и все её файлы в dfiles
     async delete(id) {
         try {
+            await DB.dfiles.where('userid').equals(id).delete();
             return await DB.users.delete(id);
         } catch (error) {
             console.error('Error operation (users; delete):', error);
@@ -2085,6 +2110,81 @@ export const dFiles = {
 
 // -=-=-=-=-=-=-Служебное-=-=-=-=-=-=-
 
+/** Добавляет в user.apps приложения из конфига, сохраняя пользовательские настройки. */
+function mergeUserApps(userApps, defaultApps) {
+    const merged = Array.isArray(userApps) ? [...userApps] : [];
+
+    for (const defaultApp of defaultApps) {
+        const idx = merged.findIndex(app => app.id === defaultApp.id);
+
+        if (idx === -1) {
+            merged.push({ ...defaultApp });
+        } else {
+            merged[idx] = { ...defaultApp, ...merged[idx] };
+        }
+    }
+
+    return merged;
+}
+
+/** Нормализует поля окон для совместимости со старыми записями. */
+function normalizeSystemConfig(systemconfig) {
+    const config = {
+        ...Def_userSystemconfig,
+        ...(systemconfig || {}),
+    };
+
+    config.windows = (config.windows || []).map(w => ({
+        ...w,
+        zIndex: w.zIndex ?? 100,
+        isMinimized: w.isMinimized ?? false,
+        isMaximized: w.isMaximized ?? false,
+        fileId: w.fileId ?? null,
+        fileName: w.fileName ?? '',
+        fileType: w.fileType ?? '',
+        fileData: w.fileData ?? null,
+    }));
+
+    return config;
+}
+
+/**
+ * Пошаговые миграции вложенных данных users.
+ * При добавлении миграции: увеличить CURRENT_DATA_VERSION и дописать ветку в цикл.
+ */
+async function runDataMigrations() {
+    const users = await DB.users.toArray();
+    if (!users.length) return;
+
+    const defaultApps = await getDefaultApps();
+
+    for (const user of users) {
+        let version = user.systemdata?.migrationVersion ?? 0;
+        if (version >= CURRENT_DATA_VERSION) continue;
+
+        const updates = { updatedAt: new Date() };
+        let systemdata = {
+            ...(user.systemdata || {}),
+            windowsstates: user.systemdata?.windowsstates || {},
+        };
+
+        while (version < CURRENT_DATA_VERSION) {
+            const nextVersion = version + 1;
+
+            if (nextVersion === 1) {
+                updates.apps = mergeUserApps(user.apps, defaultApps);
+                updates.systemconfig = normalizeSystemConfig(user.systemconfig);
+            }
+
+            systemdata.migrationVersion = nextVersion;
+            version = nextVersion;
+        }
+
+        updates.systemdata = systemdata;
+        await DB.users.update(user.id, updates);
+    }
+}
+
 // инициализация БД с тестовыми данными
 export async function initDatabase() {
     try {
@@ -2112,6 +2212,8 @@ export async function initDatabase() {
             await usersTable.save(defaultUser);
             console.log('Default user created.');
         }
+
+        await runDataMigrations();
 
         // // инициализация базовых настроек 
         // const defaultSettings = [
@@ -2143,6 +2245,7 @@ export async function clearDatabase() {
     try {
         await Promise.all([
             DB.users.clear(),
+            DB.dfiles.clear(),
             // DB.settings.clear()
         ]);
         console.log('Database cleared');
@@ -2174,7 +2277,107 @@ export async function clearDatabase() {
 //     console.log('Migration to version 2 completed');
 // });
 
-export { DB, IDBWindows, activeWindowId };
+function formatBytes(bytes) {
+    if (!bytes || bytes <= 0) return '0 B';
+
+    const units = ['B', 'KB', 'MB', 'GB'];
+    const unitIndex = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    const value = bytes / Math.pow(1024, unitIndex);
+
+    return `${value.toFixed(unitIndex > 0 ? 2 : 0)} ${units[unitIndex]}`;
+}
+
+function estimateObjectSize(value, seen = new WeakSet()) {
+    if (value === null || value === undefined) return 0;
+    if (typeof value === 'boolean') return 4;
+    if (typeof value === 'number') return 8;
+    if (typeof value === 'string') return value.length * 2;
+    if (value instanceof Date) return 8;
+    if (value instanceof Blob) return value.size;
+    if (value instanceof ArrayBuffer) return value.byteLength;
+    if (ArrayBuffer.isView(value)) return value.byteLength;
+    if (typeof value !== 'object') return 0;
+    if (seen.has(value)) return 0;
+
+    seen.add(value);
+
+    if (Array.isArray(value)) {
+        return value.reduce((sum, item) => sum + estimateObjectSize(item, seen), 0);
+    }
+
+    return Object.values(value).reduce((sum, item) => sum + estimateObjectSize(item, seen), 0);
+}
+
+async function estimateTableSize(tableName) {
+    let bytes = 0;
+    let count = 0;
+
+    await DB[tableName].each(record => {
+        count++;
+        bytes += estimateObjectSize(record);
+    });
+
+    return { count, bytes };
+}
+
+/** Статистика по базе OSIDB для экрана настроек. */
+export async function getIndexedDBStats() {
+    const [usersStats, dfilesStats] = await Promise.all([
+        estimateTableSize('users'),
+        estimateTableSize('dfiles'),
+    ]);
+
+    const totalBytes = usersStats.bytes + dfilesStats.bytes;
+
+    let quota = null;
+    if (navigator.storage?.estimate) {
+        try {
+            const estimate = await navigator.storage.estimate();
+            const usage = estimate.usage ?? 0;
+            const limit = estimate.quota ?? 0;
+
+            quota = {
+                usage,
+                quota: limit,
+                usageFormatted: formatBytes(usage),
+                quotaFormatted: formatBytes(limit),
+                usedPercent: limit ? ((usage / limit) * 100).toFixed(1) : null,
+            };
+        } catch (error) {
+            console.warn('storage.estimate failed:', error);
+        }
+    }
+
+    return {
+        database: {
+            name: db_name,
+            schemaVersion: db_version,
+            dataVersion: CURRENT_DATA_VERSION,
+        },
+        total: {
+            bytes: totalBytes,
+            megabytes: (totalBytes / (1024 * 1024)).toFixed(4),
+            formatted: formatBytes(totalBytes),
+        },
+        tables: [
+            {
+                name: 'users',
+                count: usersStats.count,
+                bytes: usersStats.bytes,
+                formatted: formatBytes(usersStats.bytes),
+            },
+            {
+                name: 'dfiles',
+                count: dfilesStats.count,
+                bytes: dfilesStats.bytes,
+                formatted: formatBytes(dfilesStats.bytes),
+            },
+        ],
+        quota,
+    };
+}
+
+export { DB, IDBWindows, activeWindowId, CURRENT_DATA_VERSION };
 
 export default {
     DB,

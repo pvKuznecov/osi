@@ -118,19 +118,16 @@
 
             async changeWallpaper(inpName) {
                 try {
-                    this.findUser();
-                    const nUser = this.USER;
+                    if (!this.USERID) return null;
 
-                    nUser.systemconfig.desktopWallpaper = inpName;
-
-                    this.USER = await usersTable.save(nUser);
+                    this.USER = await usersTable.setDesktopWallpaper(this.USERID, inpName);
                     this.reReqUserConfig();
 
                     return this.USER;
                 } catch(error) {
                     console.error('Ошибка изменения изображения:', error);
 
-                    return {};
+                    return null;
                 }
             },
 
