@@ -1,0 +1,4 @@
+<img v-if="iconImg" :src="iconImg" :alt="alt" class="app-icon-img" :class="sizeClass"/>
+<!-- Старый подход: Bootstrap Icons + CSS-градиент (iconclass) -->
+<div v-else-if="iconclass" class="app-icon-css" :class="[sizeClass, iconclass]" :style="{ color: 'white' }"></div>
+<span v-else-if="icon" class="app-icon-emoji" :class="sizeClass">{{ icon }}</span>

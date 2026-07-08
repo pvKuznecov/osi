@@ -4,41 +4,32 @@
     display: block;
     flex-shrink: 0;
     object-fit: contain;
-    background: transparent;
-}
+    background: transparent; }
 
 .app-icon-img {
     border-radius: 50%;
     aspect-ratio: 1 / 1;
-    object-fit: cover;
-}
+    object-fit: cover; }
 
 .app-icon--sm {
     width: 20px;
     height: 20px;
-    font-size: 16px;
-}
+    font-size: 16px; }
 
 .app-icon--md {
     width: 48px;
     height: 48px;
-    font-size: 32px;
-}
+    font-size: 32px; }
 
 .app-icon--lg {
     width: 60px;
     height: 60px;
-    font-size: 48px;
-}
+    font-size: 48px; }
 
 .app-icon-css {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50px;
-}
+    border-radius: 50px; }
 
-.app-icon-emoji {
-    line-height: 1;
-    text-align: center;
-}
+.app-icon-emoji { line-height: 1; text-align: center; }
