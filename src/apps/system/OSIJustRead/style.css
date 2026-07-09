@@ -1,0 +1,189 @@
+.justread_app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background: rgb(219, 219, 219);
+    overflow: hidden;
+}
+
+.justread_about {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000; }
+
+.justread_about_content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 500px;
+    height: 160px;
+    background: white;
+    border-radius: 5px; }
+
+.justread_about_content h1 {
+    width: 96%;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 10px;
+    background-color: rgb(63, 161, 132);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px; }
+
+.justread_about_content p { font-size: 14px;  }
+
+.justread_about_content button {
+    width: 100px;
+    border-radius: 5px;
+    background-color: rgb(235, 38, 55);
+    color: white;
+    padding: 3px 5px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none; }
+
+.justread_toolbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 10px;
+    width: 100%;
+    height: 50px;
+    background: rgb(63, 161, 132);
+    padding: 5px 10px;
+}
+
+.sheet_viewport {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    container-type: size;
+}
+
+.file_content {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    width: min(100cqw, calc(100cqh * 210 / 297));
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 210 / 297;
+    padding: 0;
+    background: #fff;
+    border: 1px solid #d4d4d4;
+    border-radius: 2px;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.08),
+        0 6px 20px rgba(0, 0, 0, 0.1);
+    margin: 0;
+    overflow: hidden;
+}
+
+.files_list {
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    position: absolute;
+    top: 100px;
+    left: -380px;
+    background: white;
+    border-radius: 0 5px 5px 0;
+    box-shadow: 1px 2px 10px rgb(158, 158, 158);
+    padding: 10px;
+    overflow: hidden;
+    overflow-y: auto;
+    z-index: 1000;
+    transition: left 0.3s ease; }
+.files_list:hover { left: 0; }
+
+.file_item {
+    padding: 3px 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    border: 2px solid transparent;
+    transition: background-color 0.3s ease; }
+.file_item:hover { border: 2px solid rgba(63, 161, 132, 0.5); }
+
+.selected_file { background-color: rgba(63, 161, 132, 0.5); }
+
+.main_title {
+    font-size: 16px;
+    color: white;
+    font-weight: 600; }
+
+.main_menu {
+    display: flex;
+    flex-direction: row;
+    gap: 5px; }
+
+.main_menu button {
+    background: none;
+    border: none;
+    color: white;
+    padding: 3px 5px;
+    font-size: 14px;
+    cursor: pointer; }
+.main_menu button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px; }
+
+.file_content pre {
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    padding: 36px 52px;
+    overflow-x: auto;
+    overflow-y: auto;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    line-height: 1.65;
+    color: #1a1a1a;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: transparent; }
+
+.justread_footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    position: absolute;
+    bottom: 10px;
+    left: -280px;
+    gap: 5px;
+    width: 300px;
+    height: 30px;
+    background: rgb(63, 161, 132);
+    border-radius: 0 5px 5px 0;
+    padding: 3px 20px 3px 5px;
+    box-shadow: 1px 2px 10px rgb(158, 158, 158);
+    color: white;
+    z-index: 1000;
+    transition: left 0.3s ease, padding-right 0.3s ease; }
+.justread_footer:hover { left: 0; padding-right: 5px; }
+
+.justread_footer span {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 1px 3px;
+    font-size: 12px;
+    border-radius: 3px;
+}
+
