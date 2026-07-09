@@ -112,6 +112,15 @@ const applications = [
         resizable: true, isMaximized: true, canMinimize: true, showInStartMenu: true,
         loader: () => import('@/apps/system/OSINotificator/OSINotificator.vue'),
     }),
+    new OSIApp({
+        id: 'osijustread', name: 'OSIJustRead',
+        label: 'JustRead', category: 'utilities', description: 'Простое приложение для просмотра текстовых файлов.',
+        iconImg: require('@/apps/system/OSIJustRead/icon.png'),
+        defWidth: 850, defHeight: 600,
+        resizable: true, canMinimize: true, showInStartMenu: true, showOnDesktop: true,
+        suppFormats: ['text'],
+        loader: () => import('@/apps/system/OSIJustRead/OSIJustRead.vue'),
+    }),
 ];
 
 export const appsConfig = {
@@ -153,6 +162,9 @@ export const appsConfig = {
             ...configApp,
             ...userApp,
             iconImg: userApp.iconImg || configApp.iconImg,
+            suppFormats: (userApp.suppFormats && userApp.suppFormats.length)
+                ? userApp.suppFormats
+                : (configApp.suppFormats || []),
         };
     },
 

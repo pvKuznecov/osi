@@ -1,0 +1,38 @@
+<div class="justread_app">
+    <div v-if="aboutVisible" class="justread_about">
+        <div class="justread_about_content">
+            <h1>OSI JustRead</h1>
+            <p>OSI JustRead - это приложение для чтения текстовых файлов.</p>
+            <p>Вы можете открыть файлы в формате txt, md, text/plain.</p>
+            <button @click="aboutVisible = false">Закрыть</button>
+        </div>
+    </div>
+    <div v-if="files.length > 0" class="files_list">
+        <span><b>Список файлов:</b></span>
+        <ul>
+            <li v-for="f in files" class="file_item" :class="(currentFile === f) ? 'selected_file' : ''" @click="selectFile(f)">{{f.name}}</li>
+        </ul>
+    </div>
+    <input type="file" ref="fileInput" accept=".txt,.md,text/plain" multiple @change="handleFileSelect" style="display: none">
+    <div class="justread_toolbar">
+        <div class="main_title">
+            <span>{{TargetTitle}}</span>
+        </div>
+        <div class="main_menu">
+            <button @click="openFilePicker">{{LangData.open}}</button>
+            <button @click="aboutVisible = !aboutVisible">{{LangData.about}}</button>
+        </div>
+    </div>
+    <div class="sheet_viewport">
+        <div v-if="currentFileType === 'text/plain'" class="file_content">
+            <pre>{{fileContent}}</pre>
+        </div>
+        <div v-if="currentFileType === 'text/markdown'" class="file_content">
+            <pre>{{fileContent}}</pre>
+        </div>
+    </div>
+    <div v-if="currentFile" class="justread_footer">
+        <span>Тип: {{currentFileType}}</span>
+        <span>Размер: {{currentFileSize}}</span>
+    </div>    
+</div>
