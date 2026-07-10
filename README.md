@@ -1,7 +1,10 @@
 # osi
 
 <h3>Документация для разработчиков:</h3>
-<p><a href="DevelopDocumentations/Documentation.md">DevelopDocumentations/Documentation.md</a></p>
+<ul>
+    <li><a href="DevelopDocumentations/Documentation.md">Общая документация (Documentation.md)</a></li>
+    <li><a href="DevelopDocumentations/SimpleWindow-AsyncComponents.md">SimpleWindow: кэш async-компонентов</a></li>
+</ul>
 
 <h3>Предварительная настройка проекта:</h3>
 <ul>
