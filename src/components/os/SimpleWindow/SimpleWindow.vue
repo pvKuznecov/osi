@@ -5,6 +5,27 @@
     import { appsConfig } from '@/config/applications';
     import { defineAsyncComponent } from 'vue';
 
+    /**
+     * Кэш async-компонентов приложений OSI (ключ — appName, значение — defineAsyncComponent).
+     *
+     * Зачем: Без кэша при каждом пересчёте (перетаскивание окна, смена zIndex) создаётся новое определение компонента, Vue размонтирует старый экземпляр
+     * и монтирует новый — теряется state приложения (открытые файлы, позиция в списке и т.д.).
+     *
+     * Один кэшированный loader на тип приложения; у каждого окна свой экземпляр (разные windowId и props). Только внутри SimpleWindow, на остальное - не влияет.
+     */
+    const asyncComponentCache = Object.create(null);
+
+    function getCachedAsyncComponent(appName) {
+        const loader = appsConfig.getAppLoader(appName);
+        if (!loader) return null;
+
+        if (!asyncComponentCache[appName]) {
+            asyncComponentCache[appName] = defineAsyncComponent(loader);
+        }
+
+        return asyncComponentCache[appName];
+    }
+
     export default {
         name: "SimpleWindow",
 
@@ -85,9 +106,7 @@
   
         computed: {
             dynamicComponent() {
-                const loader = appsConfig.getAppLoader(this.appName);
-
-                return loader ? defineAsyncComponent(loader) : null;
+                return getCachedAsyncComponent(this.appName);
             },
             windowStyles() {
                 const baseStyles = { zIndex: this.zIndex };

@@ -3,6 +3,10 @@
 <script>
     import { usersTable, dFiles } from '@/idb/db';
     import { LangPack } from './lang';
+
+    const FONT_SIZE_MIN = 8;
+    const FONT_SIZE_MAX = 32;
+    const FONT_SIZE_DEFAULT = 14;
     
     export default {
         name: "OSIJustRead",
@@ -29,6 +33,9 @@
                 files: [],
                 currentIndex: -1,
                 saveTimeout: null,
+                fontSize: FONT_SIZE_DEFAULT,
+                fontSizeMin: FONT_SIZE_MIN,
+                fontSizeMax: FONT_SIZE_MAX,
 
                 aboutVisible: false,
             }
@@ -45,6 +52,16 @@
 
                     try {
                         const normalizedId = String(newId);
+                        const existingIndex = this.files.findIndex(
+                            f => f.id != null && String(f.id) === normalizedId
+                        );
+
+                        if (existingIndex !== -1) {
+                            this.currentIndex = existingIndex;
+                            this.lastExternalFileId = normalizedId;
+                            return;
+                        }
+
                         if (this.lastExternalFileId === normalizedId) return;
                         this.lastExternalFileId = normalizedId;
 
@@ -67,8 +84,24 @@
 
                     if (newVal?.id !== undefined && newVal?.id !== null) {
                         const normalizedId = String(newVal.id);
+                        const existingIndex = this.files.findIndex(
+                            f => f.id != null && String(f.id) === normalizedId
+                        );
+
+                        if (existingIndex !== -1) {
+                            this.currentIndex = existingIndex;
+                            this.lastExternalFileId = normalizedId;
+                            return;
+                        }
+
                         if (this.lastExternalFileId === normalizedId) return;
                         this.lastExternalFileId = normalizedId;
+
+                        const fileData = await dFiles.getInfo(newVal.id);
+                        if (fileData) {
+                            await this.loadFileFromData(fileData, { replaceList: true });
+                        }
+                        return;
                     }
 
                     await this.loadFileFromData(newVal, { replaceList: true });
@@ -87,6 +120,10 @@
             currentIndex() {
                 if (this.isInitialized) this.throttledSaveState();
             },
+
+            fontSize() {
+                if (this.isInitialized) this.throttledSaveState();
+            },
         },
 
         computed: {
@@ -100,11 +137,12 @@
 
             currentFileSize() {
                 const bytes = this.currentFile?.size;
+                const sizes = this.LangData.sizeUnits || ['B', 'KB', 'MB', 'GB'];
+
                 if (bytes == null) return '—';
-                if (bytes === 0) return '0 Б';
+                if (bytes === 0) return `0 ${sizes[0]}`;
 
                 const k = 1024;
-                const sizes = ['Б', 'КБ', 'МБ', 'ГБ'];
                 const i = Math.floor(Math.log(bytes) / Math.log(k));
 
                 return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
@@ -117,9 +155,93 @@
             fileContent() {
                 return this.currentFile?.content ?? '';
             },
+
+            contentFontStyle() {
+                return { fontSize: `${this.fontSize}px` };
+            },
+
+            isTextViewable() {
+                if (!this.currentFile) return false;
+
+                return this.isTextLike(this.currentFile.name, this.currentFile.mimetype || '');
+            },
         },
 
         methods: {
+            clampFontSize(size) {
+                const value = Number(size);
+
+                if (Number.isNaN(value)) {
+                    return FONT_SIZE_DEFAULT;
+                }
+
+                return Math.min(FONT_SIZE_MAX, Math.max(FONT_SIZE_MIN, Math.round(value)));
+            },
+
+            Chng_fontSize(val) {
+                if (val === '-' && this.fontSize > FONT_SIZE_MIN) {
+                    this.fontSize -= 1;
+                } else if (val === '+' && this.fontSize < FONT_SIZE_MAX) {
+                    this.fontSize += 1;
+                }
+            },
+
+            handleFontSizeInput(event) {
+                const digits = event.target.value.replace(/\D/g, '').slice(0, 2);
+
+                if (!digits) {
+                    event.target.value = '';
+                    return;
+                }
+
+                let size = parseInt(digits, 10);
+
+                if (size > FONT_SIZE_MAX) {
+                    size = FONT_SIZE_MAX;
+                }
+
+                this.fontSize = size;
+                event.target.value = String(size);
+            },
+
+            onFontSizeKeydown(event) {
+                const serviceKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
+
+                if (serviceKeys.includes(event.key)) {
+                    return;
+                }
+
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    this.normalizeFontSize(event);
+                    event.target.blur();
+                    return;
+                }
+
+                if (!/^\d$/.test(event.key)) {
+                    event.preventDefault();
+                }
+            },
+
+            normalizeFontSize(event) {
+                const input = event?.target;
+                const raw = input ? input.value : String(this.fontSize);
+                const digits = raw.replace(/\D/g, '');
+
+                if (!digits) {
+                    this.fontSize = FONT_SIZE_DEFAULT;
+                    if (input) input.value = String(FONT_SIZE_DEFAULT);
+                    return;
+                }
+
+                const size = this.clampFontSize(parseInt(digits, 10));
+                this.fontSize = size;
+
+                if (input) {
+                    input.value = String(size);
+                }
+            },
+
             showError(message) {
                 alert(message);
                 console.error(message);
@@ -156,6 +278,45 @@
                 return this.files.some(existing => this.isSameFile(existing, candidate));
             },
 
+            resolveMimeType(fileName, fileData = {}) {
+                if (fileData.mimetype && String(fileData.mimetype).includes('/')) {
+                    return fileData.mimetype;
+                }
+
+                if (typeof fileData.type === 'string' && fileData.type.includes('/')) {
+                    return fileData.type;
+                }
+
+                const propType = this.fileType || '';
+                if (propType.includes('/')) {
+                    return propType;
+                }
+
+                const ext = fileName.split('.').pop()?.toLowerCase();
+                const byExt = {
+                    txt: 'text/plain',
+                    md: 'text/markdown',
+                    json: 'application/json',
+                    xml: 'application/xml',
+                    html: 'text/html',
+                    htm: 'text/html',
+                    css: 'text/css',
+                    js: 'application/javascript',
+                    csv: 'text/csv',
+                    log: 'text/plain',
+                };
+
+                if (ext && byExt[ext]) {
+                    return byExt[ext];
+                }
+
+                if (this.isTextLike(fileName, '')) {
+                    return 'text/plain';
+                }
+
+                return 'application/octet-stream';
+            },
+
             // Инициализация из IDB
             async initFromIDB() {
                 if (!this.windowId) {
@@ -175,6 +336,10 @@
                     } else {
                         this.currentIndex = -1;
                     }
+
+                    if (savedState.fontSize !== undefined) {
+                        this.fontSize = this.clampFontSize(savedState.fontSize);
+                    }
                 }
 
                 this.isInitialized = true;
@@ -183,15 +348,36 @@
                 // Если окно было открыто "Открыть с помощью..." — догружаем файл после инициализации
                 try {
                     if (this.pendingFileId) {
+                        const normalizedId = String(this.pendingFileId);
                         const fileData = await dFiles.getInfo(this.pendingFileId);
                         this.pendingFileId = null;
+                        this.lastExternalFileId = normalizedId;
                         if (fileData) await this.loadFileFromData(fileData, { replaceList: true });
                     } else if (this.pendingFileData) {
-                        const fileData = this.pendingFileData;
+                        const pending = this.pendingFileData;
                         this.pendingFileData = null;
-                        await this.loadFileFromData(fileData, { replaceList: true });
+
+                        if (pending?.id != null) {
+                            const normalizedId = String(pending.id);
+                            this.lastExternalFileId = normalizedId;
+                            const fileData = await dFiles.getInfo(pending.id);
+                            if (fileData) await this.loadFileFromData(fileData, { replaceList: true });
+                        } else {
+                            await this.loadFileFromData(pending, { replaceList: true });
+                        }
                     } else if (this.fileData && this.files.length === 0) {
-                        await this.loadFileFromData(this.fileData, { replaceList: true });
+                        if (this.fileData?.id != null) {
+                            const normalizedId = String(this.fileData.id);
+                            this.lastExternalFileId = normalizedId;
+                            const fileData = await dFiles.getInfo(this.fileData.id);
+                            if (fileData) await this.loadFileFromData(fileData, { replaceList: true });
+                        } else {
+                            await this.loadFileFromData(this.fileData, { replaceList: true });
+                        }
+                    }
+
+                    if (this.files.length > 0 && (this.currentIndex < 0 || this.currentIndex >= this.files.length)) {
+                        this.currentIndex = 0;
                     }
                 } catch (error) {
                     console.error('Failed to load initial file:', error);
@@ -202,9 +388,8 @@
                 this.$refs.fileInput.click(); 
             },
 
-            selectFile(nFile) {
-                const index = this.files.findIndex(f => this.isSameFile(f, nFile));
-                if (index !== -1) {
+            selectFile(index) {
+                if (index >= 0 && index < this.files.length) {
                     this.currentIndex = index;
                 }
             },
@@ -213,12 +398,15 @@
                 const selectedFiles = Array.from(event.target.files || []);
                 if (!selectedFiles.length) return;
 
+                const startIndex = this.files.length;
+
                 for (const file of selectedFiles) {
                     await this.loadFileFromData(file, { replaceList: false });
                 }
 
-                if (this.files.length > 0) {
-                    this.currentIndex = 0;
+                // Активным — первый из только что добавленных (если что-то добавилось)
+                if (this.files.length > startIndex) {
+                    this.currentIndex = startIndex;
                 }
 
                 event.target.value = '';
@@ -238,7 +426,7 @@
                     let textFile = null;
                     let textBlob = null;
                     let fileName = this.fileName || 'document.txt';
-                    let mimeType = this.fileType || 'text/plain';
+                    let mimeType = 'text/plain';
                     let fileId = null;
                     let parentid = null;
                     let dfileType = 'text';
@@ -249,28 +437,31 @@
                         textBlob = fileData;
                         if (fileData instanceof File) textFile = fileData;
                         fileName = fileData.name || fileName;
-                        mimeType = fileData.type || mimeType;
+                        mimeType = fileData.type || this.resolveMimeType(fileName, fileData);
                     }
-                    // Вариант 2: fileData содержит blob (из DFile)
-                    else if (fileData.blob || fileData.data) {
-                        const blobLike = fileData.blob || fileData.data;
+                    // Вариант 2: есть id, но нет пригодного blob — грузим из IDB
+                    else if (
+                        fileData?.id
+                        && !(fileData.blob instanceof Blob)
+                        && !(fileData.blob instanceof File)
+                        && !(fileData.data instanceof Blob)
+                        && !(fileData.data instanceof File)
+                    ) {
+                        const idbFile = await dFiles.getInfo(fileData.id);
+                        return await this.loadFileFromData(idbFile, options);
+                    }
+                    // Вариант 3: fileData содержит blob (из DFile)
+                    else if (fileData.blob instanceof Blob || fileData.blob instanceof File) {
+                        textBlob = fileData.blob;
+                        if (fileData.blob instanceof File) textFile = fileData.blob;
                         fileName = fileData.name || fileName;
-                        mimeType = fileData.mimetype
-                            || (typeof fileData.type === 'string' && fileData.type.includes('/') ? fileData.type : null)
-                            || mimeType;
+                        mimeType = this.resolveMimeType(fileName, fileData);
                         fileId = fileData.id ?? null;
                         parentid = fileData.parentid ?? null;
                         dfileType = fileData.type || dfileType;
                         source = fileId ? 'idb' : 'upload';
-
-                        if (blobLike instanceof Blob || blobLike instanceof File) {
-                            textBlob = blobLike;
-                            if (blobLike instanceof File) textFile = blobLike;
-                        } else {
-                            textBlob = new Blob([blobLike], { type: mimeType });
-                        }
                     }
-                    // Вариант 3: есть только id (например, при запуске из DirDigger)
+                    // Вариант 4: есть только id
                     else if (fileData?.id) {
                         const idbFile = await dFiles.getInfo(fileData.id);
                         return await this.loadFileFromData(idbFile, options);
@@ -363,7 +554,11 @@
                         }
                     }
 
-                    files.push({ ...rest, content });
+                    files.push({
+                        ...rest,
+                        content,
+                        mimetype: this.resolveMimeType(rest.name || 'document.txt', rest),
+                    });
                 }
 
                 return files;
@@ -385,6 +580,7 @@
                     appType: 'justread',
                     files: this.serializeFilesForState(),
                     currentIndex: this.currentIndex,
+                    fontSize: this.fontSize,
                     timestamp: Date.now(),
                 };
 
