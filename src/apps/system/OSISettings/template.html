@@ -1,21 +1,22 @@
 <div class="osisettings-app">
-    <div class="osisettings-menu">
-        <div class="main-left-menu-block">
-            <h3>Навигация:</h3>
-            <ul>
-                <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('all'))}"><span class="osisettings-menu-elem" @click="ChngArea('all')">{{ LangData.allsettings }}</span></li>
-                <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('description'))}"><span class="osisettings-menu-elem" @click="ChngArea('description')">{{ LangData.description }}</span></li>
-                <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('accounts'))}"><span class="osisettings-menu-elem" @click="ChngArea('accounts')">{{ LangData.accounts }}</span></li>
-                <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('design'))}"><span class="osisettings-menu-elem" @click="ChngArea('design')">{{ LangData.design }}</span></li>
-                <li v-bind:class="{'selected-menu-elem': (Chk_selectedArea('memmanagment'))}"><span class="osisettings-menu-elem" @click="ChngArea('memmanagment')">{{ LangData.memmanagment }}</span></li>
-            </ul>
+    <div class="osi_set_menu">
+        <div class="m_leftmenu_block">
+            <h3>{{LangData.navigation}}:</h3>
+            <nav>
+                <li v-bind:class="{'m_selected_elem': (Chk_selectedArea('all'))}" class="m_elem" @click="ChngArea('all')">{{LangData.allsettings}}</li>
+                <li v-bind:class="{'m_selected_elem': (Chk_selectedArea('description'))}" class="m_elem" @click="ChngArea('description')">{{LangData.description}}</li>
+                <li v-bind:class="{'m_selected_elem': (Chk_selectedArea('accounts'))}" class="m_elem" @click="ChngArea('accounts')">{{LangData.accounts}}</li>
+                <li v-bind:class="{'m_selected_elem': (Chk_selectedArea('design'))}" class="m_elem" @click="ChngArea('design')">{{LangData.design}}</li>
+                <li v-bind:class="{'m_selected_elem': (Chk_selectedArea('memmanagment'))}" class="m_elem" @click="ChngArea('memmanagment')">{{LangData.memmanagment}}</li>
+            </nav>
         </div>        
     </div>
-    <div class="osisettings-content">        
+    <div class="osi_set_content">        
         <!-- description area -->
-        <div v-if="SelectArea === 'description' || SelectArea === 'all'" class="osisettings-elem-info">
-            <div>
-                <h2>{{LangData.description}}</h2>
+        <div v-if="SelectArea === 'description' || SelectArea === 'all'" class="osi_set_infoelem">
+            <h2>{{LangData.description}}</h2>
+            <div class="sub_infoelem">
+                <h2>{{LangData.system}}</h2>
                 <ul>
                     <li>{{LangData.name}}: <i>"{{ OSIData.name }}"</i></li>
                     <li>{{LangData.version}}: <i>"{{ OSIData.versionName }}"</i></li>
@@ -23,202 +24,204 @@
                     <li>{{ LangData.date }}: <i>{{ OSIData.date }}</i></li>
                 </ul>
             </div>
-            <br>
-            <div v-if="GetBrowserData()">
-                <h2>Устройство пользователя</h2>
+            <div v-if="GetBrowserData()" class="sub_infoelem">
+                <h2>{{LangData.userSoftware}}</h2>
                 <ul>
-                    <li>{{LangData.name}}: <i>"{{ GetBrowserData().name }}"</i></li>
-                    <li>{{LangData.version}}: <i>{{ GetBrowserData().version }}</i></li>
+                    <li>{{LangData.name}}: <i>"{{GetBrowserData().name}}"</i></li>
+                    <li>{{LangData.version}}: <i>{{GetBrowserData().version}}</i></li>
                 </ul>
             </div>
         </div>
 
         <!-- accounts area -->
-        <div v-if="SelectArea === 'accounts' || SelectArea === 'all'" class="osisettings-elem-info">
+        <div v-if="SelectArea === 'accounts' || SelectArea === 'all'" class="osi_set_infoelem">
             <h2>{{LangData.accounts}}</h2>
-            <h3>Текущая учетная запись:</h3>
-            <div class="account-elem d-flex justify-content-center align-items-center">
-                <div class="account-elem-avatar" :style="avatarStyle(USER.config.avatar)"></div>
-                <ul style="display: inline-block;">
-                    <li>{{LangData.user}}: {{USER.name}}</li>
-                    <li>{{LangData.login}}: {{USER.login}}</li>
-                    <li>{{LangData.created}}: {{USER.createdAt.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}} {{USER.createdAt.toLocaleDateString()}}</li>
-                    <li>{{LangData.changed}}: {{USER.updatedAt.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}} {{USER.updatedAt.toLocaleDateString()}}</li>
-                </ul>
+            <div class="sub_infoelem">
+                <h3 class="h3_panel">
+                    <span>{{LangData.currentAccount}}:</span>
+                    <span class="osisettings-btn-warning" @click="ReloadPage()"><i class="bi bi-door-open-fill"></i> Выйти</span>
+                </h3>
+                <div class="account_elem">
+                    <div class="account_avatar" :style="avatarStyle(USER.config.avatar)"></div>
+                    <ul style="display: inline-block;">
+                        <li>{{LangData.user}}: {{USER.name}}</li>
+                        <li>{{LangData.login}}: {{USER.login}}</li>
+                        <li>{{LangData.created}}: {{USER.createdAt.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}} {{USER.createdAt.toLocaleDateString()}}</li>
+                        <li>{{LangData.changed}}: {{USER.updatedAt.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}} {{USER.updatedAt.toLocaleDateString()}}</li>
+                    </ul>
+                </div>
+                <!-- <div class="d-flex justify-content-start align-items-center m-1 mb-2">
+                    <span class="osisettings-btn-warning" @click="ReloadPage()"><i class="bi bi-door-open-fill"></i> Выйти из учетной записи</span>
+                </div> -->
             </div>
-            <div class="d-flex justify-content-center align-items-center">
-                <!-- <span class="osisettings-btn-neutral" @click="ChngArea('account_settings')">Редактировать учетную запись</span> -->
-                <span class="osisettings-btn-warning" @click="ReloadPage()"><i class="bi bi-door-open-fill"></i> Выйти из учетной записи</span>
-            </div>
-            <hr>
-            <h3>Все учетные записи на устройстве:</h3>
-            <div class="accaunts-list row">
-                <div v-for="u in users" class="account-elem-min d-flex justify-content-center align-items-center">
-                    <div class="account-elem-avatar-min" :style="avatarStyle(u.config.avatar)"></div>
-                    <div style="display: inline-block;">
-                        <b>{{u.login}}</b>
+            <div class="sub_infoelem">
+                <h3>Все учетные записи на устройстве:</h3>
+                <div class="accaunts_list">
+                    <div v-for="u in users" class="account_elem_min">
+                        <div class="account_avatar_min" :style="avatarStyle(u.config.avatar)"></div>
+                        <div style="display: inline-block;">
+                            <b>{{u.login}}</b>
+                        </div>
                     </div>
                 </div>
             </div>            
         </div>
 
         <!-- design area -->
-        <div v-if="SelectArea === 'design' || SelectArea === 'all'" class="osisettings-elem-info">
+        <div v-if="SelectArea === 'design' || SelectArea === 'all'" class="osi_set_infoelem">
             <h2>{{LangData.design}}</h2>
-            <ul>
-                <li>
-                    <h3>{{ LangData.desktopbgimg }}:</h3>
-                    <div v-for="wp in wpList" class="wp-elem-min" @mousedown.stop @click="ChangeWPImage(wp.nameExt)">
-                        <img :src="wp.path" :alt="wp.name" :class="(USER.systemconfig.desktopWallpaper == wp.nameExt) ? 'selected-wp' : ''" />
-                        <div class="wp-elem-min-title">{{ wp.name }}</div>
+            <div class="sub_infoelem">
+                <h3>{{ LangData.desktopbgimg }}:</h3>
+                <div class="imglist_area">
+                    <div v-for="wp in wpList" class="wp_elem_min" @mousedown.stop @click="ChangeWPImage(wp.nameExt)">
+                        <img :src="wp.path" :alt="wp.name" :class="(USER.systemconfig.desktopWallpaper == wp.nameExt) ? 'selected_wp' : ''" />
+                        <div class="wp_elem_min_title">{{ wp.name }}</div>
                     </div>
-                </li>
-            </ul>
+                </div>
+            </div>
         </div>
 
         <!-- memory managment area -->
-        <div v-if="SelectArea === 'memmanagment' || SelectArea === 'all'" class="osisettings-elem-info">
-            <h2>{{ LangData.memmanagment }}</h2>
-            <h3 style="padding-left: 10px; margin-top: 10px;">localStorage:</h3>
-            <div v-if="storeStatistic">
-                <table class="osisettings-elem-info-tab">
-                    <tbody>
-                        <tr class="tab-header">
-                            <td colspan="3">Память:</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">Лимит:</td>
-                            <td>{{storeStatistic.limit.standard}}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">Занято (в MB):</td>
-                            <td>{{storeStatistic.total.megabytes}}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">Занято (в %):</td>
-                            <td>{{storeStatistic.limit.usedPercent}}</td>
-                        </tr>
-                        <tr class="tab-header">
-                            <td colspan="3">Хранилища:</td>
-                        </tr>
-                        <tr v-if="storeStatistic.entries && storeStatistic.entries.length > 0">
-                            <td>№</td>
-                            <td>Наименование</td>
-                            <td>Занято</td>
-                        </tr>
-                        <tr v-for="(val, counter) in storeStatistic.entries">
-                        <!-- <tr v-for="(counter,val) in Array.from({ length: storeStatistic.total.entries }, (_, i) => i + 1)"></tr> -->
-                            <td>{{++counter}}</td>
-                            <td>{{val.key}}</td>
-                            <td>{{val.totalSize}}</td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div v-if="SelectArea === 'memmanagment' || SelectArea === 'all'" class="osi_set_infoelem">
+            <h2>{{LangData.memmanagment}}</h2>
+            <div class="sub_infoelem">
+                <h3>localStorage:</h3>
+                <div v-if="storeStatistic">
+                    <table class="elem_info_tab">
+                        <tbody>
+                            <tr class="tab_header">
+                                <td colspan="3">Память:</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">Лимит:</td>
+                                <td>{{storeStatistic.limit.standard}}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">Занято (MB):</td>
+                                <td>{{storeStatistic.total.megabytes}}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">Занято (%):</td>
+                                <td>{{storeStatistic.limit.usedPercent}}</td>
+                            </tr>
+                            <tr class="tab_header">
+                                <td colspan="3">Хранилища:</td>
+                            </tr>
+                            <tr v-if="storeStatistic.entries && storeStatistic.entries.length > 0">
+                                <td>№</td>
+                                <td>Наименование</td>
+                                <td>Занято</td>
+                            </tr>
+                            <tr v-for="(val, counter) in storeStatistic.entries">
+                                <td>{{++counter}}</td>
+                                <td>{{val.key}}</td>
+                                <td>{{val.totalSize}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div v-else>
+                    <table class="elem_info_tab">
+                        <tbody>
+                            <tr>
+                                <td>Нет данных</td>
+                            </tr>
+                        </tbody>
+                    </table>                
+                </div>
             </div>
-            <div v-else>
-                <table class="osisettings-elem-info-tab">
-                    <tbody>
-                        <tr>
-                            <td>Нет данных</td>
-                        </tr>
-                    </tbody>
-                </table>                
-            </div>
-            <h3 style="padding-left: 10px; margin-top: 10px;">
-                IndexedDB:
-                <span
-                    v-if="!idbStatsLoading"
-                    class="osisettings-btn-neutral"
-                    style="margin-left: 10px; font-size: 12px;"
-                    @click="loadIndexedDBStatistic()"
-                >{{ LangData.idbRefresh }}</span>
-            </h3>
-            <div v-if="idbStatsLoading">
-                <table class="osisettings-elem-info-tab">
-                    <tbody>
-                        <tr>
-                            <td>{{ LangData.idbLoading }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div v-else-if="indexedDBStatistic">
-                <table class="osisettings-elem-info-tab">
-                    <tbody>
-                        <tr class="tab-header">
-                            <td colspan="3">{{ LangData.idbDatabase }}:</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">{{ LangData.name }}:</td>
-                            <td>{{ indexedDBStatistic.database.name }}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">{{ LangData.idbSchemaVersion }}:</td>
-                            <td>{{ indexedDBStatistic.database.schemaVersion }}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">{{ LangData.idbDataVersion }}:</td>
-                            <td>{{ indexedDBStatistic.database.dataVersion }}</td>
-                        </tr>
-                        <tr class="tab-header">
-                            <td colspan="3">{{ LangData.idbMemory }}:</td>
-                        </tr>
-                        <tr v-if="indexedDBStatistic.quota">
-                            <td colspan="2">{{ LangData.idbOriginLimit }}:</td>
-                            <td>{{ indexedDBStatistic.quota.quotaFormatted }}</td>
-                        </tr>
-                        <tr v-if="indexedDBStatistic.quota">
-                            <td colspan="2">{{ LangData.idbOriginUsed }}:</td>
-                            <td>{{ indexedDBStatistic.quota.usageFormatted }}</td>
-                        </tr>
-                        <tr v-if="indexedDBStatistic.quota">
-                            <td colspan="2">{{ LangData.idbOccupiedPercent }}:</td>
-                            <td>{{ indexedDBStatistic.quota.usedPercent }}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">{{ LangData.idbEstimatedSize }}:</td>
-                            <td>{{ indexedDBStatistic.total.formatted }}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">{{ LangData.idbOccupiedMB }}:</td>
-                            <td>{{ indexedDBStatistic.total.megabytes }}</td>
-                        </tr>
-                        <tr class="tab-header">
-                            <td colspan="3">{{ LangData.idbTables }}:</td>
-                        </tr>
-                        <tr>
-                            <td>№</td>
-                            <td>Наименование</td>
-                            <td>{{ LangData.idbRecords }} / размер</td>
-                        </tr>
-                        <tr v-for="(table, index) in indexedDBStatistic.tables" :key="table.name">
-                            <td>{{ index + 1 }}</td>
-                            <td>{{ table.name }}</td>
-                            <td>{{ table.count }} / {{ table.formatted }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div v-else>
-                <table class="osisettings-elem-info-tab">
-                    <tbody>
-                        <tr>
-                            <td>{{ LangData.idbNoData }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <div class="sub_infoelem">
+                <h3 class="h3_panel">
+                    IndexedDB:
+                    <span v-if="!idbStatsLoading" class="osisettings-btn-neutral" style="margin-left: 10px; font-size: 12px;" @click="loadIndexedDBStatistic()">{{ LangData.idbRefresh }}</span>
+                </h3>
+                <div v-if="idbStatsLoading">
+                    <table class="elem_info_tab">
+                        <tbody>
+                            <tr>
+                                <td>{{ LangData.idbLoading }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div v-else-if="indexedDBStatistic">
+                    <table class="elem_info_tab">
+                        <tbody>
+                            <tr class="tab_header">
+                                <td colspan="3">{{ LangData.idbDatabase }}:</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ LangData.name }}:</td>
+                                <td>{{ indexedDBStatistic.database.name }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ LangData.idbSchemaVersion }}:</td>
+                                <td>{{ indexedDBStatistic.database.schemaVersion }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ LangData.idbDataVersion }}:</td>
+                                <td>{{ indexedDBStatistic.database.dataVersion }}</td>
+                            </tr>
+                            <tr class="tab_header">
+                                <td colspan="3">{{ LangData.idbMemory }}:</td>
+                            </tr>
+                            <tr v-if="indexedDBStatistic.quota">
+                                <td colspan="2">{{ LangData.idbOriginLimit }}:</td>
+                                <td>{{ indexedDBStatistic.quota.quotaFormatted }}</td>
+                            </tr>
+                            <tr v-if="indexedDBStatistic.quota">
+                                <td colspan="2">{{ LangData.idbOriginUsed }}:</td>
+                                <td>{{ indexedDBStatistic.quota.usageFormatted }}</td>
+                            </tr>
+                            <tr v-if="indexedDBStatistic.quota">
+                                <td colspan="2">{{ LangData.idbOccupiedPercent }}:</td>
+                                <td>{{ indexedDBStatistic.quota.usedPercent }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ LangData.idbEstimatedSize }}:</td>
+                                <td>{{ indexedDBStatistic.total.formatted }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">{{ LangData.idbOccupiedMB }}:</td>
+                                <td>{{ indexedDBStatistic.total.megabytes }}</td>
+                            </tr>
+                            <tr class="tab_header">
+                                <td colspan="3">{{ LangData.idbTables }}:</td>
+                            </tr>
+                            <tr>
+                                <td>№</td>
+                                <td>Наименование</td>
+                                <td>{{ LangData.idbRecords }} / размер</td>
+                            </tr>
+                            <tr v-for="(table, index) in indexedDBStatistic.tables" :key="table.name">
+                                <td>{{ index + 1 }}</td>
+                                <td>{{ table.name }}</td>
+                                <td>{{ table.count }} / {{ table.formatted }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div v-else>
+                    <table class="elem_info_tab">
+                        <tbody>
+                            <tr>
+                                <td>{{ LangData.idbNoData }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>            
         </div>
 
         <!-- частные разделы -->
-        <div v-if="SelectArea === 'account_settings'" class="osisettings-elem-info">
+        <div v-if="SelectArea === 'account_settings'" class="osi_set_infoelem">
             <h2>Редактирование учетной записи</h2>
-            <table class="osisettings-elem-info-tab" style="width: 100%;">
+            <table class="elem_info_tab" style="width: 100%;">
                 <tbody>
                     <tr>
                         <td style="width: 180px; height: 180px;" class="dark-area">
                             <div class="d-flex justify-content-center align-items-center" style="width: 100%;">
-                                <div class="account-elem-avatar-max" :style="avatarStyle(USER.config.avatar)"></div>
+                                <div class="account_avatar_max" :style="avatarStyle(USER.config.avatar)"></div>
                             </div>                            
                         </td>
                         <td class="dark-area">
@@ -244,8 +247,7 @@
                         <td colspan="2" class="dark-area">
                             <div class="row" style="width: 98%; margin-left: auto; margin-right: auto;">
                                 <h3>Аватар:</h3>
-                                <!-- <div v-for="av in avatarsList" class="account-elem-avatar-max col-2">{{av}}</div> -->
-                                <div v-for="av in avatarsList" class="account-elem-avatar-min col-3" :style="avatarStyle(av.nameExt)" style="margin: 10px;"></div>
+                                <div v-for="av in avatarsList" class="account_avatar_min col-3" :style="avatarStyle(av.nameExt)" style="margin: 10px;"></div>
                             </div>                            
                         </td>
                     </tr>
