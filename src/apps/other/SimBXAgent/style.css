@@ -1,0 +1,311 @@
+.sim-bx-agent {
+    background: var(--window-bg, #fff);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-height: 600px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color, #e0e0e0);
+}
+
+/* Заголовок */
+.widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-color, #e0e0e0);
+    flex-shrink: 0;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-left h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary, #333);
+}
+
+.task-count {
+    font-size: 14px;
+    color: var(--text-secondary, #666);
+    background: var(--bg-secondary, #f0f0f0);
+    padding: 2px 10px;
+    border-radius: 12px;
+}
+
+.btn-refresh {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.btn-refresh:hover:not(:disabled) {
+    background: var(--bg-hover, #f0f0f0);
+    transform: rotate(45deg);
+}
+
+.btn-refresh:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Состояния загрузки */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 12px;
+    color: var(--text-secondary, #666);
+}
+
+.spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--border-color, #e0e0e0);
+    border-top-color: var(--primary-color, #0066cc);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Ошибка */
+.error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    gap: 12px;
+    color: #d32f2f;
+    background: #ffebee;
+    border-radius: 6px;
+}
+
+.error-icon {
+    font-size: 32px;
+}
+
+.btn-retry {
+    background: #d32f2f;
+    color: white;
+    border: none;
+    padding: 6px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-retry:hover {
+    background: #b71c1c;
+}
+
+/* Список задач */
+.tasks-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.task-item {
+    background: var(--task-bg, #f8f9fa);
+    border-radius: 6px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+}
+
+.task-item:hover {
+    background: var(--task-hover, #f0f1f3);
+    transform: translateX(2px);
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.task-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.task-priority {
+    font-size: 12px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.task-priority.priority-high {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.task-priority.priority-medium {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.task-priority.priority-low {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.task-title {
+    font-size: 14px;
+    color: var(--text-primary, #333);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.task-status {
+    font-size: 12px;
+    padding: 2px 10px;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.task-status.status-new {
+    background: #e3f2fd;
+    color: #0d47a1;
+}
+
+.task-status.status-progress {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.task-status.status-pending {
+    background: #f3e5f5;
+    color: #4a148c;
+}
+
+.task-status.status-done {
+    background: #e8f5e9;
+    color: #1b5e20;
+}
+
+.task-meta {
+    display: flex;
+    gap: 16px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-secondary, #666);
+}
+
+.task-id {
+    font-weight: 500;
+    color: var(--text-secondary, #888);
+}
+
+/* Пустое состояние */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 20px;
+    gap: 8px;
+    color: var(--text-secondary, #999);
+}
+
+.empty-icon {
+    font-size: 40px;
+}
+
+.empty-hint {
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+/* Загрузка ещё */
+.load-more {
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color, #e0e0e0);
+    flex-shrink: 0;
+}
+
+.btn-load-more {
+    width: 100%;
+    padding: 8px;
+    background: var(--bg-secondary, #f0f0f0);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-primary, #333);
+    transition: background 0.15s;
+}
+
+.btn-load-more:hover:not(:disabled) {
+    background: var(--bg-hover, #e0e0e0);
+}
+
+.btn-load-more:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Скролл */
+.tasks-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.tasks-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.tasks-list::-webkit-scrollbar-thumb {
+    background: var(--border-color, #ccc);
+    border-radius: 2px;
+}
+
+.tasks-list::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary, #999);
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+    .task-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+    
+    .task-status {
+        align-self: flex-start;
+    }
+    
+    .task-meta {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
