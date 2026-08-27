@@ -121,6 +121,14 @@ const applications = [
         suppFormats: ['text'],
         loader: () => import('@/apps/system/OSIJustRead/OSIJustRead.vue'),
     }),
+    // new OSIApp({
+    //     id: 'simbxagent', name: 'SimBXAgent',
+    //     label: 'SimBXAgent', category: 'utilities', description: 'Простой агент для работы с системой Битрикс24.',
+    //     iconImg: require('@/apps/other/SimBXAgent/icon.png'),
+    //     defWidth: 850, defHeight: 600,
+    //     resizable: true, canMinimize: true, showInStartMenu: true, showOnDesktop: true,
+    //     loader: () => import('@/apps/other/SimBXAgent/SimBXAgent.vue'),
+    // }),
 ];
 
 export const appsConfig = {

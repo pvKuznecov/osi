@@ -1,0 +1,134 @@
+<div class="sim-bx-agent">
+    <!-- Заголовок -->
+    <div class="widget-header">
+        <div class="header-left">
+            <h3>📋 Задачи Битрикс24</h3>
+            <span class="task-count" v-if="total > 0">
+                {{ total }} {{ pluralize(total, ['задача', 'задачи', 'задач']) }}
+            </span>
+        </div>
+        <div class="header-right">
+            <!-- ⭐ Выбор количества на странице -->
+            <select 
+                v-model="perPage" 
+                @change="changePerPage(Number($event.target.value))"
+                class="per-page-select"
+                :disabled="loading"
+            >
+                <option 
+                    v-for="option in perPageOptions" 
+                    :key="option" 
+                    :value="option"
+                >
+                    {{ option }} на странице
+                </option>
+            </select>
+            
+            <button 
+                @click="refreshTasks" 
+                :disabled="loading"
+                class="btn-refresh"
+                title="Обновить"
+            >
+                {{ loading ? '⏳' : '🔄' }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Загрузка -->
+    <div v-if="loading && tasks.length === 0" class="loading-state">
+        <div class="spinner"></div>
+        <span>Загрузка задач...</span>
+    </div>
+
+    <!-- Ошибка -->
+    <div v-else-if="error" class="error-state">
+        <span class="error-icon">⚠️</span>
+        <span>{{ error }}</span>
+        <button @click="refreshTasks" class="btn-retry">Повторить</button>
+    </div>
+
+    <!-- Список задач -->
+    <div v-else-if="tasks.length > 0" class="tasks-list">
+        <div v-for="task in tasks" :key="task.id" class="task-item">
+            <div class="task-header" @click="toggleTaskExpand(task.id)">
+                <div class="task-title-wrapper">
+                    <span class="task-priority" :class="getPriorityClass(task.priority)">{{getPriorityLabel(task.priority)}}</span>
+                    <span class="task-title">{{task.title}}</span>
+                </div>
+                <span class="task-status" :class="getStatusClass(task.status)">
+                    {{ getStatusLabel(task.status) }}
+                </span>
+            </div>
+            
+            <div class="task-meta">
+                <span class="task-id">#{{ task.id }}</span>
+                <span class="task-created">
+                    <b>Дата создания:</b> {{ formatDate(task.createdDate) }}
+                </span>
+                <span class="task-deadline" v-if="task.deadline">
+                    <b>Крайний срок:</b> {{formatDate(task.deadline)}}
+                </span>
+                <button v-if="task.description" class="btn-toggle-desc" @click.stop="toggleTaskExpand(task.id)">
+                    {{ expandedTasks.includes(task.id) ? '🔼 Скрыть' : '📄 Описание' }}
+                </button>
+            </div>
+            
+            <!-- Описание -->
+            <div v-if="task.description && expandedTasks.includes(task.id)" class="task-description" @click.stop>
+                <div class="description-content" v-html="formatDescription(task.description)"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Пусто -->
+    <div v-else class="empty-state">
+        <span class="empty-icon">📭</span>
+        <span>Нет активных задач</span>
+        <span class="empty-hint">Попробуйте изменить фильтр</span>
+    </div>
+
+    <!-- ⭐ ПАГИНАЦИЯ -->
+    <div v-if="totalPages > 1" class="pagination-wrapper">
+        <div class="pagination-info">
+            {{ rangeText }}
+        </div>
+        
+        <div class="pagination-controls">
+            <!-- Кнопка "Назад" -->
+            <button @click="prevPage" :disabled="currentPage === 1 || loading"
+                class="pagination-btn"
+                title="Предыдущая страница"
+            >
+                ◀
+            </button>
+            
+            <!-- Номера страниц -->
+            <div class="page-numbers">
+                <button 
+                    v-for="page in visiblePages" 
+                    :key="page"
+                    @click="goToPage(page)"
+                    :disabled="page === '...' || loading"
+                    class="page-btn"
+                    :class="{
+                        'page-active': page === currentPage,
+                        'page-dots': page === '...'
+                    }"
+                >
+                    {{ page }}
+                </button>
+            </div>
+            
+            <!-- Кнопка "Вперёд" -->
+            <button 
+                @click="nextPage" 
+                :disabled="currentPage === totalPages || loading"
+                class="pagination-btn"
+                title="Следующая страница"
+            >
+                ▶
+            </button>
+        </div>
+    </div>
+</div>
