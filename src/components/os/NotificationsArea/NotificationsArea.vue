@@ -47,7 +47,20 @@
             loading() {
                 const store = useNotificationsStore();
                 return store.loading;
-            }
+            },
+
+            unreadCountTxt() {
+                const unrCount = this.unreadCount;
+                const LangData = this.LangData;
+
+                if (unrCount && LangData && LangData.youhaveunreadnotifications) {
+                    let lText = LangData.youhaveunreadnotifications;
+
+                    return lText.replace('*', unrCount);
+                } else {
+                    return '';
+                }
+            },            
         },
 
         methods: {

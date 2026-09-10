@@ -24,6 +24,8 @@
 
                 allNotifs: [],
                 SelectNotif: true,
+
+                curHeader: 'Менеджер уведомлений',
             }
         },
 
