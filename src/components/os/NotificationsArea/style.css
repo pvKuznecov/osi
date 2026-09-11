@@ -173,8 +173,7 @@
     font-size: small;
     text-align: center;
     color: black;
-    flex-shrink: 0;
-}
+    flex-shrink: 0; }
 
 .elem_content .title {
     display: flex;

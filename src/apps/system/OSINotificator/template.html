@@ -1,17 +1,61 @@
 <div class="notificator-app">
-    <div class="notif_mmenu"></div>
+    <div class="notif_mmenu">
+        <div class="notif_mmenu_panel">
+            <span :class="(SelectMMenuArea === 'filters' ? 'notif_mmenu_panel_selectbtn' : 'notif_mmenu_panel_btn')" @click="Chng_SelectMMenuArea('filters')">Фильтры</span>
+            <span :class="(SelectMMenuArea === 'tabs' ? 'notif_mmenu_panel_selectbtn' : 'notif_mmenu_panel_btn')" @click="Chng_SelectMMenuArea('tabs')">Вкладки</span>
+        </div>
+        <div class="notif_mmenu_block">
+
+        </div>
+    </div>
     <div class="notif_marea">
         <div class="notif_mheader">{{curHeader}}</div>
         <div v-for="N in SortedNotifs" class="notif_elem">
-            <div class="notif_elem_authorarea"></div>
+            <i v-if="N.read" class="notif_newelem bi bi-info-circle"></i>
+            <div class="notif_elem_authorarea">
+                <div class="notif_elem_applogo"></div>
+                <span>{{N.app ?? 'OSI'}}</span>
+            </div>
             <div class="notif_elem_contentarea">
                 <div class="notif_elem_header">
-                    <b>{{N.title}}</b>
-                    <button>X</button>
+                    <span>{{N.title}}</span>
+                    <small>{{formatTime(N.createdAt)}}</small>                    
                 </div>
-                <!-- <span v-html="N.content"></span> -->
-                {{N}}
-            </div>            
+                <div v-html="N.content ?? ''"></div>
+            </div>
+            <div class="notif_elem_panel">
+                <button class="notif_btn_close">X</button>
+            </div>
         </div>
     </div>    
 </div>
+
+<!-- {
+    "id": 1,
+    "app": null,
+    "title": "Добро пожаловать в OSI!",
+    "content": "Поздравляем! Ваша учетная запись успешно создана. Это Ваш первый вход в систему.",
+    "type": "info",
+    "icon": "I",
+    "autoclose": 0,
+    "read": false,
+    "createdAt": "2026-08-27T02:58:54.878Z",
+    "endAt": null,
+    "actions": [ "close" ],
+    "data": {}
+}
+
+{
+    "id": 2,
+    "app": null,
+    "title": "Первичные рекомендации",
+    "content": "Перед началом работы с системой, рекомендуется выполнить следующие настройки:<ul><li>настроить список приложений \"под себя\";</li><li>кастомизировать рабочий стол.</li></ul>",
+    "type": "info",
+    "icon": "I",
+    "autoclose": 0,
+    "read": false,
+    "createdAt": "2026-08-27T02:58:54.878Z",
+    "endAt": null,
+    "actions": [ "close" ],
+    "data": {} 
+} -->
