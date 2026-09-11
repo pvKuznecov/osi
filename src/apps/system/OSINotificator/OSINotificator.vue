@@ -24,6 +24,7 @@
 
                 allNotifs: [],
                 SelectNotif: true,
+                SelectMMenuArea: 'filters',
 
                 curHeader: 'Менеджер уведомлений',
             }
@@ -53,6 +54,13 @@
                 this.allNotifs = res;
             },
 
+            Chng_SelectMMenuArea(inpVal) {
+                if (!inpVal) return;
+
+                this.SelectMMenuArea = inpVal;
+            },
+
+            // Вывод даты-времени в человеко-читабельном формате
             formatTime(date) {
                 if (!date) return '';
                 const d = new Date(date);
