@@ -49,5 +49,26 @@ export const notificationService = {
     get_all() {
         const store = useNotificationsStore();
         return store.notifications;
+    },
+
+    // -=-=-= БЛОК ПОЛУЧЕНИЯ ВСПОМОГАТЕЛЬНЫХ ДАННЫХ =-=-=-
+    // Получить расшифровку типов (языковой пакет)
+    get_langData_type() {
+        const LangData = {
+            "en": {
+                "info": "Notification",
+                "success": "Confirmation request",
+                "warning": "Important notice",
+                "error": "Error"
+            },
+            "ru": {
+                "info": "Уведомление",
+                "success": "Запрос подтверждения",
+                "warning": "Важное уведомление",
+                "error": "Ошибка"
+            },
+        };
+
+        return LangData;
     }
 };
