@@ -1,16 +1,45 @@
 <div class="notificator-app">
     <div class="notif_mmenu">
         <div class="notif_mmenu_panel">
+            <span :class="(SelectMMenuArea === 'actions' ? 'notif_mmenu_panel_selectbtn' : 'notif_mmenu_panel_btn')" @click="Chng_SelectMMenuArea('actions')">Действия</span>
             <span :class="(SelectMMenuArea === 'filters' ? 'notif_mmenu_panel_selectbtn' : 'notif_mmenu_panel_btn')" @click="Chng_SelectMMenuArea('filters')">Фильтры</span>
             <span :class="(SelectMMenuArea === 'tabs' ? 'notif_mmenu_panel_selectbtn' : 'notif_mmenu_panel_btn')" @click="Chng_SelectMMenuArea('tabs')">Вкладки</span>
         </div>
         <div class="notif_mmenu_block">
-
+            <!-- Действия -->
+            <div v-if="SelectMMenuArea === 'actions'" class="notif_mmenu_blockelem">
+                <button class="notif_btn bg_green">Создать напоминание</button>
+            </div>
+            <!-- Фильтры -->
+            <div v-if="SelectMMenuArea === 'filters'" class="notif_mmenu_blockelem">
+                <div class="notif_filterblock">
+                    <b>Тип:</b>
+                    <div v-for="typeKey in Object.keys(Lang_data_type)" class="notif_filterchkbox">
+                        <input type="checkbox" :id="'filter_type_' + typeKey" :value="typeKey" v-model="SelectedFilters">
+                        <label :for="'filter_type_' + typeKey">{{Lang_data_type[typeKey]}}</label>
+                    </div>
+                </div>
+            </div>            
+            <!-- Вкладки -->
+            <div v-if="SelectMMenuArea === 'tabs'" class="notif_mmenu_blockelem">
+                
+            </div>
         </div>
     </div>
     <div class="notif_marea">
         <div class="notif_mheader">{{curHeader}}</div>
-        <div v-for="N in SortedNotifs" class="notif_elem">
+        <!-- Массив уведомлений -->
+        <div v-if="!SelectedNotifId && SelectedFilters.length > 0" class="notif_notifsElems_panel">
+            <div v-for="FilterKey in SelectedFilters" class="notif_notifsElems_panelConteiner">
+                {{Lang_data_type[FilterKey]}}
+            </div>
+        </div>
+        <div v-if="!SelectedNotifId" class="notif_notifsElems_panel">
+            <div class="notif_notifsElems_panelConteiner">
+                Всего уведомлений: {{SortedNotifs.length}}
+            </div>            
+        </div>
+        <div v-if="!SelectedNotifId" v-for="N in SortedNotifs" class="notif_elem">
             <i v-if="N.read" class="notif_newelem bi bi-info-circle"></i>
             <div class="notif_elem_authorarea">
                 <div class="notif_elem_applogo"></div>
@@ -21,12 +50,34 @@
                     <span>{{N.title}}</span>
                     <small>{{formatTime(N.createdAt)}}</small>                    
                 </div>
-                <div v-html="N.content ?? ''"></div>
+                <div v-if="SelectedNotifId !== N.id" v-html="Get_sliceTextLimit(N.content, 50) ?? ''" class="notif_content_area"></div>
+                <div v-if="SelectedNotifId === N.id" v-html="N.content ?? ''" class="notif_content_area"></div>
+                <button v-if="SelectedNotifId !== N.id" class="notif_btn bg_blue notif_btn_showFullNotif" @click="Upd_SelectedNotifId(N.id)">Показать полностью</button>
             </div>
             <div class="notif_elem_panel">
-                <button class="notif_btn_close">X</button>
+                <button class="notif_btn notif_btn_close">X</button>
             </div>
         </div>
+
+        <!-- Одна выбранная карточка уведомления -->
+         <div v-if="SelectedNotifId" class="notif_fullCard_area">
+            <div class="notif_mheader">{{SelectedNotif.title}}</div>
+            <div></div>
+            <div>
+                {{SelectedNotif.app}}<br>
+                {{SelectedNotif.createdAt}}<br>
+            </div>
+            <div v-html="SelectedNotif.content" class="notif_fullCard_content"></div>
+            <!-- <div>
+                {{SelectedNotif}}
+            </div> -->
+            <div class="notif_fullCard_actions">
+                <button @click="Upd_SelectedNotifId(SelectedNotifId)" class="notif_btn">Назад</button>
+                <button v-for="nAction in SelectedNotif.actions" class="notif_btn">
+                    {{nAction}}
+                </button>
+            </div>
+         </div>
     </div>    
 </div>
 
