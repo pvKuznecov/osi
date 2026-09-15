@@ -70,5 +70,21 @@ export const notificationService = {
         };
 
         return LangData;
+    },
+    get_langData_status() {
+        const LangData = {
+            "en": {
+                "all": "All",
+                "read": "Read",
+                "unread": "Unread"
+            },
+            "ru": {
+                "all": "Все",
+                "read": "Прочитанные",
+                "unread": "Непрочитанные"
+            }
+        };
+
+        return LangData;
     }
 };
