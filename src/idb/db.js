@@ -796,7 +796,6 @@ export const usersTable = {
                 const notifs = user.notifs || [];
                 notifs.unshift(newNotif);
 
-                // ограничиваем кол-во уведомлений у пользователя (100)
                 if (notifs.length > 100) notifs.length = 100;
 
                 await DB.users.update(user_id, {
@@ -804,12 +803,38 @@ export const usersTable = {
                     updatedAt: new Date(),
                 });
 
-                return notifs;
-            } catch(err) {
+                return newNotif;     // ← ВОЗВРАЩАЕМ ОДНО УВЕДОМЛЕНИЕ
+            } catch (err) {
                 console.error('Error adding new notification:', err);
                 throw new Error(`Failed to add notification: ${err.message}`);
             }
         },
+        // async add(user_id = false, notif_data = false) {
+        //     if (!user_id) throw new Error('User Id required.');
+        //     if (!notif_data) throw new Error('Notification data required.');
+
+        //     try {
+        //         const user = await DB.users.get(user_id);
+        //         if (!user) throw new Error(`User not found: ${user_id}`);
+
+        //         const newNotif = new Notification(notif_data);
+        //         const notifs = user.notifs || [];
+        //         notifs.unshift(newNotif);
+
+        //         // ограничиваем кол-во уведомлений у пользователя (100)
+        //         if (notifs.length > 100) notifs.length = 100;
+
+        //         await DB.users.update(user_id, {
+        //             notifs: notifs,
+        //             updatedAt: new Date(),
+        //         });
+
+        //         return notifs;
+        //     } catch(err) {
+        //         console.error('Error adding new notification:', err);
+        //         throw new Error(`Failed to add notification: ${err.message}`);
+        //     }
+        // },
 
         // отметить уведомление как прочитанное (одно, по его ID)
         async markAsRead(user_id = false, notif_id = false) {

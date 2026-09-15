@@ -28,7 +28,15 @@
                 SelectNotif: true,
                 SelectMMenuArea: 'filters',
                 SelectedNotifId: null,
-                SelectedFilters: [],
+                SelectedTypeFilters: [],
+                SelectedStatusFilter: "all",
+                SelectedDateFilter_from: new Date().toISOString().slice(0, 10),
+                SelectedDateFilter_to: new Date().toISOString().slice(0, 10),
+
+                CreatorMode: false,
+                NewData: {},
+                NewData_error: null,
+                AddResult: null,
 
                 curHeader: 'Менеджер уведомлений',
             }
@@ -37,7 +45,20 @@
         computed: {
             SortedNotifs() {
                 const allArr = this.allNotifs;
-                return allArr.sort((a, b) => b.id - a.id);
+                if (!allArr) return [];
+
+                const FilterType = this.SelectedTypeFilters ?? [];
+                const FilterStatus = this.SelectedStatusFilter ?? "all";
+                
+                let res = allArr.filter(a => FilterType.includes(a.type));
+
+                if (FilterStatus && FilterStatus === "read") {
+                    res = res.filter(a => a.read);
+                } else if (FilterStatus && FilterStatus === "unread") {
+                    res = res.filter(a => !a.read);
+                }
+
+                return res.sort((a, b) => b.id - a.id);
             },
 
             SelectedNotif() {
@@ -50,6 +71,57 @@
         },
 
         methods: {
+            async AddNewNotif() {
+                const NewData = this.NewData;
+                const newTitle = NewData?.title?.trim();
+                const newContent = NewData?.content?.trim();
+
+                if (!newTitle || !newContent) {
+                    this.NewData_error = 'undefined';
+                    return;
+                }
+
+                this.NewData_error = null;
+
+                try {
+                    await this.addNotif_success(newTitle, newContent);
+                    
+                    const res = await notificationService.get_all();
+                    
+                    this.allNotifs = Array.isArray(res) ? res : (res?.data ?? res?.items ?? []);
+                    this.AddResult = 'ok';
+                    this.NewData = {};
+
+                    setTimeout(() => {
+                        this.AddResult = null;
+                        this.CreatorMode = false;
+                    }, 2000);                    
+                } catch (e) {
+                    this.NewData_error = 'error';
+                }
+            },
+
+            // Включить/выключить форму создания своего напоминания
+            toCreatorMode() {
+                const curMode = this.CreatorMode;
+
+                if (!curMode) {
+                    this.NewData = {};
+                    this.NewData_error = null;
+                }
+
+                this.CreatorMode = !curMode;
+                this.SelectedNotifId = null;
+            },
+
+            // Удалить один выбранный фильтр (Тип)
+            Del_selectedFilterVal(inpVal) {
+                const SelectedTypeFilters = this.SelectedTypeFilters;
+                const newSelectedTypeFilters = SelectedTypeFilters.filter(item => item !== inpVal);
+                
+                this.SelectedTypeFilters = newSelectedTypeFilters;
+            },
+
             LangData(key) { return this.lang_data[key] || ''; },
 
             Get_sliceTextLimit(txtVal, limitVal = 25) {
@@ -61,13 +133,9 @@
 
             // выбор целевого уведомления
             Upd_SelectedNotifId(newId) {
-                console.log('newId', newId);
                 if (!newId) return;
-                if (this.SelectedNotifId !== newId) {
-                    this.SelectedNotifId = newId;
-                } else {
-                    this.SelectedNotifId = null;
-                }
+
+                this.SelectedNotifId = (this.SelectedNotifId !== newId) ? newId : null;
             },
 
             // создать уведомление
@@ -75,7 +143,7 @@
                 if (!title) return;
                 if (!content) return;
 
-                await notificationService.add_system(title, content);
+                return await notificationService.add_system(title, content);
             },
 
             // Получить массив всех уведомлений
@@ -115,9 +183,14 @@
             
             const LangPackData = LangPack;
             const LangDataType = notificationService.get_langData_type();
+            const LangDataStatus = notificationService.get_langData_status();
 
             this.lang_data = (userLangS && LangPackData && LangPackData[userLangS]) ? LangPackData[userLangS] : LangPackData.en;
             this.Lang_data_type = (userLangS && LangDataType && LangDataType[userLangS]) ? LangDataType[userLangS] : LangDataType.en;
+            this.Lang_data_status = (userLangS && LangDataStatus && LangDataStatus[userLangS]) ? LangDataStatus[userLangS] : LangDataStatus.en;
+            
+            if (this.Lang_data_type) this.SelectedTypeFilters = Object.keys(this.Lang_data_type);
+            if (this.Lang_data_status) this.SelectedStatusFilters = Object.keys(this.Lang_data_status);
 
             this.getNotif_all();
         }
