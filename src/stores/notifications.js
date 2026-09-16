@@ -47,6 +47,7 @@ export const useNotificationsStore = defineStore('notifications', {
         
             try {
                 const notifs = await usersTable.notifs.getAll(userId);
+
                 this.notifications = notifs;
                 this.isInitialized = true;
             } catch (error) {
@@ -58,9 +59,7 @@ export const useNotificationsStore = defineStore('notifications', {
 
         // Добавление уведомления
         async add(notificationData) {
-            if (!this.currentUserId) {
-                throw new Error('No user selected');
-            }
+            if (!this.currentUserId) throw new Error('No user selected');
 
             try {
                 const notification = await usersTable.notifs.add(this.currentUserId, notificationData);

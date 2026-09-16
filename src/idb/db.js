@@ -336,6 +336,7 @@ export class Notification {
         this.createdAt = data.createdAt || new Date();
         this.endAt = data.endAt || null;
         this.actions = data.actions || ["close"];
+        this.pinned = data.pinned || false;
         this.data = data.data || {};
     }
 
@@ -809,32 +810,6 @@ export const usersTable = {
                 throw new Error(`Failed to add notification: ${err.message}`);
             }
         },
-        // async add(user_id = false, notif_data = false) {
-        //     if (!user_id) throw new Error('User Id required.');
-        //     if (!notif_data) throw new Error('Notification data required.');
-
-        //     try {
-        //         const user = await DB.users.get(user_id);
-        //         if (!user) throw new Error(`User not found: ${user_id}`);
-
-        //         const newNotif = new Notification(notif_data);
-        //         const notifs = user.notifs || [];
-        //         notifs.unshift(newNotif);
-
-        //         // ограничиваем кол-во уведомлений у пользователя (100)
-        //         if (notifs.length > 100) notifs.length = 100;
-
-        //         await DB.users.update(user_id, {
-        //             notifs: notifs,
-        //             updatedAt: new Date(),
-        //         });
-
-        //         return notifs;
-        //     } catch(err) {
-        //         console.error('Error adding new notification:', err);
-        //         throw new Error(`Failed to add notification: ${err.message}`);
-        //     }
-        // },
 
         // отметить уведомление как прочитанное (одно, по его ID)
         async markAsRead(user_id = false, notif_id = false) {
@@ -941,6 +916,33 @@ export const usersTable = {
                 icon: null
             });
         },
+
+        // закрепить/открепить уведомление
+        async togglePinned(user_id = false, notif_id = false) {
+            if (!user_id) throw new Error('User ID required.');
+            if (!notif_id) throw new Error('Notification ID required.');
+
+            try {
+                const user = await DB.users.get(user_id);
+                if (!user) throw new Error(`User not found: ${user_id}`);
+
+                const notifs = user.notifs || [];
+                const index = notifs.findIndex(n => n.id === notif_id);
+                if (index === -1) throw new Error(`Notification not found: ${notif_id}`);
+
+                notifs[index].pinned = !notifs[index].pinned;
+
+                await DB.users.update(user_id, {
+                    notifs: notifs,
+                    updatedAt: new Date(),
+                });
+
+                return notifs[index].pinned;   // ← возвращаем новое состояние
+            } catch (err) {
+                console.error('Error toggling pinned:', err);
+                throw new Error(`Failed to toggle pinned: ${err.message}`);
+            }
+        }
     },
 
     windows: {

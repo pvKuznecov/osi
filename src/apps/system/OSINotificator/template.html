@@ -10,7 +10,11 @@
             <div v-if="SelectMMenuArea === 'actions'" class="notif_mmenu_blockelem">
                 <div class="notif_menublock">
                     <button class="notif_btn bg_green" @click="toCreatorMode()">Создать напоминание</button>
-                </div>                
+                </div>
+                <div class="notif_menublock">
+                    <button class="notif_btn bg_blue">Отметить все как прочитанные</button>
+                    <button class="notif_btn bg_red">Удалить все</button>
+                </div>
             </div>
             <!-- Фильтры -->
             <div v-if="SelectMMenuArea === 'filters'" class="notif_mmenu_blockelem">
@@ -25,14 +29,14 @@
                     <b>Статус:</b>
                     <div class="notif_filterselect">
                         <select id="filter_status" v-model="SelectedStatusFilter">
-                            <option value="all">Все</option>
-                            <option value="read">Прочитанные</option>
-                            <option value="unread">Непрочитанные</option>
+                            <option value="all">{{LangData('all')}}</option>
+                            <option value="read">{{LangData('read')}}</option>
+                            <option value="unread">{{LangData('unread')}}</option>
                         </select>
                     </div>
                 </div>
                 <div class="notif_menublock">
-                    <b>Дата создания:</b>
+                    <b>{{LangData('creationdate')}}:</b>
                     <div class="notif_filterdate">
                         <input type="date" id="filter_date_from" v-model="SelectedDateFilter_from">
                         <i>-</i>
@@ -47,34 +51,34 @@
         </div>
     </div>
     <div class="notif_marea">
-        <div class="notif_mheader">{{curHeader}}</div>
+        <div id="main_mheader" class="notif_mheader">{{curHeader}}</div>
 
         <!-- Форма создания нового напоминания -->
         <div v-if="CreatorMode" class="notif_creator_area">
-            <div class="notif_mheader">Создание напоминания</div>
+            <div class="notif_mheader">{{LangData('createreminder')}}</div>
             <div v-if="NewData_error" class="notif_errorarea">
-                <b>Внимание!</b>
-                <span v-if="NewData_error === 'undefined'">Обязательные поля не заполнены.</span>
-                <span v-if="NewData_error === 'error'">Произошла ошибка при попытке создать новое уведомление.</span>
+                <b>{{LangData('attention')}}!</b>
+                <span v-if="NewData_error === 'undefined'">{{LangData('requiredfieldsaremissing')}}.</span>
+                <span v-if="NewData_error === 'error'">{{LangData('errorcreateanewnotification')}}.</span>
             </div>
             <div v-if="AddResult" class="notif_donearea">
-                Операция прошла успешно!
+                {{LangData('operationsuccessful')}}!
             </div>
             <div v-if="AddResult !== 'ok'" class="notif_creator_newelem">
-                <b>Заголовок:</b>
+                <b>{{LangData('title')}}:</b>
                 <input type="text" v-model="NewData.title">
             </div>
             <div v-if="AddResult !== 'ok'" class="notif_creator_newelem">
-                <b>Содержание:</b>
+                <b>{{LangData('content')}}:</b>
                 <textarea name="" id="" v-model="NewData.content"></textarea>
-            </div>
-            {{NewData}}            
+            </div>       
             <div v-if="AddResult !== 'ok'" class="notif_creator_newelem">
-                <button type="button" class="notif_btn bg_green" @click="AddNewNotif()">Создать</button>
+                <button type="button" class="notif_btn bg_green" @click="AddNewNotif()">{{LangData('create')}}</button>
+                <button type="button" class="notif_btn bg_red" @click="AbortNewNotif()">{{LangData('cancel')}}</button>
             </div>
         </div>
 
-        <!-- Массив уведомлений -->
+        <!-- Фильтры + Статистика -->
         <div v-if="!SelectedNotifId && !CreatorMode && SelectedTypeFilters.length > 0" class="notif_notifsElems_panel">
             <span class="notif_notifsElems_paneltitle">Фильтры:</span>
             <div v-for="FilterKey in SelectedTypeFilters" class="notif_notifsElems_panelConteiner">
@@ -87,14 +91,29 @@
                 </span>
                 <button type="button" class="notif_notifsElems_panelConteiner_x bg_red" @click="SelectedStatusFilter = null">x</button>
             </div>
+
+            <div v-if="SelectedDateFilter_from" class="notif_notifsElems_panelConteiner">
+                <i>Дата создания (от):</i> {{SelectedDateFilter_from}}
+                <button type="button" class="notif_notifsElems_panelConteiner_x bg_red" @click="SelectedDateFilter_from = null">x</button>
+            </div>
+            <div v-if="SelectedDateFilter_to" class="notif_notifsElems_panelConteiner">
+                <i>Дата создания (до):</i> {{SelectedDateFilter_to}}
+                <button type="button" class="notif_notifsElems_panelConteiner_x bg_red" @click="SelectedDateFilter_to = null">x</button>
+            </div>
         </div>
         <div v-if="!SelectedNotifId && !CreatorMode" class="notif_notifsElems_panel">
+            <span class="notif_notifsElems_paneltitle">Статистика:</span>
             <div class="notif_notifsElems_panelConteiner">
                 Всего уведомлений: {{SortedNotifs.length}}
             </div>            
         </div>
-        <div v-if="!SelectedNotifId && !CreatorMode" v-for="N in SortedNotifs" class="notif_elem">
-            <i v-if="!N.read" class="notif_newelem bi bi-info-circle"></i>
+        <!-- Массив уведомлений -->
+         <div v-if="!SelectedNotifId && !CreatorMode" v-for="N in SortedNotifs" class="notif_elem">
+            <div class="notif_elem_panel">
+                <i v-if="!N.read" class="notif_newelem bi bi-info-circle" title="Новое уведомление"></i>
+                <button v-if="N.pinned" type="button" class="notif_btn_pinmsg bi bi-pin-fill" title="Открепить" @click="TogglePinned(N.id)"></button>
+                <button v-if="!N.pinned" type="button" class="notif_btn_unpinmsg bi bi-pin-fill" title="Закрепить" @click="TogglePinned(N.id)"></button>
+            </div>            
             <div class="notif_elem_authorarea">
                 <div class="notif_elem_applogo"></div>
                 <span>{{N.app ?? 'OSI'}}</span>
@@ -123,41 +142,9 @@
             </div>
             <div v-html="SelectedNotif.content" class="notif_fullCard_content"></div>
             <div class="notif_fullCard_actions">
-                <button @click="Upd_SelectedNotifId(SelectedNotifId)" class="notif_btn">Назад</button>
-                <button v-for="nAction in SelectedNotif.actions" class="notif_btn">
-                    {{nAction}}
-                </button>
+                <button @click="Upd_SelectedNotifId(SelectedNotifId)" class="notif_btn">{{LangData('back')}}</button>
+                <button v-for="nAction in SelectedNotif.actions" class="notif_btn">{{nAction}}</button>
             </div>
          </div>
     </div>    
 </div>
-
-<!-- {
-    "id": 1,
-    "app": null,
-    "title": "Добро пожаловать в OSI!",
-    "content": "Поздравляем! Ваша учетная запись успешно создана. Это Ваш первый вход в систему.",
-    "type": "info",
-    "icon": "I",
-    "autoclose": 0,
-    "read": false,
-    "createdAt": "2026-08-27T02:58:54.878Z",
-    "endAt": null,
-    "actions": [ "close" ],
-    "data": {}
-}
-
-{
-    "id": 2,
-    "app": null,
-    "title": "Первичные рекомендации",
-    "content": "Перед началом работы с системой, рекомендуется выполнить следующие настройки:<ul><li>настроить список приложений \"под себя\";</li><li>кастомизировать рабочий стол.</li></ul>",
-    "type": "info",
-    "icon": "I",
-    "autoclose": 0,
-    "read": false,
-    "createdAt": "2026-08-27T02:58:54.878Z",
-    "endAt": null,
-    "actions": [ "close" ],
-    "data": {} 
-} -->
