@@ -7,7 +7,7 @@ export const notificationService = {
     add_system(title, content, type = 'info', autoclose = 5) {
         const store = useNotificationsStore();
         return store.add({
-            app: 'system',
+            app: 'OSI',
             title,
             content,
             type,
@@ -51,6 +51,11 @@ export const notificationService = {
         return store.notifications;
     },
 
+    togglePinned(notifId) {
+        const store = useNotificationsStore();
+        return store.togglePinned(notifId);
+    },
+
     // -=-=-= БЛОК ПОЛУЧЕНИЯ ВСПОМОГАТЕЛЬНЫХ ДАННЫХ =-=-=-
     // Получить расшифровку типов (языковой пакет)
     get_langData_type() {
@@ -71,6 +76,7 @@ export const notificationService = {
 
         return LangData;
     },
+    // Получить расшифровку статусов (языковой пакет)
     get_langData_status() {
         const LangData = {
             "en": {

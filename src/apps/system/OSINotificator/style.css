@@ -97,6 +97,16 @@
     margin-bottom: auto;
     margin-right: 5px; }
 
+.notif_marea::-webkit-scrollbar {
+    width: 10px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, white, rgb(103, 141, 141), white); }
+.notif_marea::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgb(7, 177, 177), darkcyan, rgb(1, 110, 110));
+    border-radius: 3px;
+    box-shadow: 1px 2px black;
+    cursor: pointer; }
+
 .notif_mheader {
     display: flex;
     flex-direction: row;
@@ -115,6 +125,11 @@
     text-shadow: 1px 2px black;
     font-size: 16px;
     box-shadow: 1px 2px 6px black; }
+
+#main_mheader {
+    position: sticky;
+    top: 0;
+    z-index: 100; }
 
 .notif_notifsElems_panel {
     display: flex;
@@ -144,12 +159,11 @@
     justify-content: space-between;
     gap: 3px;
     width: calc(96% - 10px);
-    max-width: 900px;
+    max-width: 800px;
     height: 90px;
     background-color: rgba(255, 255, 255, 0.945);
     border-radius: 3px;
     margin-left: 2%;
-    /* margin-right: auto; */
     box-shadow: 1px 2px 6px black;
     padding: 5px; }
 
@@ -205,8 +219,6 @@
     background: linear-gradient(180deg, rgb(166, 236, 59), rgb(124, 202, 8));
     width: 15px;
     height: 15px;
-    margin-left: -10px;
-    margin-top: -8px;
     border-radius: 10px;
     border: 1px solid rgb(124, 202, 8);
     color: rgb(29, 46, 4);
@@ -232,7 +244,7 @@
     flex-direction: column;
     justify-content: flex-start;
     overflow: hidden;
-    min-width: calc(100% - 130px);
+    min-width: calc(100% - 135px);
     max-width: calc(100% - 130px);
     height: 80px;
     padding: 0 5px 5px 5px; }
@@ -334,9 +346,10 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    gap: 3px;
     width: calc(100% - 10px);
     border-radius: 3px;
-    padding: 3px 5px;
+    padding: 10px 5px;
     border: 1px solid lightgray; }
 
 .notif_filterchkbox,
@@ -399,3 +412,18 @@
     font-size: 14px;
     color: black;
     text-shadow: none; }
+
+.notif_btn_pinmsg,
+.notif_btn_unpinmsg {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 16px;
+    height: 16px;
+    border: none;
+    cursor: pointer;
+    opacity: .9; }
+.notif_btn_pinmsg:hover,
+.notif_btn_unpinmsg:hover { opacity: 1;}
+.notif_btn_pinmsg { color: black; }
+.notif_btn_unpinmsg { color: gray; }

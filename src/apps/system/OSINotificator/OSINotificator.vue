@@ -30,8 +30,8 @@
                 SelectedNotifId: null,
                 SelectedTypeFilters: [],
                 SelectedStatusFilter: "all",
-                SelectedDateFilter_from: new Date().toISOString().slice(0, 10),
-                SelectedDateFilter_to: new Date().toISOString().slice(0, 10),
+                SelectedDateFilter_from: null,
+                SelectedDateFilter_to: null,
 
                 CreatorMode: false,
                 NewData: {},
@@ -49,13 +49,36 @@
 
                 const FilterType = this.SelectedTypeFilters ?? [];
                 const FilterStatus = this.SelectedStatusFilter ?? "all";
-                
+                const FilterDateFrom = this.SelectedDateFilter_from ?? null;
+                const FilterDateTo = this.SelectedDateFilter_to ?? null;
+
                 let res = allArr.filter(a => FilterType.includes(a.type));
 
+                // Фильтр по статусу
                 if (FilterStatus && FilterStatus === "read") {
                     res = res.filter(a => a.read);
                 } else if (FilterStatus && FilterStatus === "unread") {
                     res = res.filter(a => !a.read);
+                }
+
+                // Фильтр по дате
+                if (FilterDateFrom || FilterDateTo) {
+                    // Начало периода (00:00:00)
+                    const fromTs = FilterDateFrom
+                        ? new Date(FilterDateFrom + 'T00:00:00').getTime()
+                        : -Infinity;
+                    // Конец периода (23:59:59.999)
+                    const toTs = FilterDateTo
+                        ? new Date(FilterDateTo + 'T23:59:59.999').getTime()
+                        : Infinity;
+
+                    res = res.filter(a => {
+                        if (!a.createdAt && !a.date && !a.created_at) return false;
+                        const raw = a.createdAt ?? a.date ?? a.created_at;
+                        const ts = new Date(raw).getTime();
+                        if (Number.isNaN(ts)) return false;
+                        return ts >= fromTs && ts <= toTs;
+                    });
                 }
 
                 return res.sort((a, b) => b.id - a.id);
@@ -71,6 +94,7 @@
         },
 
         methods: {
+            // Создание нового напоминания (на основе данных из формочки)
             async AddNewNotif() {
                 const NewData = this.NewData;
                 const newTitle = NewData?.title?.trim();
@@ -99,6 +123,13 @@
                 } catch (e) {
                     this.NewData_error = 'error';
                 }
+            },
+
+            // Отмена создания нового напоминания, с выходом из режима "создание" и зачисткой лишнего
+            AbortNewNotif() {
+                this.AddResult = null;
+                this.CreatorMode = false;
+                this.NewData_error = null;
             },
 
             // Включить/выключить форму создания своего напоминания
@@ -156,6 +187,11 @@
                 if (!inpVal) return;
 
                 this.SelectMMenuArea = inpVal;
+            },
+
+            // Закрепить уведомление
+            async TogglePinned(inpId) {
+                await notificationService.togglePinned(inpId);
             },
 
             // Вывод даты-времени в человеко-читабельном формате
