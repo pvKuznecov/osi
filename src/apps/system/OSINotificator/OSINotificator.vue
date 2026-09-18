@@ -32,6 +32,7 @@
                 SelectedStatusFilter: "all",
                 SelectedDateFilter_from: null,
                 SelectedDateFilter_to: null,
+                SelectedManNotifs: [],
 
                 CreatorMode: false,
                 NewData: {},
@@ -192,6 +193,28 @@
             // Закрепить уведомление
             async TogglePinned(inpId) {
                 await notificationService.togglePinned(inpId);
+            },
+
+            // Закрепить/открепить ВСЕ уведомления (по умолч. открепить)
+            Full_TogglePinned(inpVal = false) {
+                const FullList = this.allNotifs;
+                if (!FullList || FullList.length === 0) return;
+
+                FullList.forEach(elem => {
+                    if (elem.pinned !== inpVal) this.TogglePinned(elem.id);
+                });
+            },
+
+            // Пометить все как прочитанные/не прочитанные (по умолч. "не прочитанные")
+            async markAllAsRead(selectVal = false) {
+                const FullList = this.allNotifs;
+                if (!FullList || FullList.length === 0) return;
+
+                if (selectVal) {
+                    await notificationService.markAll_asRead();
+                } else {
+                    await notificationService.markAll_asUnread();
+                }                
             },
 
             // Вывод даты-времени в человеко-читабельном формате

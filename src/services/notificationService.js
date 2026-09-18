@@ -28,11 +28,12 @@ export const notificationService = {
         });
     },
 
-    // Короткие методы
+    // -=-=-= КОРОТКИЕ МЕТОДЫ =-=-=-
     add_success(title, content, autoclose = 5) {
         return this.system(title, content, 'success', autoclose);
     },
 
+    // Создать уведомление об ошибке
     add_error(title, content, autoclose = 10) {
         return this.system(title, content, 'error', autoclose);
     },
@@ -45,15 +46,27 @@ export const notificationService = {
         return this.system(title, content, 'info', autoclose);
     },
 
+    // Закрепить уведомление
+    togglePinned(notifId) {
+        const store = useNotificationsStore();
+        return store.togglePinned(notifId);
+    },
+
+    // Пометить все - "Прочитанные"
+    markAll_asRead() {
+        const store = useNotificationsStore();
+        return store.markAllAsRead();
+    },
+    // Пометить все - "Не прочитанные"
+    markAll_asUnread() {
+        const store = useNotificationsStore();
+        return store.markAllAsUnread();
+    },
+
     // -=-=-= БЛОК ПОЛУЧЕНИЯ УВЕДОМЛЕНИЙ =-=-=-
     get_all() {
         const store = useNotificationsStore();
         return store.notifications;
-    },
-
-    togglePinned(notifId) {
-        const store = useNotificationsStore();
-        return store.togglePinned(notifId);
     },
 
     // -=-=-= БЛОК ПОЛУЧЕНИЯ ВСПОМОГАТЕЛЬНЫХ ДАННЫХ =-=-=-

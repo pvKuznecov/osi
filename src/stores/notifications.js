@@ -95,11 +95,32 @@ export const useNotificationsStore = defineStore('notifications', {
         async markAllAsRead() {
             if (!this.currentUserId) return;
 
-            try {
-                await usersTable.notifs.markAllAsRead(this.currentUserId);
+            console.log('usersTable.notifs', usersTable.notifs);
+
+            try {                
+                await usersTable.notifs.markAsReadAll(this.currentUserId);
                 this.notifications.forEach(n => n.read = true);
+
+                console.log('markAllAsRead::', 'ok');
+
+                return "ok";
             } catch (error) {
                 console.error('Failed to mark all as read:', error);
+                return "error";
+            }
+        },
+        // Отметить все как не прочитанные
+        async markAllAsUnread() {
+            if (!this.currentUserId) return;
+
+            try {                
+                await usersTable.notifs.markAsReadAll(this.currentUserId);
+                this.notifications.forEach(n => n.read = false);
+
+                return "ok";
+            } catch (error) {
+                console.error('Failed to mark all as unread:', error);
+                return "error";
             }
         },
 
