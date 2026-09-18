@@ -9,11 +9,17 @@
             <!-- Действия -->
             <div v-if="SelectMMenuArea === 'actions'" class="notif_mmenu_blockelem">
                 <div class="notif_menublock">
-                    <button class="notif_btn bg_green" @click="toCreatorMode()">Создать напоминание</button>
+                    <button class="notif_btn bg_green" @click="toCreatorMode()">+ {{LangData('сreateareminder')}}</button>
                 </div>
                 <div class="notif_menublock">
-                    <button class="notif_btn bg_blue">Отметить все как прочитанные</button>
+                    <button class="notif_btn bg_blue" @click="markAllAsRead(true)">{{LangData('markallasread')}}</button>
+                    <button class="notif_btn bg_blue" @click="markAllAsRead()">{{LangData('markallasunread')}}</button>
                     <button class="notif_btn bg_red">Удалить все</button>
+                </div>
+                <div v-if="SelectedManNotifs.length > 0" class="notif_menublock">
+                    <button class="notif_btn bg_blue">Отметить выбранные ({{SelectedManNotifs.length}}) как прочитанное</button>
+                    <button class="notif_btn bg_blue">Отметить выбранные ({{SelectedManNotifs.length}}) как не прочитанное</button>
+                    <button class="notif_btn bg_red">Удалить выбранные ({{SelectedManNotifs.length}})</button>
                 </div>
             </div>
             <!-- Фильтры -->
@@ -70,7 +76,7 @@
             </div>
             <div v-if="AddResult !== 'ok'" class="notif_creator_newelem">
                 <b>{{LangData('content')}}:</b>
-                <textarea name="" id="" v-model="NewData.content"></textarea>
+                <textarea v-model="NewData.content"></textarea>
             </div>       
             <div v-if="AddResult !== 'ok'" class="notif_creator_newelem">
                 <button type="button" class="notif_btn bg_green" @click="AddNewNotif()">{{LangData('create')}}</button>
@@ -78,41 +84,36 @@
             </div>
         </div>
 
-        <!-- Фильтры + Статистика -->
-        <div v-if="!SelectedNotifId && !CreatorMode && SelectedTypeFilters.length > 0" class="notif_notifsElems_panel">
-            <span class="notif_notifsElems_paneltitle">Фильтры:</span>
-            <div v-for="FilterKey in SelectedTypeFilters" class="notif_notifsElems_panelConteiner">
-                <span><i>Тип:</i> {{Lang_data_type[FilterKey]}}</span>
+        <!-- Фильтры -->
+        <div v-if="!SelectedNotifId && !CreatorMode && SelectedTypeFilters.length > 0" class="notif_notifsElems_toppanel">
+            <div v-for="FilterKey in SelectedTypeFilters" class="elem">
+                <i class="bi bi-filter-circle-fill"></i>
+                <i>Тип: </i> {{Lang_data_type[FilterKey]}}
                 <button type="button" class="notif_notifsElems_panelConteiner_x bg_red" @click="Del_selectedFilterVal(FilterKey)">x</button>
             </div>
-            <div v-if="SelectedStatusFilter" class="notif_notifsElems_panelConteiner">
-                <span>
-                    <i>Статус:</i> {{Lang_data_status[SelectedStatusFilter]}}
-                </span>
+            <div v-if="SelectedStatusFilter" class="elem">
+                <i class="bi bi-filter-circle-fill"></i>
+                <i>Статус:</i> {{Lang_data_status[SelectedStatusFilter]}}
                 <button type="button" class="notif_notifsElems_panelConteiner_x bg_red" @click="SelectedStatusFilter = null">x</button>
             </div>
-
-            <div v-if="SelectedDateFilter_from" class="notif_notifsElems_panelConteiner">
+            <div v-if="SelectedDateFilter_from" class="elem">
+                <i class="bi bi-filter-circle-fill"></i>
                 <i>Дата создания (от):</i> {{SelectedDateFilter_from}}
                 <button type="button" class="notif_notifsElems_panelConteiner_x bg_red" @click="SelectedDateFilter_from = null">x</button>
             </div>
-            <div v-if="SelectedDateFilter_to" class="notif_notifsElems_panelConteiner">
+            <div v-if="SelectedDateFilter_to" class="elem">
+                <i class="bi bi-filter-circle-fill"></i>
                 <i>Дата создания (до):</i> {{SelectedDateFilter_to}}
                 <button type="button" class="notif_notifsElems_panelConteiner_x bg_red" @click="SelectedDateFilter_to = null">x</button>
             </div>
         </div>
-        <div v-if="!SelectedNotifId && !CreatorMode" class="notif_notifsElems_panel">
-            <span class="notif_notifsElems_paneltitle">Статистика:</span>
-            <div class="notif_notifsElems_panelConteiner">
-                Всего уведомлений: {{SortedNotifs.length}}
-            </div>            
-        </div>
         <!-- Массив уведомлений -->
-         <div v-if="!SelectedNotifId && !CreatorMode" v-for="N in SortedNotifs" class="notif_elem">
+        <div v-if="!SelectedNotifId && !CreatorMode" v-for="N in SortedNotifs" class="notif_elem">
             <div class="notif_elem_panel">
                 <i v-if="!N.read" class="notif_newelem bi bi-info-circle" title="Новое уведомление"></i>
                 <button v-if="N.pinned" type="button" class="notif_btn_pinmsg bi bi-pin-fill" title="Открепить" @click="TogglePinned(N.id)"></button>
                 <button v-if="!N.pinned" type="button" class="notif_btn_unpinmsg bi bi-pin-fill" title="Закрепить" @click="TogglePinned(N.id)"></button>
+                <input type="checkbox" :value="N.id" v-model="SelectedManNotifs">
             </div>            
             <div class="notif_elem_authorarea">
                 <div class="notif_elem_applogo"></div>
@@ -131,20 +132,47 @@
                 <button class="notif_btn notif_btn_close">X</button>
             </div>
         </div>
+        <!-- Статистика -->
+        <div v-if="!SelectedNotifId && !CreatorMode" class="notif_notifsElems_botpanel">
+            <div v-if="SelectedManNotifs.length > 0" class="elem">
+                <i>Выбрано: </i>{{SelectedManNotifs.length}}
+            </div>
+            <div class="elem">
+                <i>Всего уведомлений: </i>{{SortedNotifs.length}}
+            </div>            
+        </div>
 
         <!-- Одна выбранная карточка уведомления -->
          <div v-if="SelectedNotifId && !CreatorMode" class="notif_fullCard_area">
-            <div class="notif_mheader">{{SelectedNotif.title}}</div>
-            <div></div>
-            <div>
-                {{SelectedNotif.app}}<br>
-                {{SelectedNotif.createdAt}}<br>
+            <div class="notif_mheader" style="justify-content: space-between; padding-left: 5px;">
+                <span @click="Upd_SelectedNotifId(SelectedNotifId)" :title="LangData('back')" style="cursor: pointer;">
+                    <i class="bi bi-caret-left-fill"></i>
+                </span>
+                <span>{{SelectedNotif.title}}</span>
+            </div>
+            <div class="notif_fullCard_namearea">
+                <div class="notif_elem_authorarea">
+                    <div class="notif_elem_applogo"></div>
+                    <span>{{SelectedNotif.app ?? 'OSI'}}</span>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                    <span>
+                        <b>{{Lang_data_type[SelectedNotif.type]}}</b>
+                        <span v-if="SelectedNotif.pinned"> (Закреплено)</span>
+                    </span>
+                    <span><i>Отправитель:</i> {{SelectedNotif.app ?? 'OSI'}}</span>
+                    <span><i>Создано:</i> {{formatTime(SelectedNotif.createdAt)}}</span>
+                    <span>{{(SelectedNotif.read) ? 'Прочитано' : 'Не прочитано'}}</span>
+                </div>
             </div>
             <div v-html="SelectedNotif.content" class="notif_fullCard_content"></div>
             <div class="notif_fullCard_actions">
-                <button @click="Upd_SelectedNotifId(SelectedNotifId)" class="notif_btn">{{LangData('back')}}</button>
+                <button @click="Upd_SelectedNotifId(SelectedNotifId)" class="notif_btn"><i class="bi bi-caret-left-fill"></i> {{LangData('back')}}</button>
+                <button v-if="SelectedNotif.pinned" class="notif_btn bg_green" @click="TogglePinned(SelectedNotif.id)"><i class="bi bi-pin-fill"></i> Открепить</button>
+                <button v-if="!SelectedNotif.pinned" class="notif_btn bg_green"  @click="TogglePinned(SelectedNotif.id)"><i class="bi bi-pin-fill"></i> Закрепить</button>
                 <button v-for="nAction in SelectedNotif.actions" class="notif_btn">{{nAction}}</button>
             </div>
+            {{SelectedNotif}}
          </div>
     </div>    
 </div>
