@@ -1,6 +1,7 @@
 import Dexie from "dexie";
 import { ref } from "vue";
 import { appsConfig } from "@/config/applications";
+// import { read } from "jsmediatags";
 
 // конфигураторы БД
 const db_name = 'OSIDB';
@@ -44,7 +45,7 @@ async function getDefaultApps() {
 
 // описание схемы БД
 DB.version(db_version).stores({
-    users: '++id, name, login, password, apps, data, config, notifs, systemconfig, systemdata, createdAt, updatedAt',
+    users: '++id, name, login, password, apps, data, config, systemconfig, systemdata, createdAt, updatedAt',
     // settings: '++id, key, value, updatedAt',
     dfiles: '++id, name, userid, parentid, [userid+parentid], type, size, mimetype, data, private, protect, createdAt, updatedAt',
 });
@@ -325,7 +326,7 @@ export class Window {
 
 export class Notification {
     constructor(data = {}) {
-        this.id = data.id || Date.now();
+        this.id = data.id || (Date.now() + Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000);
         this.app = data.app || null;
         this.title = data.title || "Уведомление";
         this.content = data.content || "";
@@ -841,6 +842,7 @@ export const usersTable = {
 
         // отметить все уведомления пользователя как прочитанные
         async markAsReadAll(user_id = false) {
+            console.log('user_id', user_id);
             if (!user_id) throw new Error('User ID required.');
 
             try {
@@ -862,6 +864,32 @@ export const usersTable = {
             } catch(err) {
                 console.error('Error marking all notifications as read:', err);
                 throw new Error(`Failed to mark all notifications as read: ${err.message}`);
+            }
+        },
+        // отметить все уведомления пользователя как НЕ прочитанные
+        async markAsUnreadAll(user_id = false) {
+            console.log('user_id', user_id);
+            if (!user_id) throw new Error('User ID required.');
+
+            try {
+                const user = await DB.users.get(user_id);
+                if (!user) throw new Error(`User not found: ${user_id}`);
+
+                // находим все уведомления и сразу помечаем их как прочитанные
+                const notifs = (user.notifs || []).map(n => ({
+                    ...n,
+                    read: false
+                }));
+
+                await DB.users.update(user_id, {
+                    notifs: notifs,
+                    updatedAt: new Date(),
+                });
+
+                return true;
+            } catch(err) {
+                console.error('Error marking all notifications as unread:', err);
+                throw new Error(`Failed to mark all notifications as unread: ${err.message}`);
             }
         },
 

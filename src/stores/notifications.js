@@ -93,6 +93,7 @@ export const useNotificationsStore = defineStore('notifications', {
 
         // Отметить все как прочитанные
         async markAllAsRead() {
+            console.log('this.currentUserId', this.currentUserId);
             if (!this.currentUserId) return;
 
             console.log('usersTable.notifs', usersTable.notifs);
@@ -114,7 +115,7 @@ export const useNotificationsStore = defineStore('notifications', {
             if (!this.currentUserId) return;
 
             try {                
-                await usersTable.notifs.markAsReadAll(this.currentUserId);
+                await usersTable.notifs.markAsUnreadAll(this.currentUserId);
                 this.notifications.forEach(n => n.read = false);
 
                 return "ok";
