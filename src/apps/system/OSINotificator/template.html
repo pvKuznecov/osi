@@ -9,14 +9,21 @@
             <!-- Действия -->
             <div v-if="SelectMMenuArea === 'actions'" class="notif_mmenu_blockelem">
                 <div class="notif_menublock">
+                    <b>Создание:</b>
                     <button class="notif_btn bg_green" @click="toCreatorMode()">+ {{LangData('сreateareminder')}}</button>
                 </div>
                 <div class="notif_menublock">
+                    <b>Операции над всеми:</b>
                     <button class="notif_btn bg_blue" @click="markAllAsRead(true)">{{LangData('markallasread')}}</button>
                     <button class="notif_btn bg_blue" @click="markAllAsRead()">{{LangData('markallasunread')}}</button>
+                    <hr>
+                    <button class="notif_btn bg_blue" @click="Full_TogglePinned(true)">Закрепить все</button>
+                    <button class="notif_btn bg_blue" @click="Full_TogglePinned()">Открепить все</button>
+                    <hr>
                     <button class="notif_btn bg_red">Удалить все</button>
                 </div>
                 <div v-if="SelectedManNotifs.length > 0" class="notif_menublock">
+                    <b>Операции над выбранными ({{SelectedManNotifs.length}}):</b>
                     <button class="notif_btn bg_blue">Отметить выбранные ({{SelectedManNotifs.length}}) как прочитанное</button>
                     <button class="notif_btn bg_blue">Отметить выбранные ({{SelectedManNotifs.length}}) как не прочитанное</button>
                     <button class="notif_btn bg_red">Удалить выбранные ({{SelectedManNotifs.length}})</button>
@@ -134,9 +141,12 @@
         </div>
         <!-- Статистика -->
         <div v-if="!SelectedNotifId && !CreatorMode" class="notif_notifsElems_botpanel">
-            <div v-if="SelectedManNotifs.length > 0" class="elem">
-                <i>Выбрано: </i>{{SelectedManNotifs.length}}
-            </div>
+            <div style="display: flex; flex-direction: row; gap: 3px;">
+                <button class="notif_btn" :title="LangData('selectall')" @click="SelectAllNotifs()"><i class="bi bi-check-all"></i></button>
+                <div v-if="SelectedManNotifs.length > 0" class="elem">
+                    <i>Выбрано: </i>{{SelectedManNotifs.length}}
+                </div>
+            </div>            
             <div class="elem">
                 <i>Всего уведомлений: </i>{{SortedNotifs.length}}
             </div>            
@@ -172,7 +182,6 @@
                 <button v-if="!SelectedNotif.pinned" class="notif_btn bg_green"  @click="TogglePinned(SelectedNotif.id)"><i class="bi bi-pin-fill"></i> Закрепить</button>
                 <button v-for="nAction in SelectedNotif.actions" class="notif_btn">{{nAction}}</button>
             </div>
-            {{SelectedNotif}}
          </div>
     </div>    
 </div>

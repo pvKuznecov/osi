@@ -1,16 +1,20 @@
+// /src/idb/db.js
 import Dexie from "dexie";
 import { ref } from "vue";
 import { appsConfig } from "@/config/applications";
 // import { read } from "jsmediatags";
 
-// конфигураторы БД
+// Конфигураторы БД
 const db_name = 'OSIDB';
 const db_version = 1;
 /** Версия структуры данных внутри документов users (не путать с db_version Dexie). */
 const CURRENT_DATA_VERSION = 1;
 
-// инициализация БД
+// Инициализация БД
 const DB = new Dexie(db_name);
+// Определение языка системы
+const userLang = navigator.language || navigator.userLanguage;
+const userLangS = userLang.split('-')[0];
 
 // const defaultApps = await appsConfig.getAllApps();
 // Функция для получения упрощенных объектов приложений
@@ -59,30 +63,45 @@ const Def_userSystemconfig = {
     activeWindowId: null,
 };
 
-const Def_notifs = [
-    {
-        id: 1,
-        app: null,
-        title: "Добро пожаловать в OSI!",
-        content: "Поздравляем! Ваша учетная запись успешно создана. Это Ваш первый вход в систему.",
-        create: new Date(),
-        type: "info",
-        icon: "I",
-        autoclose: 0,
-        createdAt: new Date(),
-    },
-    {
-        id: 2,
-        app: null,
-        title: "Первичные рекомендации",
-        content: 'Перед началом работы с системой, рекомендуется выполнить следующие настройки:<ul><li>настроить список приложений "под себя";</li><li>кастомизировать рабочий стол.</li></ul>',
-        create: new Date(),
-        type: "info",
-        icon: "I",
-        autoclose: 0,
-        createdAt: new Date(),
-    },
-];
+// Базовые уведомления (на момент создания учетной записи)
+const Def_notifs = {
+    'en': [
+        {
+            id: 1, app: null, type: "info", icon: "I",
+            title: "Welcome to OSI!",
+            content: "Congratulations! Your account has been successfully created. This is your first time logging in.",
+            create: new Date(),            
+            autoclose: 0,
+            createdAt: new Date(),
+        },
+        {
+            id: 2, app: null, type: "info", icon: "I",
+            title: "Initial recommendations",
+            content: "Before you start using the system, it is recommended to configure the following settings:<ul><li>customize the list of applications to suit your needs;</li><li>customize the desktop.</li></ul>",
+            create: new Date(),            
+            autoclose: 0,
+            createdAt: new Date(),
+        },
+    ],
+    'ru': [
+        {
+            id: 1, app: null, type: "info", icon: "I",
+            title: "Добро пожаловать в OSI!",
+            content: "Поздравляем! Ваша учетная запись успешно создана. Это Ваш первый вход в систему.",
+            create: new Date(),            
+            autoclose: 0,
+            createdAt: new Date(),
+        },
+        {
+            id: 2, app: null, type: "info", icon: "I",
+            title: "Первичные рекомендации",
+            content: 'Перед началом работы с системой, рекомендуется выполнить следующие настройки:<ul><li>настроить список приложений "под себя";</li><li>кастомизировать рабочий стол.</li></ul>',
+            create: new Date(),            
+            autoclose: 0,
+            createdAt: new Date(),
+        },
+    ]
+};
 
 // const Def_notif_template = {
 //     id: null,                               // id уведомления
@@ -119,7 +138,7 @@ export class User {
         this.apps = data.apps || [];
         this.data = data.data || {};
         this.config = data.config || Def_userConfig;
-        this.notifs = data.notifs || Def_notifs;
+        this.notifs = data.notifs || Def_notifs[userLangS];
         this.systemconfig = data.systemconfig || Def_userSystemconfig;
         this.systemdata = data.systemdata || Def_systemdata;
         this.protect = data.protect || false;
@@ -135,9 +154,7 @@ export class DFile {
     static ROOT_PARENT = 0;
 
     constructor(data = {}) {
-        // автоматическое присваение id (вариант для "совместимости")
-        if (data.id) this.id = data.id;
-
+        if (data.id) this.id = data.id;                         // автоматическое присваение id (вариант для "совместимости")
         this.name = data.name || 'Unknown';
         this.userid = data.userid || null;                      // владелец (связь с users.id)
         this.parentid = data.parentid ?? DFile.ROOT_PARENT;     // родительская папка
@@ -151,8 +168,7 @@ export class DFile {
 
         // Типозависимые поля
         this.extension = data.extension || this.getExtensionFromName();
-
-        // Для папок
+            // Для папок
         if (this.type === 'folder') {
             this.children = data.children || [];        // массив ID дочерних элементов
             this.isExpanded = data.isExpanded || false; //UI метка "открытая\закрытая папка"
@@ -195,36 +211,43 @@ export class DFile {
     // Сеттеры для обновления метаданных
     set camera(value) { 
         if (!this.metadata) this.metadata = {};
+        
         this.metadata.camera = value; 
     }
     
     set width(value) { 
         if (!this.metadata) this.metadata = {};
+        
         this.metadata.width = value; 
     }
     
     set height(value) { 
         if (!this.metadata) this.metadata = {};
+        
         this.metadata.height = value; 
     }
     
     set duration(value) { 
         if (!this.metadata) this.metadata = {};
+        
         this.metadata.duration = value; 
     }
     
     set artist(value) { 
         if (!this.metadata) this.metadata = {};
+        
         this.metadata.artist = value; 
     }
     
     set album(value) { 
         if (!this.metadata) this.metadata = {};
+        
         this.metadata.album = value; 
     }
     
     set title(value) { 
         if (!this.metadata) this.metadata = {};
+        
         this.metadata.title = value; 
     }
 
@@ -262,6 +285,7 @@ export class DFile {
             while (current.parentid && current.parentid !== DFile.ROOT_PARENT) {
                 const parent = await db.dfiles.get(current.parentid);
                 if (!parent) break;
+        
                 path.unshift(parent);
                 current = parent;
             }
@@ -280,6 +304,7 @@ export class DFile {
     }
 }  
 
+// Класс "Настройки"
 export class Setting {
     constructor(key, value) {
         this.key = key;
@@ -287,14 +312,14 @@ export class Setting {
         this.updatedAt = new Date();
     }
 }
-
+// Класс "Состояние окна"
 export class WindowState {
     constructor(data = {}) {
         this.windowId = data.windowId || null;
         this.data = data.data || {};
     }
 }
-
+// Класс "Окно"
 export class Window {
     constructor(data = {}) {
         this.id = (data.id) ? data.id : Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -323,7 +348,7 @@ export class Window {
         this.fileType = data.fileType || '';
     }
 }
-
+// Класс "Уведомление"
 export class Notification {
     constructor(data = {}) {
         this.id = data.id || (Date.now() + Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000);
@@ -349,19 +374,21 @@ export class Notification {
         if (diff < 60) return 'только что';
         if (diff < 3600) return `${Math.floor(diff / 60)} мин. назад`;
         if (diff < 86400) return `${Math.floor(diff / 3600)} ч. назад`;
+        
         return `${Math.floor(diff / 86400)} дн. назад`;
     }
     
     // Проверка на истекшее уведомление
     isExpired() {
         if (!this.endAt) return false;
+        
         return new Date() > new Date(this.endAt);
     }
 }
 
 // -=-=-=-=-=-=-Основные операции CRUD-=-=-=-=-=-=-
 export const usersTable = {
-    // обновление|сохранение учетной записи
+    // Обновление|сохранение учетной записи
     async save(userData) {
         try {
             const NUser = new User(userData);
@@ -375,7 +402,7 @@ export const usersTable = {
 
                 return NUser;
             } else {
-                // зачищаем id в NUser (автоматически сгенерирует)
+                // Зачищаем id в NUser (автоматически сгенерирует)
                 delete NUser.id;
 
                 NUser.apps = await getDefaultApps();
@@ -433,9 +460,7 @@ export const usersTable = {
             // Проверяем сериализуемость значения
             if (self.isSerializable(val)) {
                 const copied = self.createSafeCopy(val);
-                if (copied !== undefined) {
-                    result[key] = copied;
-                }
+                if (copied !== undefined) result[key] = copied;
             }
         });
         
@@ -464,7 +489,7 @@ export const usersTable = {
         };
     },
 
-    // поиск учетной записи по id
+    // Поиск учетной записи по id
     async getbyId(id) {
         try {
             const user = await DB.users.get(id);
@@ -475,7 +500,7 @@ export const usersTable = {
         }
     },
 
-    // поиск учетной записи по login
+    // Поиск учетной записи по login
     async getbyLogin(login) {
         try {
             const user = await DB.users.where('login').equals(login).first();
@@ -486,7 +511,7 @@ export const usersTable = {
         }
     },
 
-    // получить массив всех учетных записей
+    // Получить массив всех учетных записей
     async getAll() {
         try {
             const users = await DB.users.toArray();
@@ -497,7 +522,7 @@ export const usersTable = {
         }
     },
 
-    // получить массив apps учетной записи
+    // Получить массив apps учетной записи
     async getApps(id) {
         try {
             const USER = await DB.users.get(id);
@@ -512,7 +537,7 @@ export const usersTable = {
         }
     },
 
-    // получить config пользователя по id
+    // Получить config пользователя по id
     async getConfig(id) {
         try {
             const USER = await DB.users.get(id);
@@ -527,7 +552,7 @@ export const usersTable = {
         }
     },
 
-    // получить systemconfig пользователя по id
+    // Получить systemconfig пользователя по id
     async getSConfig(id) {
         try {
             const USER = await DB.users.get(id);
@@ -542,7 +567,7 @@ export const usersTable = {
         }
     },
 
-    // смена обоев рабочего стола (без затрагивания списка окон)
+    // Смена обоев рабочего стола (без затрагивания списка окон)
     async setDesktopWallpaper(userId, wallpaperName) {
         if (!userId) throw new Error('User ID required');
         if (!wallpaperName) throw new Error('Wallpaper name required');
@@ -550,6 +575,7 @@ export const usersTable = {
         try {
             await DB.users.where('id').equals(userId).modify(user => {
                 if (!user.systemconfig) user.systemconfig = { ...Def_userSystemconfig };
+        
                 user.systemconfig.desktopWallpaper = wallpaperName;
                 user.updatedAt = new Date();
             });
@@ -569,15 +595,11 @@ export const usersTable = {
             // Получаем пользователя
             const user = await DB.users.get(userId);
             
-            if (!user) {
-                throw new Error(`Пользователь с ID ${userId} не найден`);
-            }
+            if (!user) throw new Error(`Пользователь с ID ${userId} не найден`);
             
             // Находим приложение в массиве apps
             const appIndex = user.apps.findIndex(app => app.id === appId);
-            if (appIndex === -1) {
-                throw new Error(`Приложение с ID ${appId} не найдено у пользователя ${userId}`);
-            }
+            if (appIndex === -1) throw new Error(`Приложение с ID ${appId} не найдено у пользователя ${userId}`);
             
             // Обновляем значение ключа
             // Используем $set для реактивного обновления, если это необходимо
@@ -602,7 +624,7 @@ export const usersTable = {
         }
     },
 
-    // удалить учетную запись и все её файлы в dfiles
+    // Удалить учетную запись и все её файлы в dfiles
     async delete(id) {
         try {
             await DB.dfiles.where('userid').equals(id).delete();
@@ -613,7 +635,7 @@ export const usersTable = {
         }
     },
 
-    // кол-во учетных записей
+    // Кол-во учетных записей
     async count() {
         try {
             return await DB.users.count();
@@ -636,7 +658,7 @@ export const usersTable = {
         }
     },
 
-    // комплексное закрытие окна (окно + состояние) с транзакцией и таймаутом
+    // Комплексное закрытие окна (окно + состояние) с транзакцией и таймаутом
     async closeComplWindow(userId, windowId) {
         if (!userId) throw new Error('User ID required');
         if (!windowId) throw new Error('Window ID required');
@@ -655,9 +677,7 @@ export const usersTable = {
         
         console.log(`Window exists: ${windowExists}, State exists: ${stateExists}`);
         
-        if (!windowExists && !stateExists) {
-            return { success: true, alreadyClosed: true };
-        }
+        if (!windowExists && !stateExists) return { success: true, alreadyClosed: true };
         
         // Используем транзакцию с ТАЙМАУТОМ
         try {
@@ -686,9 +706,7 @@ export const usersTable = {
                     // Обновляем activeWindowId если нужно
                     if (newSystemConfig.activeWindowId === windowId) {
                         if (newWindows.length > 0) {
-                            const maxZWindow = newWindows.reduce((max, w) => 
-                                (w.zIndex || 0) > (max.zIndex || 0) ? w : max
-                            );
+                            const maxZWindow = newWindows.reduce((max, w) => (w.zIndex || 0) > (max.zIndex || 0) ? w : max);
                             newSystemConfig.activeWindowId = maxZWindow.id;
                         } else {
                             newSystemConfig.activeWindowId = null;
@@ -759,11 +777,10 @@ export const usersTable = {
     },
 
     notifs: {
-        // получить все уведомления пользователя
+        // Получить все уведомления пользователя
         async getAll(id) {
             try {
-                const USER = await DB.users.get(id);
-                
+                const USER = await DB.users.get(id);                
                 if (USER && USER.notifs) return USER.notifs.map(n => new Notification(n));
                 
                 return [];
@@ -773,7 +790,7 @@ export const usersTable = {
             }
         },
 
-        // получить только непрочитанные уведомления пользователя
+        // Получить только непрочитанные уведомления пользователя
         async getUnread(id) {
             try {
                 const allNotifs = await this.getAll(id);
@@ -785,7 +802,7 @@ export const usersTable = {
             }
         },
 
-        // создать новое уведомление
+        // Создать новое уведомление
         async add(user_id = false, notif_data = false) {
             if (!user_id) throw new Error('User Id required.');
             if (!notif_data) throw new Error('Notification data required.');
@@ -812,7 +829,7 @@ export const usersTable = {
             }
         },
 
-        // отметить уведомление как прочитанное (одно, по его ID)
+        // Отметить уведомление как прочитанное (одно, по его ID)
         async markAsRead(user_id = false, notif_id = false) {
             if (!user_id) throw new Error('User ID required.');
             if (!notif_id) throw new Error('Notification ID required.');
@@ -840,16 +857,15 @@ export const usersTable = {
             }
         },
 
-        // отметить все уведомления пользователя как прочитанные
+        // Отметить все уведомления пользователя как прочитанные
         async markAsReadAll(user_id = false) {
-            console.log('user_id', user_id);
             if (!user_id) throw new Error('User ID required.');
 
             try {
                 const user = await DB.users.get(user_id);
                 if (!user) throw new Error(`User not found: ${user_id}`);
 
-                // находим все уведомления и сразу помечаем их как прочитанные
+                // Находим все уведомления и сразу помечаем их как прочитанные
                 const notifs = (user.notifs || []).map(n => ({
                     ...n,
                     read: true
@@ -866,9 +882,9 @@ export const usersTable = {
                 throw new Error(`Failed to mark all notifications as read: ${err.message}`);
             }
         },
-        // отметить все уведомления пользователя как НЕ прочитанные
+
+        // Отметить все уведомления пользователя как НЕ прочитанные
         async markAsUnreadAll(user_id = false) {
-            console.log('user_id', user_id);
             if (!user_id) throw new Error('User ID required.');
 
             try {
@@ -893,7 +909,7 @@ export const usersTable = {
             }
         },
 
-        // удалить уведомление
+        // Удалить уведомление
         async delete(user_id = false, notif_id = false) {
             if (!user_id) throw new Error('User ID required.');
             if (!notif_id) throw new Error('Notification ID required.');
@@ -917,7 +933,7 @@ export const usersTable = {
             }
         },
 
-        // получить кол-во непрочитанных уведомлений
+        // Получить кол-во непрочитанных уведомлений
         async getUnreadCount(user_id = false) {
             if (!user_id) throw new Error('User ID required.');
 
@@ -930,14 +946,14 @@ export const usersTable = {
             }
         },
 
-        // создать системное уведомление
+        // Создать системное уведомление
         async addSystem(user_id = false, title = false, content = false, type = "info", autoclose = 5) {
             if (!user_id) throw new Error('User ID required.');
             if (!content) throw new Error('Content required.');
 
             return await this.add(user_id, {
                 app: "system",
-                title: title || "Системное уведомление",
+                title: title || ((userLangS === 'ru') ? "Системное уведомление" : "System notification"),
                 content: content,
                 type: type,
                 autoclose: autoclose,
@@ -945,7 +961,7 @@ export const usersTable = {
             });
         },
 
-        // закрепить/открепить уведомление
+        // Закрепить/открепить уведомление
         async togglePinned(user_id = false, notif_id = false) {
             if (!user_id) throw new Error('User ID required.');
             if (!notif_id) throw new Error('Notification ID required.');
@@ -970,7 +986,101 @@ export const usersTable = {
                 console.error('Error toggling pinned:', err);
                 throw new Error(`Failed to toggle pinned: ${err.message}`);
             }
-        }
+        },
+
+        // Закрепить/открепить ВСЕ уведомления
+        async setPinnedAll(user_id, pinned) {
+            if (!user_id) throw new Error('User ID required.');
+
+            try {
+                const user = await DB.users.get(user_id);
+                if (!user) throw new Error(`User not found: ${user_id}`);
+
+                const notifs = (user.notifs || []).map(n => ({ ...n, pinned }));
+
+                await DB.users.update(user_id, {
+                    notifs,
+                    updatedAt: new Date(),
+                });
+
+                return true;
+            } catch (err) {
+                console.error('Error setPinnedAll:', err);
+                throw new Error(`Failed to set pinned all: ${err.message}`);
+            }
+        },
+
+        // Закрепить/открепить ВЫБРАННЫЕ уведомления
+        async setPinnedMany(user_id = false, notif_ids = [], pinned = false) {
+            if (!user_id) throw new Error('User ID required.');
+            if (!Array.isArray(notif_ids) || notif_ids.length === 0) throw new Error('Notification IDs array required.');
+
+            try {
+                const user = await DB.users.get(user_id);
+                if (!user) throw new Error(`User not found: ${user_id}`);
+
+                const idSet = new Set(notif_ids);
+                const notifs = (user.notifs || []).map(n => idSet.has(n.id) ? { ...n, pinned } : n);
+
+                await DB.users.update(user_id, {
+                    notifs,
+                    updatedAt: new Date(),
+                });
+
+                return true;
+            } catch (err) {
+                console.error('Error setPinnedMany:', err);
+                throw new Error(`Failed to set pinned many: ${err.message}`);
+            }
+        },
+
+        // Отметить ВЫБРАННЫЕ уведомления пользователя как прочитанные/не прочитанные
+        async setReadMany(user_id = false, notif_ids = [], read = true) {
+            if (!user_id) throw new Error('User ID required.');
+            if (!Array.isArray(notif_ids) || notif_ids.length === 0) throw new Error('Notification IDs array required.');
+
+            try {
+                const user = await DB.users.get(user_id);
+                if (!user) throw new Error(`User not found: ${user_id}`);
+
+                const idSet = new Set(notif_ids);
+                const notifs = (user.notifs || []).map(n => idSet.has(n.id) ? { ...n, read } : n);
+
+                await DB.users.update(user_id, {
+                    notifs,
+                    updatedAt: new Date(),
+                });
+
+                return true;
+            } catch (err) {
+                console.error('Error setReadMany:', err);
+                throw new Error(`Failed to set read many: ${err.message}`);
+            }
+        },
+
+        // Удаление ВЫБРАННЫХ уведомлений
+        async deleteMany(user_id = false, notif_ids = []) {
+            if (!user_id) throw new Error('User ID required.');
+            if (!Array.isArray(notif_ids) || notif_ids.length === 0) throw new Error('Notification IDs array required.');
+
+            try {
+                const user = await DB.users.get(user_id);
+                if (!user) throw new Error(`User not found: ${user_id}`);
+
+                const idSet = new Set(notif_ids);
+                const notifs = (user.notifs || []).filter(n => !idSet.has(n.id));
+
+                await DB.users.update(user_id, {
+                    notifs,
+                    updatedAt: new Date(),
+                });
+
+                return true;
+            } catch (err) {
+                console.error('Error deleteMany:', err);
+                throw new Error(`Failed to delete many: ${err.message}`);
+            }
+        },
     },
 
     windows: {
@@ -979,7 +1089,6 @@ export const usersTable = {
 
             try {
                 const FindWindows = await this.windows_getAll(userId);
-                
                 // Убедимся, что у всех окон есть zIndex
                 const windowsWithZIndex = FindWindows.map(w => ({
                     ...w,
@@ -1000,7 +1109,7 @@ export const usersTable = {
             }
         },
 
-        // создание нового окна с обновлением данных
+        // Создание нового окна с обновлением данных
         async create(userId, appData) {
             // валидация
             if (!appData.name) throw new Error('App name required!');
@@ -1014,10 +1123,8 @@ export const usersTable = {
                 if (!user) throw new Error(`User with ID ${userId} not found`);
                 
                 const currentWindows = user?.systemconfig?.windows || [];
-                
                 // Проверяем, существует ли уже окно с таким ID
                 const existingWindowIndex = currentWindows.findIndex(w => w.id === windowId);
-                
                 let newWindows;
                 let targetWindow;
                 
@@ -1084,7 +1191,7 @@ export const usersTable = {
                 // Обновляем реактивную переменную
                 IDBWindows.value = newWindows;
                 
-                console.log('✅ Окно создано с fileData:', targetWindow.fileData?.name || targetWindow.fileName);
+                console.log('✅ The window was created with :', targetWindow.fileData?.name || targetWindow.fileName);
                 
                 return targetWindow;
             } catch (error) {
@@ -1093,12 +1200,11 @@ export const usersTable = {
             }
         },
 
-        // получить список всех окон по ID пользователя
+        // Получить список всех окон по ID пользователя
         async windows_getAll(userId) {
             if (!userId) throw new Error('User ID required');
             
             const user = await DB.users.get(userId);
-
             if (!user) throw new Error(`User with ID ${userId} not found`);
             
             const windows = user?.systemconfig?.windows || [];
@@ -1112,7 +1218,7 @@ export const usersTable = {
             return windowsWithZIndex;
         },
 
-        // получение конкретного окна по ID пользователя + ID окна
+        // Получение конкретного окна по ID пользователя + ID окна
         async getById(userId, windowId) {
             if (!userId) throw new Error('User ID required')
             if (!windowId) throw new Error('Window ID required')
@@ -1130,7 +1236,7 @@ export const usersTable = {
             return result;
         },
         
-        // проверка наличия окна по ID пользователя + ID окна
+        // Проверка наличия окна по ID пользователя + ID окна
         async exists(userId, windowId) {
             if (!userId) throw new Error('User ID required')
             if (!windowId) throw new Error('Window ID required')
@@ -1143,7 +1249,7 @@ export const usersTable = {
             }
         },
 
-        // возвращает "следующее" значение zIndex, которое можно использовать
+        // Возвращает "следующее" значение zIndex, которое можно использовать
         async getCurZIndex(userId) {
             if (!userId) throw new Error('User ID required');
 
@@ -1173,8 +1279,6 @@ export const usersTable = {
             try {
                 const user = await DB.users.get(userId);
                 const nWindows = IDBWindows.value.map(w => (new Window(w)));
-                // const nWindows = IDBWindows.value.map(w => (this.prepareWindowForDB(w)));
-
                 let uSystemconfig = user.systemconfig || Def_userSystemconfig;
                 
                 uSystemconfig.windows = nWindows;
@@ -1194,7 +1298,7 @@ export const usersTable = {
             }
         },
 
-        // активирование окна (поднятие его zIndex)
+        // Активирование окна (поднятие его zIndex)
         async activate(userId, windowId) {
             if (!userId) throw new Error('User ID required');
             if (!windowId) throw new Error('Window ID required');
@@ -1202,11 +1306,9 @@ export const usersTable = {
             try {                
                 // Получаем пользователя
                 const user = await DB.users.get(userId);
-                const windows = user?.systemconfig?.windows || [];
-                
+                const windows = user?.systemconfig?.windows || [];                
                 // Находим окно
                 const windowIndex = windows.findIndex(w => w.id === windowId);
-
                 if (windowIndex === -1) throw new Error(`Window with ID ${windowId} not found`);
                 
                 // Если окно свернуто - разворачиваем его
@@ -1238,7 +1340,7 @@ export const usersTable = {
             }
         },
 
-        // поиск "окна" в SConfig пользователя по данным приложения
+        // Поиск "окна" в SConfig пользователя по данным приложения
         async getWindow_byConfig(userId, appData) {
             if (!userId) throw new Error('User ID required');
             if (!appData) throw new Error('appData required');
@@ -1263,7 +1365,7 @@ export const usersTable = {
             }
         },
 
-        // сворачивание окна
+        // Сворачивание окна
         async minimize(userId, windowId) {
             if (!userId) throw new Error('User ID required');
             if (!windowId) throw new Error('Window ID required');
@@ -1273,11 +1375,9 @@ export const usersTable = {
                 const user = await DB.users.get(userId);
                 if (!user) throw new Error(`User with ID ${userId} not found`);
                 
-                const windows = user?.systemconfig?.windows || [];
-                
+                const windows = user?.systemconfig?.windows || [];                
                 // Находим индекс сворачиваемого окна
-                const windowIndex = windows.findIndex(w => w.id === windowId);
-                
+                const windowIndex = windows.findIndex(w => w.id === windowId);                
                 if (windowIndex === -1) throw new Error(`Window with ID ${windowId} not found`);
                 
                 // Устанавливаем isMinimized в true
@@ -1313,7 +1413,7 @@ export const usersTable = {
             }
         },
         
-        // восстановление окна из свернутого состояния
+        // Восстановление окна из свернутого состояния
         async restore(userId, windowId) {
             if (!userId) throw new Error('User ID required');
             if (!windowId) throw new Error('Window ID required');
@@ -1323,11 +1423,9 @@ export const usersTable = {
                 const user = await DB.users.get(userId);
                 if (!user) throw new Error(`User with ID ${userId} not found`);
                 
-                const windows = user?.systemconfig?.windows || [];
-                
+                const windows = user?.systemconfig?.windows || [];                
                 // Находим индекс восстанавливаемого окна
-                const windowIndex = windows.findIndex(w => w.id === windowId);
-                
+                const windowIndex = windows.findIndex(w => w.id === windowId);                
                 if (windowIndex === -1) throw new Error(`Window with ID ${windowId} not found`);
                 
                 // Устанавливаем isMinimized в false
@@ -1359,6 +1457,7 @@ export const usersTable = {
             }
         },
 
+        // Закрыть окно
         async close(userId, windowId) {
             if (!userId) throw new Error('User ID required');
             if (!windowId) throw new Error('Window ID required');
@@ -1402,9 +1501,7 @@ export const usersTable = {
                             zIndex: w.zIndex || 100
                         }));
                         
-                        const maxZWindow = windowsWithZIndex.reduce((max, w) => 
-                            w.zIndex > max.zIndex ? w : max
-                        );
+                        const maxZWindow = windowsWithZIndex.reduce((max, w) => w.zIndex > max.zIndex ? w : max);
                         
                         uSystemconfig.activeWindowId = maxZWindow.id;
                         activeWindowId.value = maxZWindow.id;
@@ -1436,7 +1533,7 @@ export const usersTable = {
             }
         },
 
-        // фиксирование новых координат окна
+        // Фиксирование новых координат окна
         async updatePosition(userId, windowId, positionx, positiony) {
             if (!userId) throw new Error('User ID required');
             if (!windowId) throw new Error('Window ID required');
@@ -1447,11 +1544,9 @@ export const usersTable = {
                 const user = await DB.users.get(userId);
                 if (!user) throw new Error(`User with ID ${userId} not found`);
                 
-                const windows = user?.systemconfig?.windows || [];
-                
+                const windows = user?.systemconfig?.windows || [];                
                 // Находим индекс окна
-                const windowIndex = windows.findIndex(w => w.id === windowId);
-                
+                const windowIndex = windows.findIndex(w => w.id === windowId);                
                 if (windowIndex === -1) throw new Error(`Window with ID ${windowId} not found`);
                 
                 // Обновляем позицию окна
@@ -1481,6 +1576,7 @@ export const usersTable = {
             }
         },
 
+        // Обновление размера окна
         async updateSize(userId, windowId, width, height) {
             if (!userId) throw new Error('User ID required');
             if (!windowId) throw new Error('Window ID required');
@@ -1491,11 +1587,9 @@ export const usersTable = {
                 const user = await DB.users.get(userId);
                 if (!user) throw new Error(`User with ID ${userId} not found`);
                 
-                const windows = user?.systemconfig?.windows || [];
-                
+                const windows = user?.systemconfig?.windows || [];                
                 // Находим индекс окна
-                const windowIndex = windows.findIndex(w => w.id === windowId);
-                
+                const windowIndex = windows.findIndex(w => w.id === windowId);                
                 if (windowIndex === -1) throw new Error(`Window with ID ${windowId} not found`);
                 
                 // Обновляем размеры окна
@@ -1527,7 +1621,7 @@ export const usersTable = {
     },
 
     windstates: {
-        // получить список всех состояний окон по ID пользователя
+        // Получить список всех состояний окон по ID пользователя
         async getAll(userId) {
             if (!userId) throw new Error('User ID required');
             
@@ -1547,7 +1641,7 @@ export const usersTable = {
             }        
         },
 
-        // получить состояние конкретного окна по ID пользователя + ID окна
+        // Получить состояние конкретного окна по ID пользователя + ID окна
         async getById(userId, windowId) {
             if (!userId) throw new Error('User ID required');
             if (!windowId) throw new Error('Window ID required');
@@ -1555,17 +1649,16 @@ export const usersTable = {
             try {
                 const user = await DB.users.get(userId);
                 
-                if (!user) {
-                    throw new Error(`User with ID ${userId} not found`);
-                } else {
-                    const states = user?.systemdata?.windowsstates || false;
+                if (!user) throw new Error(`User with ID ${userId} not found`);
+                
+                const states = user?.systemdata?.windowsstates || false;
 
-                    if (states && Object.keys(states).includes(windowId)) {
-                        return states[windowId];
-                    } else {
-                        return false;
-                    }
+                if (states && Object.keys(states).includes(windowId)) {
+                    return states[windowId];
+                } else {
+                    return false;
                 }
+                
             } catch (error) {
                 console.error("Error: ", error);
                 return false;
@@ -1622,7 +1715,7 @@ export const usersTable = {
             }
         },
 
-        // переписать состояние окна по ID пользователя + ID окна + данные состояния
+        // Переписать состояние окна по ID пользователя + ID окна + данные состояния
         async updateVal(userId, windowId, stateData = false) {
             if (!userId) throw new Error('User ID required');
             if (!windowId) throw new Error('Window ID required');
@@ -1630,12 +1723,10 @@ export const usersTable = {
 
             try {
                 const user = await DB.users.get(userId);
-
                 if (!user) throw new Error(`User with ID ${userId} not found`);
 
                 // Создаем безопасную копию stateData для сохранения в БД
-                const safeStateData = usersTable.createSafeCopy(stateData);
-                
+                const safeStateData = usersTable.createSafeCopy(stateData);                
                 if (!safeStateData) throw new Error('Failed to create safe copy of state data');
 
                 // Инициализируем systemdata.windowsstates если его нет
@@ -1668,19 +1759,19 @@ export const usersTable = {
 };
 
 export const dFiles = {
-    // получить корневую папку пользователя
+    // Получить корневую папку пользователя
     async getRoot(userId) {
         if (!userId) throw new Error('User ID required');
 
         try {
-            // пытаемся найти корень
+            // Пытаемся найти корень
             let RootFolder = await DB.dfiles
                 .where('[userid+parentid]')
                 .equals([userId, DFile.ROOT_PARENT])
                 .and(item => item.type === 'folder' && item.name === 'core')
                 .first();
             
-            // корня нет - создаем
+            // Корня нет - создаем
             if (!RootFolder) {
                 RootFolder = new DFile({
                     name: 'core',
@@ -1792,8 +1883,7 @@ export const dFiles = {
         
         try {
             // Определяем тип файла
-            const type = this.getFileType(fileData.type, fileData.name);
-            
+            const type = this.getFileType(fileData.type, fileData.name);            
             // Создаем объект для сохранения
             const fileObj = {
                 name: fileData.name,
@@ -1819,7 +1909,9 @@ export const dFiles = {
             const parent = await DB.dfiles.get(parentId);
             if (parent) {
                 if (!parent.children) parent.children = [];
+                
                 parent.children.push(id);
+                
                 await DB.dfiles.update(parentId, {
                     children: parent.children,
                     updatedAt: new Date()
@@ -1874,7 +1966,6 @@ export const dFiles = {
         
         try {
             const item = await DB.dfiles.get(itemId);
-
             if (!item) throw new Error('Item not found');   //эл-т не найден
             if (item.userid !== userId) throw new Error('Access denied');   //эл-т "чужой"
             if (item.protect) throw new Error('Item is protected'); //эл-т защищен от удаления
@@ -1886,9 +1977,7 @@ export const dFiles = {
                     .equals(itemId)
                     .count();
                 
-                if (contents > 0) {
-                    throw new Error('Folder is not empty. Use recursive delete to remove all contents.');
-                }
+                if (contents > 0) throw new Error('Folder is not empty. Use recursive delete to remove all contents.');
             }
             
             // Рекурсивное удаление
@@ -1908,6 +1997,7 @@ export const dFiles = {
                 const parent = await DB.dfiles.get(item.parentid);
                 if (parent && parent.children) {
                     parent.children = parent.children.filter(id => id !== itemId);
+                    
                     await DB.dfiles.update(item.parentid, {
                         children: parent.children,
                         updatedAt: new Date()
@@ -1934,8 +2024,7 @@ export const dFiles = {
         try {
             const item = await DB.dfiles.get(itemId);
             if (!item) throw new Error('Item not found');
-            if (item.userid !== userId) throw new Error('Access denied');
-            
+            if (item.userid !== userId) throw new Error('Access denied');            
             // Проверяем, нет ли в этой папке элемента с таким именем
             if (item.parentid) {
                 const existing = await DB.dfiles
@@ -1975,8 +2064,7 @@ export const dFiles = {
             if (item.userid !== userId) throw new Error('Access denied');
             
             // Если newParentId не указан или null - перемещаем в корень
-            let targetParentId = newParentId ?? DFile.ROOT_PARENT;
-            
+            let targetParentId = newParentId ?? DFile.ROOT_PARENT;            
             if (targetParentId !== DFile.ROOT_PARENT) {
                 const newParent = await DB.dfiles.get(targetParentId);
                 if (!newParent) throw new Error('Target folder not found');
@@ -1987,9 +2075,8 @@ export const dFiles = {
                 if (item.type === 'folder') {
                     let current = newParent;
                     while (current && current.id !== DFile.ROOT_PARENT) {
-                        if (current.id === itemId) {
-                            throw new Error('Cannot move folder into itself or its descendant');
-                        }
+                        if (current.id === itemId) throw new Error('Cannot move folder into itself or its descendant');
+
                         current = current.parentid ? await DB.dfiles.get(current.parentid) : null;
                     }
                 }
@@ -2002,9 +2089,7 @@ export const dFiles = {
                 .and(i => i.name === item.name && i.id !== itemId)
                 .first();
             
-            if (existing) {
-                throw new Error('Item with this name already exists in target folder');
-            }
+            if (existing) throw new Error('Item with this name already exists in target folder');
             
             // Удаляем из старой родительской папки
             if (item.parentid && item.parentid !== DFile.ROOT_PARENT) {
@@ -2058,9 +2143,7 @@ export const dFiles = {
                 .equals(userId)
                 .and(item => item.name.toLowerCase().includes(query.toLowerCase()));
             
-            if (type) {
-                collection = collection.and(item => item.type === type);
-            }
+            if (type) collection = collection.and(item => item.type === type);
             
             return await collection.toArray();
         } catch (error) {
@@ -2104,66 +2187,6 @@ export const dFiles = {
         }
     }
 };
-// export const settingsTable = {
-//     // сохранение настройки
-//     async save(key, value) {
-//         try {
-//             const existing = await DB.settings.where('key').equals(key).first();
-
-//             if (existing) {
-//                 await DB.settings.update(existing.id, {
-//                     value: value,
-//                     updatedAt: new Date(),
-//                 });
-//                 return existing.id;
-//             } else {
-//                 return await DB.settings.add(new Setting(key, value));
-//             }
-//         } catch (error) {
-//             console.error('Error operation (settings; save');
-//             throw new Error(`Failed to save setting ${key}: ${error.message}`);
-//         }
-//     },
-
-//     // получить настройку
-//     async get(key, defaultVal = null) {
-//         try {
-//             const findSetting = DB.settings.where('key').equals(key).first();
-
-//             return findSetting ? findSetting.value : defaultVal;
-//         } catch (error) {
-//             console.error('Error operation (settings; get');
-//             throw new Error(`Failed to get setting ${key}: ${error.message}`);
-//         }
-//     },
-
-//     // удалить настройку
-//     async delete(key) {
-//         try {
-//             const findSetting = await DB.settings.where('key').equals(key).first();
-
-//             if (findSetting) {
-//                 return await DB.settings.delete(findSetting.id);
-//             } else {
-//                 return null;
-//             }
-//         } catch (error) {
-//             console.error('Error operation (settings; delete');
-//             throw new Error(`Failed to delete setting ${key}: ${error.message}`);
-//         }
-//     },
-
-//     // получить все настройки
-//     async getAll() {
-//         try {
-//             return await DB.settings.toArray();
-//         } catch (error) {
-//             console.error('Error operation (settings; getAll');
-//             throw new Error(`Failed to get all settings`);
-//         }
-//     },
-// };
-
 
 // -=-=-=-=-=-=-Служебное-=-=-=-=-=-=-
 
@@ -2271,22 +2294,6 @@ export async function initDatabase() {
         }
 
         await runDataMigrations();
-
-        // // инициализация базовых настроек 
-        // const defaultSettings = [
-        //     ['theme', 'dark'],
-        //     ['avatarDefault', 'cat'],
-        // ];
-
-        // for (const [key, value] of defaultSettings) {
-        //     const existing = await settingsTable.get(key);
-
-        //     if (existing === null) {
-        //         await settingsTable.set(key, value);
-        //     }
-        // }
-
-        // console.log('Database initialized successfully');
         return true;
     } catch (error) {
         console.error('Error initializing DB:', error);
@@ -2295,9 +2302,7 @@ export async function initDatabase() {
     }    
 }
 
-/**
- * Очистка базы данных (осторожно!)
- */
+// Очистка базы данных (!ОСТОРОЖНО!)
 export async function clearDatabase() {
     try {
         await Promise.all([
@@ -2358,9 +2363,7 @@ function estimateObjectSize(value, seen = new WeakSet()) {
 
     seen.add(value);
 
-    if (Array.isArray(value)) {
-        return value.reduce((sum, item) => sum + estimateObjectSize(item, seen), 0);
-    }
+    if (Array.isArray(value)) return value.reduce((sum, item) => sum + estimateObjectSize(item, seen), 0);
 
     return Object.values(value).reduce((sum, item) => sum + estimateObjectSize(item, seen), 0);
 }
@@ -2385,8 +2388,8 @@ export async function getIndexedDBStats() {
     ]);
 
     const totalBytes = usersStats.bytes + dfilesStats.bytes;
-
     let quota = null;
+
     if (navigator.storage?.estimate) {
         try {
             const estimate = await navigator.storage.estimate();

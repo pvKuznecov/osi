@@ -376,8 +376,10 @@
     width: calc(100% - 10px);
     background-color: rgba(255, 255, 255, 0.3);
     border-radius: 3px;
-    padding: 10px 5px;
+    padding: 3px 5px 10px 5px;
     border: 1px solid lightgray; }
+
+.notif_menublock hr { margin: 5px 0; }
 
 .notif_filterchkbox,
 .notif_filterselect,
@@ -475,7 +477,7 @@
 .notif_notifsElems_botpanel {
     display: flex;
     flex-direction: row;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 5px;
     z-index: 100;
     position: sticky;

@@ -51,7 +51,7 @@ const applications = [
     // }),
     new OSIApp({
         id: 'osicalculator', name: 'OSICalculator',
-        label: 'Калькулятор', category: 'utilities', description: 'Простой калькулятор для базовых вычислений.',
+        label: 'Калькулятор', category: 'applications', description: 'Простой калькулятор для базовых вычислений.',
         // iconclass: 'bi-calculator-fill text-ico-purpure',
         iconImg: require('@/apps/system/OSICalculator/icon.png'),
         defWidth: 400, defHeight: 670,
@@ -60,7 +60,7 @@ const applications = [
     }),
     new OSIApp({
         id: 'osimplayer', name: 'OSIMPlayer',
-        label: 'MPlayer', category: 'utilities', description: 'Простейший музыкальный плеер.',
+        label: 'MPlayer', category: 'applications', description: 'Простейший музыкальный плеер.',
         // iconclass: 'bi-cassette-fill text-ico-purpure',
         iconImg: require('@/apps/system/OSIMPlayer/icon.png'),
         defWidth: 850, defHeight: 400,
@@ -78,7 +78,7 @@ const applications = [
     }),
     new OSIApp({
         id: 'osipicta', name: 'OSIPicta',
-        label: 'Picta', category: 'utilities', description: 'Просмотр изображений.',
+        label: 'Picta', category: 'applications', description: 'Просмотр изображений.',
         // iconclass: 'bi-easel-fill text-ico-purpure',
         iconImg: require('@/apps/system/OSIPicta/icon.png'),
         isMaximized: true, canMinimize: true, showInStartMenu: true, showOnDesktop: true,
@@ -114,7 +114,7 @@ const applications = [
     }),
     new OSIApp({
         id: 'osijustread', name: 'OSIJustRead',
-        label: 'JustRead', category: 'utilities', description: 'Простое приложение для просмотра текстовых файлов.',
+        label: 'JustRead', category: 'applications', description: 'Простое приложение для просмотра текстовых файлов.',
         iconImg: require('@/apps/system/OSIJustRead/icon.png'),
         defWidth: 850, defHeight: 600,
         resizable: true, canMinimize: true, showInStartMenu: true, showOnDesktop: true,

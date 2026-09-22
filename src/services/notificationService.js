@@ -46,10 +46,16 @@ export const notificationService = {
         return this.system(title, content, 'info', autoclose);
     },
 
-    // Закрепить уведомление
+    // Закрепить/открепить уведомление
     togglePinned(notifId) {
         const store = useNotificationsStore();
         return store.togglePinned(notifId);
+    },
+
+    // Закрепить/открепить ВСЕ уведомления
+    setPinnedAll(pinned) {
+        const store = useNotificationsStore();
+        return store.setPinnedAll(pinned);
     },
 
     // Пометить все - "Прочитанные"
@@ -57,12 +63,30 @@ export const notificationService = {
         const store = useNotificationsStore();
         return store.markAllAsRead();
     },
+
     // Пометить все - "Не прочитанные"
     markAll_asUnread() {
         const store = useNotificationsStore();
         return store.markAllAsUnread();
     },
 
+    // Закрепить/открепить выбранные
+    setPinnedMany(ids, pinned) {
+        const store = useNotificationsStore();
+        return store.setPinnedMany(ids, pinned);
+    },
+
+    // Метка "Прочитано"/"Не прочитанно" для выбранного (массив)
+    setReadMany(ids, read) {
+        const store = useNotificationsStore();
+        return store.setReadMany(ids, read);
+    },
+
+    removeMany(ids) {
+        const store = useNotificationsStore();
+        return store.removeMany(ids);
+    },
+    
     // -=-=-= БЛОК ПОЛУЧЕНИЯ УВЕДОМЛЕНИЙ =-=-=-
     get_all() {
         const store = useNotificationsStore();
