@@ -173,6 +173,47 @@ export const useNotificationsStore = defineStore('notifications', {
             }
         },
 
+        // Закрепить/открепить ВСЕ уведомления
+        async setPinnedAll(pinned) {
+            if (!this.currentUserId) return;
+            await usersTable.notifs.setPinnedAll(this.currentUserId, pinned);
+            this.notifications.forEach(n => n.pinned = pinned);
+        },
+
+        async setPinnedMany(ids, pinned) {
+            if (!this.currentUserId) return;
+            await usersTable.notifs.setPinnedMany(this.currentUserId, ids, pinned);
+
+            const idSet = new Set(ids);
+            this.notifications.forEach(n => {
+                if (idSet.has(n.id)) n.pinned = pinned;
+            });
+        },
+
+        async setReadMany(ids, read) {
+            if (!this.currentUserId) return;
+            await usersTable.notifs.setReadMany(this.currentUserId, ids, read);
+            const idSet = new Set(ids);
+            this.notifications.forEach(n => {
+                if (idSet.has(n.id)) n.read = read;
+            });
+        },
+
+        async removeMany(ids) {
+            if (!this.currentUserId) return;
+            await usersTable.notifs.deleteMany(this.currentUserId, ids);
+            const idSet = new Set(ids);
+            this.notifications = this.notifications.filter(n => !idSet.has(n.id));
+
+            // Почистить таймеры автозакрытия
+            for (const id of ids) {
+                if (this.autoCloseTimers.has(id)) {
+                    clearTimeout(this.autoCloseTimers.get(id));
+                    this.autoCloseTimers.delete(id);
+                }
+            }
+        },
+
         // Автозакрытие
         setAutoClose(notificationId, seconds) {
             if (this.autoCloseTimers.has(notificationId)) clearTimeout(this.autoCloseTimers.get(notificationId));
@@ -194,6 +235,7 @@ export const useNotificationsStore = defineStore('notifications', {
         
                 const toRemove = this.notifications.filter(n => {
                     if (n.pinned) return false;
+                
                     const createdAt = new Date(n.createdAt);
                     return createdAt < cutoff;
                 });

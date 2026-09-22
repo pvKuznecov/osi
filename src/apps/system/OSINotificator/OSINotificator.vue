@@ -20,13 +20,14 @@
         
         data() {
             return {
+                UserLang: 'en',
                 lang_data: {},
 
                 Lang_data_type: {},
 
                 allNotifs: [],
                 SelectNotif: true,
-                SelectMMenuArea: 'filters',
+                SelectMMenuArea: 'actions',
                 SelectedNotifId: null,
                 SelectedTypeFilters: [],
                 SelectedStatusFilter: "all",
@@ -95,6 +96,14 @@
         },
 
         methods: {
+            // Выбрать все / Снять выделение
+            SelectAllNotifs() {
+                const SelectedManNotifs = this.SelectedManNotifs;
+                const allNotifs = this.allNotifs;
+
+                this.SelectedManNotifs = (SelectedManNotifs.length === allNotifs.length) ? [] : allNotifs.map((elem) => elem.id);
+            },
+
             // Создание нового напоминания (на основе данных из формочки)
             async AddNewNotif() {
                 const NewData = this.NewData;
@@ -196,13 +205,10 @@
             },
 
             // Закрепить/открепить ВСЕ уведомления (по умолч. открепить)
-            Full_TogglePinned(inpVal = false) {
-                const FullList = this.allNotifs;
-                if (!FullList || FullList.length === 0) return;
-
-                FullList.forEach(elem => {
-                    if (elem.pinned !== inpVal) this.TogglePinned(elem.id);
-                });
+            async Full_TogglePinned(inpVal = false) {
+                if (!this.allNotifs?.length) return;
+                await notificationService.setPinnedAll(inpVal);
+                await this.getNotif_all();
             },
 
             // Пометить все как прочитанные/не прочитанные (по умолч. "не прочитанные")
@@ -211,14 +217,12 @@
                 if (!FullList || FullList.length === 0) return;
 
                 if (selectVal) {
-                    let res = await notificationService.markAll_asRead();
-                    console.log('res', res);                    
+                    await notificationService.markAll_asRead();
                 } else {
-                    let res = await notificationService.markAll_asUnread();
-                    console.log('res', res);
+                    await notificationService.markAll_asUnread();
                 }
 
-                this.getNotif_all();                
+                this.getNotif_all();      
             },
 
             // Вывод даты-времени в человеко-читабельном формате

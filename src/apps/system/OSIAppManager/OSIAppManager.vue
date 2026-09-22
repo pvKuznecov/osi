@@ -1,8 +1,10 @@
 <template src="./template.html"></template>
 <style src="./style.css"></style>
 <script>
+    import { LangPack } from './lang';
     import { appsConfig } from '@/config/applications';
     import { usersTable } from '@/idb/db';
+    import { JSH } from '@/core/helpers';
     import AppIcon from '@/components/os/AppIcon/AppIcon.vue';
 
     export default {
@@ -25,6 +27,10 @@
 
         data() {
             return {
+                UserLang: 'en',
+                lang_data: {},
+                GLangData: {},
+
                 appsList: [],
                 searchInputTxt: '',
                 USERApps: [],
@@ -80,6 +86,19 @@
         },
 
         async mounted() {
+            console.log('OSINotificator app mounted with windowId:', this.windowId);
+
+            const userLang = navigator.language || navigator.userLanguage;
+            const userLangS = userLang.split('-')[0];
+            const LangPackData = LangPack;
+
+            this.UserLang = userLangS;
+            this.lang_data = (userLangS && LangPackData && LangPackData[userLangS]) ? LangPackData[userLangS] : LangPackData.en;
+
+            const GlobalLangPack = JSH.lang;           
+            
+            this.GLangData = (userLangS && GlobalLangPack && GlobalLangPack[userLangS]) ? GlobalLangPack[userLangS] : GlobalLangPack.en;
+
             const defAppsList = appsConfig.getAllApps();
             const findUserApps = await usersTable.getApps(this.USERID);
 
@@ -90,6 +109,8 @@
         },
 
         methods: {
+            LangData(key) { return this.lang_data[key] || ''; },
+
             // перезагрузка страницы
             reloadPage() { document.location.reload(); },
 
