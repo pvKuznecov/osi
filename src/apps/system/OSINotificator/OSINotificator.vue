@@ -211,10 +211,14 @@
                 if (!FullList || FullList.length === 0) return;
 
                 if (selectVal) {
-                    await notificationService.markAll_asRead();
+                    let res = await notificationService.markAll_asRead();
+                    console.log('res', res);                    
                 } else {
-                    await notificationService.markAll_asUnread();
-                }                
+                    let res = await notificationService.markAll_asUnread();
+                    console.log('res', res);
+                }
+
+                this.getNotif_all();                
             },
 
             // Вывод даты-времени в человеко-читабельном формате
