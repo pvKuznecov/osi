@@ -211,9 +211,10 @@
             },
 
             // выбор целевого уведомления
-            Upd_SelectedNotifId(newId) {
+            async Upd_SelectedNotifId(newId) {
                 if (!newId) return;
 
+                await notificationService.setReadMany([newId], true);
                 this.SelectedNotifId = (this.SelectedNotifId !== newId) ? newId : null;
             },
 
