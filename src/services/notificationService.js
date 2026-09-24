@@ -30,20 +30,20 @@ export const notificationService = {
 
     // -=-=-= КОРОТКИЕ МЕТОДЫ =-=-=-
     add_success(title, content, autoclose = 5) {
-        return this.system(title, content, 'success', autoclose);
+        return this.add_system(title, content, 'success', autoclose);
     },
 
     // Создать уведомление об ошибке
     add_error(title, content, autoclose = 10) {
-        return this.system(title, content, 'error', autoclose);
+        return this.add_system(title, content, 'error', autoclose);
     },
 
     add_warning(title, content, autoclose = 5) {
-        return this.system(title, content, 'warning', autoclose);
+        return this.add_system(title, content, 'warning', autoclose);
     },
 
     add_info(title, content, autoclose = 5) {
-        return this.system(title, content, 'info', autoclose);
+        return this.add_system(title, content, 'info', autoclose);
     },
 
     // Закрепить/открепить уведомление

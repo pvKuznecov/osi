@@ -3,6 +3,9 @@
 <script>
     import { LangPack } from './lang';
     import { notificationService } from '@/services/notificationService';
+    import { appsConfig } from '@/config/applications'
+    import AppIcon from '@/components/os/AppIcon/AppIcon.vue';
+    import OSIICO from './osi.png';
 
     export default {
         name: 'OSINotificator',
@@ -17,6 +20,8 @@
         },
 
         emits: ['startapp', 'error', 'notification'],
+
+        components: { AppIcon },
         
         data() {
             return {
@@ -24,6 +29,10 @@
                 lang_data: {},
 
                 Lang_data_type: {},
+
+                appsData: {},
+
+                osiIco: OSIICO,
 
                 allNotifs: [],
                 SelectNotif: true,
@@ -96,6 +105,35 @@
         },
 
         methods: {
+            // Работа с конфигом app: iconImg
+            Get_app_iconImg(appVal) {
+                const appsData = this.appsData;
+                if (!appsData) return this.osiIco;
+
+                return (appsData[appVal]) ? appsData[appVal].iconImg : this.osiIco;
+            },
+            // Работа с конфигом app: iconClass
+            Get_app_iconClass(appVal) {
+                const appsData = this.appsData;
+                if (!appsData) return '';
+
+                return (appsData[appVal]) ? appsData[appVal].iconclass : "";
+            },
+            // Работа с конфигом app: icon
+            Get_app_icon(appVal) {
+                const appsData = this.appsData;
+                if (!appsData) return '';
+
+                return (appsData[appVal]) ? appsData[appVal].icon : "";
+            },
+            // Работа с конфигом app: name
+            Get_app_name(appVal) {
+                const appsData = this.appsData;
+                if (!appsData) return 'OSI';
+
+                return (appsData[appVal]) ? appsData[appVal].name : "OSI";
+            },
+
             // Выбрать все / Снять выделение
             SelectAllNotifs() {
                 const SelectedManNotifs = this.SelectedManNotifs;
@@ -184,7 +222,7 @@
                 if (!title) return;
                 if (!content) return;
 
-                return await notificationService.add_system(title, content, 'info', closeTime);
+                return await notificationService.add_info(title, content, closeTime);
             },
 
             // Получить массив всех уведомлений
@@ -295,6 +333,11 @@
             
             if (this.Lang_data_type) this.SelectedTypeFilters = Object.keys(this.Lang_data_type);
             if (this.Lang_data_status) this.SelectedStatusFilters = Object.keys(this.Lang_data_status);
+
+            const AllApps = appsConfig.getAllApps();
+            if(AllApps) AllApps.forEach((elem) => {
+                this.appsData[elem.id] = elem;
+            });
 
             this.getNotif_all();
         }
