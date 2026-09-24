@@ -180,11 +180,11 @@
             },
 
             // создать уведомление
-            async addNotif_success(title = false, content = false) {
+            async addNotif_success(title = false, content = false, closeTime = 0) {
                 if (!title) return;
                 if (!content) return;
 
-                return await notificationService.add_system(title, content);
+                return await notificationService.add_system(title, content, 'info', closeTime);
             },
 
             // Получить массив всех уведомлений
@@ -205,14 +205,14 @@
             },
 
             // Закрепить/открепить ВСЕ уведомления (по умолч. открепить)
-            async Full_TogglePinned(inpVal = false) {
+            async markAll_asPinned(inpVal = false) {
                 if (!this.allNotifs?.length) return;
                 await notificationService.setPinnedAll(inpVal);
                 await this.getNotif_all();
             },
 
             // Пометить все как прочитанные/не прочитанные (по умолч. "не прочитанные")
-            async markAllAsRead(selectVal = false) {
+            async markAll_asRead(selectVal = false) {
                 const FullList = this.allNotifs;
                 if (!FullList || FullList.length === 0) return;
 
@@ -222,7 +222,44 @@
                     await notificationService.markAll_asUnread();
                 }
 
-                this.getNotif_all();      
+                this.getNotif_all();
+            },
+
+            // Удалить все
+            async markAll_deleted() {
+                const FullList = this.allNotifs;
+                if (!FullList || FullList.length === 0) return;
+
+                const FullListIds = FullList.map((elem) => elem.id);
+                await notificationService.removeMany(FullListIds);
+                this.getNotif_all();
+            },
+
+            // Пометить выбранные как прочитанные/не прочитанные (по умолч. "не прочитанные")
+            async markSelected_asRead(selectVal = false) {
+                const SelectedManNotifs = this.SelectedManNotifs;
+                if (!SelectedManNotifs || SelectedManNotifs.length === 0) return;
+
+                await notificationService.setReadMany(SelectedManNotifs, selectVal);
+                this.getNotif_all();
+            },
+
+            // Пометить выбранные как закрепленные /не закрепленные (по умолч. "не закрепленные")
+            async markSelected_asPinned(selectVal = false) {
+                const SelectedManNotifs = this.SelectedManNotifs;
+                if (!SelectedManNotifs || SelectedManNotifs.length === 0) return;
+
+                await notificationService.setPinnedMany(SelectedManNotifs, selectVal);
+                this.getNotif_all();
+            },            
+
+            // Удалить выбранные
+            async markSelected_deleted() {
+                const SelectedManNotifs = this.SelectedManNotifs;
+                if (!SelectedManNotifs || SelectedManNotifs.length === 0) return;
+
+                await notificationService.removeMany(SelectedManNotifs);
+                this.getNotif_all();
             },
 
             // Вывод даты-времени в человеко-читабельном формате
