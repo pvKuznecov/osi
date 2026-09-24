@@ -3,6 +3,9 @@
 <script>
     import { useNotificationsStore } from '@/stores/notifications';
     import { LangPack } from './lang';
+    import { appsConfig } from '@/config/applications'
+    import AppIcon from '@/components/os/AppIcon/AppIcon.vue';
+    import OSIICO from './osi.png';
 
     const BaseIcon = '/src/assets/icons/favicons/icon_big.png';
 
@@ -23,6 +26,10 @@
                 osiIcon: BaseIcon,
                 LangData: {},
 
+                appsData: {},
+
+                osiIco: OSIICO,
+
                 // Состояние компонента
                 fullModeNotif: null,
                 isPanelOpen: false,
@@ -31,6 +38,8 @@
                 MAX_FLOATING: 5
             }
         },
+
+        components: { AppIcon },
 
         computed: {
             // Данные из Pinia store
@@ -64,6 +73,35 @@
         },
 
         methods: {
+            // Работа с конфигом app: iconImg
+            Get_app_iconImg(appVal) {
+                const appsData = this.appsData;
+                if (!appsData) return this.osiIco;
+
+                return (appsData[appVal]) ? appsData[appVal].iconImg : this.osiIco;
+            },
+            // Работа с конфигом app: iconClass
+            Get_app_iconClass(appVal) {
+                const appsData = this.appsData;
+                if (!appsData) return '';
+
+                return (appsData[appVal]) ? appsData[appVal].iconclass : "";
+            },
+            // Работа с конфигом app: icon
+            Get_app_icon(appVal) {
+                const appsData = this.appsData;
+                if (!appsData) return '';
+
+                return (appsData[appVal]) ? appsData[appVal].icon : "";
+            },
+            // Работа с конфигом app: name
+            Get_app_name(appVal) {
+                const appsData = this.appsData;
+                if (!appsData) return 'OSI';
+
+                return (appsData[appVal]) ? appsData[appVal].name : "OSI";
+            },
+
             // Инициализация пользователя
             async findUser() {
                 try {
@@ -214,6 +252,11 @@
         
             const LangPackData = LangPack;
             this.LangData = (userLangS && LangPackData && LangPackData[userLangS]) ? LangPackData[userLangS] : LangPackData.en;
+
+            const AllApps = appsConfig.getAllApps();
+            if(AllApps) AllApps.forEach((elem) => {
+                this.appsData[elem.id] = elem;
+            });
         
             // Инициализация
             this.findUser();

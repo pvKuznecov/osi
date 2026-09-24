@@ -5,7 +5,8 @@
         <div v-for="notif in AllNotifs" :key="notif.id" :class="(notif !== fullModeNotif) ? 'notifelem_minimal' : 'notifelem'"  :id="`notif_${notif.id}`">
             <!-- Блок "мини" отображения -->
             <div v-if="notif !== fullModeNotif" class="minelem_content" @click="selectedNotif(notif)">
-                <div class="logo">{{ notif.app || 'OSI' }}</div>
+                <!-- <div class="logo">{{ notif.app || 'OSI' }}</div> -->
+                <AppIcon :icon-img="Get_app_iconImg(notif.app)" :iconclass="Get_app_iconClass(notif.app)" :icon="Get_app_icon(notif.app)" :alt="Get_app_name(notif.app)" size="md"/>
                 <div class="min-title">{{ notif.title }}</div>
                 <div class="elem_content_btn_close bi bi-x-lg" @click.stop="removeNotif(notif.id)"></div>
             </div>

@@ -127,7 +127,7 @@
                 <input type="checkbox" :value="N.id" v-model="SelectedManNotifs">
             </div>            
             <div class="notif_elem_authorarea">
-                <div class="notif_elem_applogo"></div>
+                <AppIcon :icon-img="Get_app_iconImg(N.app)" :iconclass="Get_app_iconClass(N.app)" :icon="Get_app_icon(N.app)" :alt="Get_app_name(N.app)" size="md"/>
                 <span>{{N.app ?? 'OSI'}}</span>
             </div>
             <div class="notif_elem_contentarea">

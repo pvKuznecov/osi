@@ -4,6 +4,7 @@
     import { usersTable, dFiles } from '@/idb/db';
     import { LangPack } from './lang';
     import { parseBlob } from 'music-metadata';
+    import { notificationService } from '@/services/notificationService';
     import debounce from 'lodash/debounce';
 
     export default {
@@ -24,7 +25,7 @@
         data() {
             return {
                 lang_data: {},
-                audioElement: null, // Аудио0элемент, отвечающий за воспроизведение
+                audioElement: null, // Аудио элемент, отвечающий за воспроизведение
                 PlayList: [],
                 isPlaying: false,
                 durationAll: 0,
@@ -78,6 +79,13 @@
         },
 
         watch: {
+            isPlaying: {
+                handler() {
+                    if (this.isPlaying && this.currentTrack) this.AddNewNotif('Запуск воспроизведения:', `${this.currentTrack.common.artist} - ${this.currentTrack.common.title}`);
+                },
+                immediate: true
+            },
+
             currentTrack: {
                 handler() {
                     this.updateCoverUrl();
@@ -170,6 +178,19 @@
                 this.audioElement.addEventListener('ended', this._onEnded);
                 this.audioElement.addEventListener('timeupdate', this._onTimeUpdate);
                 this.audioElement.addEventListener('error', this._onError);
+            },
+
+            async AddNewNotif(title = false, content = false) {
+                if (!title || !content) return;
+
+                const appId = 'osimplayer';
+                const appName = 'OSIMPlayer';
+                
+                try {
+                    await notificationService.add_fromApp(appId, appName, title, content);
+                } catch (err) {
+                    console.log('ERROR: ' + err);
+                }
             },
             
             async initFromIDB() {
@@ -856,7 +877,7 @@
                         this.audioElement.removeEventListener('canplay', onCanPlay);
                     
                         setTimeout(() => {
-                            this.PlayerAction_Play();
+                            this.PlayerAction_Play();                            
                         }, 100);
                     };
                     
@@ -868,7 +889,7 @@
                         setTimeout(() => {
                             this.PlayerAction_Play();
                         }, 100);
-                    }, 2000);
+                    }, 2000);                    
                 });
             },
 
