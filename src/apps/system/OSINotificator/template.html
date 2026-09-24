@@ -9,24 +9,28 @@
             <!-- Действия -->
             <div v-if="SelectMMenuArea === 'actions'" class="notif_mmenu_blockelem">
                 <div class="notif_menublock">
-                    <b>Создание:</b>
+                    <b>{{LangData('creation')}}:</b>
                     <button class="notif_btn bg_green" @click="toCreatorMode()">+ {{LangData('сreateareminder')}}</button>
                 </div>
                 <div class="notif_menublock">
-                    <b>Операции над всеми:</b>
-                    <button class="notif_btn bg_blue" @click="markAllAsRead(true)">{{LangData('markallasread')}}</button>
-                    <button class="notif_btn bg_blue" @click="markAllAsRead()">{{LangData('markallasunread')}}</button>
+                    <b>{{LangData('operationsoneveryone')}}:</b>
+                    <button class="notif_btn bg_blue" @click="markAll_asRead(true)">{{LangData('markallasread')}}</button>
+                    <button class="notif_btn bg_blue" @click="markAll_asRead()">{{LangData('markallasunread')}}</button>
                     <hr>
-                    <button class="notif_btn bg_blue" @click="Full_TogglePinned(true)">Закрепить все</button>
-                    <button class="notif_btn bg_blue" @click="Full_TogglePinned()">Открепить все</button>
+                    <button class="notif_btn bg_blue" @click="markAll_asPinned(true)">{{LangData('pinall')}}</button>
+                    <button class="notif_btn bg_blue" @click="markAll_asPinned()">{{LangData('detachall')}}</button>
                     <hr>
-                    <button class="notif_btn bg_red">Удалить все</button>
+                    <button class="notif_btn bg_red" @click="markAll_deleted()">Удалить все</button>
                 </div>
                 <div v-if="SelectedManNotifs.length > 0" class="notif_menublock">
-                    <b>Операции над выбранными ({{SelectedManNotifs.length}}):</b>
-                    <button class="notif_btn bg_blue">Отметить выбранные ({{SelectedManNotifs.length}}) как прочитанное</button>
-                    <button class="notif_btn bg_blue">Отметить выбранные ({{SelectedManNotifs.length}}) как не прочитанное</button>
-                    <button class="notif_btn bg_red">Удалить выбранные ({{SelectedManNotifs.length}})</button>
+                    <b>{{LangData('operationsonselecteditems')}} ({{SelectedManNotifs.length}}):</b>
+                    <button class="notif_btn bg_blue" @click="markSelected_asRead(true)">{{LangData('markselectedasread').replace('*', SelectedManNotifs.length)}}</button>
+                    <button class="notif_btn bg_blue" @click="markSelected_asRead()">{{LangData('markselectedasunread').replace('*', SelectedManNotifs.length)}}</button>
+                    <hr>
+                    <button class="notif_btn bg_blue" @click="markSelected_asPinned(true)">Закрепить выбранное ({{SelectedManNotifs.length}})</button>
+                    <button class="notif_btn bg_blue" @click="markSelected_asPinned()">Открепить выбранное ({{SelectedManNotifs.length}})</button>
+                    <hr>
+                    <button class="notif_btn bg_red" @click="markSelected_deleted()">Удалить выбранные ({{SelectedManNotifs.length}})</button>
                 </div>
             </div>
             <!-- Фильтры -->
