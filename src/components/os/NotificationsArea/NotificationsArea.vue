@@ -25,7 +25,6 @@
                 UserLang: null,
                 osiIcon: BaseIcon,
                 LangData: {},
-
                 appsData: {},
 
                 osiIco: OSIICO,
@@ -42,15 +41,15 @@
         components: { AppIcon },
 
         computed: {
-            // Данные из Pinia store
+            // Данные из Pinia store (актуальный массив, с учетом дат)
             AllNotifs() {
                 const store = useNotificationsStore();
-                return store.notifications;
+                return store.allActual;
             },
-        
+            // Кол-во непрочитанных
             unreadCount() {
                 const store = useNotificationsStore();
-                return store.unreadCount;
+                return store.unreadActualCount;
             },
 
             loading() {
@@ -253,6 +252,7 @@
             const LangPackData = LangPack;
             this.LangData = (userLangS && LangPackData && LangPackData[userLangS]) ? LangPackData[userLangS] : LangPackData.en;
 
+            // Формируем данные по приложениям (нужны для корректной отрисовки уведомлений)
             const AllApps = appsConfig.getAllApps();
             if(AllApps) AllApps.forEach((elem) => {
                 this.appsData[elem.id] = elem;

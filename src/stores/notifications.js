@@ -14,24 +14,44 @@ export const useNotificationsStore = defineStore('notifications', {
     getters: {
         // Все уведомления
         all: (state) => state.notifications,
+        // Все актуальные (учет по дате начала и дате закрытия) уведомления
+        allActual: (state) => {
+            const now = Date.now();
+            return state.notifications.filter(n =>
+                (!n.createdAt || n.createdAt <= now) &&
+                (!n.endAt     || n.endAt     >  now)
+            );
+        },
 
         // Непрочитанные
         unread: (state) => state.notifications.filter(n => !n.read),
+        // Непрочитанные актуальные
+        unreadActual() { return this.allActual.filter(n => !n.read); },
     
         // Количество непрочитанных
-        unreadCount: (state) => state.notifications.filter(n => !n.read).length,
+        unreadCount() { return this.unread.length; },
+        // Количество актуальных непрочитанных
+        unreadActualCount() { return this.unreadActual.length; },
 
         // Закрепленные
         pinned: (state) => state.notifications.filter(n => n.pinned),
+        // Закрепленные актуальные
+        pinnedActual() { return this.allActual.filter(n => n.pinned); },
 
         // По приложению
-        getForApp: (state) => (appId) => state.notifications.filter(n => n.app === appId),
+        getForApp() { return (appId) => this.all.filter(n => n.app === appId); },
+        // По приложению актуальные
+        getForAppActual() { return (appId) => this.allActual.filter(n => n.app === appId); },
 
         // По типу
-        getByType: (state) => (type) => state.notifications.filter(n => n.type === type),
+        getByType() { return (type) => this.all.filter(n => n.type === type); },
+        // По типу актуальные
+        getByTypeActual() { return (type) => this.allActual.filter(n => n.type === type); },
 
         // Последние N
-        getRecent: (state) => (count = 5) => state.notifications.slice(0, count)
+        getRecent() { return (count = 5) => this.all.slice(0, count); },
+        // Последние N актуальные
+        getRecentActual() { return (count = 5) => this.allActual.slice(0, count); }
     },
 
     actions: {
@@ -180,6 +200,7 @@ export const useNotificationsStore = defineStore('notifications', {
             this.notifications.forEach(n => n.pinned = pinned);
         },
 
+        // Закрепить/открепить ВЫБРАННЫЕ уведомления
         async setPinnedMany(ids, pinned) {
             if (!this.currentUserId) return;
             await usersTable.notifs.setPinnedMany(this.currentUserId, ids, pinned);

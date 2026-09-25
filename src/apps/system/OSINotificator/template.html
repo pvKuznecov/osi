@@ -63,12 +63,17 @@
             </div>            
             <!-- Вкладки -->
             <div v-if="SelectMMenuArea === 'tabs'" class="notif_mmenu_blockelem">
-                
+                <div class="notif_menublock">
+                    <b>Источник:</b>
+                    <button class="notif_btn bg_blue" v-for="sVal in Object.keys(SourceTypes)" @click="DataSourceType = sVal">{{SourceTypes[sVal]}}</button>
+                </div>                
             </div>
         </div>
     </div>
     <div class="notif_marea">
-        <div id="main_mheader" class="notif_mheader">{{curHeader}}</div>
+        <div id="main_mheader" class="notif_mheader">
+            <span>{{SourceTypes[DataSourceType]}}</span>
+        </div>
 
         <!-- Форма создания нового напоминания -->
         <div v-if="CreatorMode" class="notif_creator_area">
@@ -88,11 +93,18 @@
             <div v-if="AddResult !== 'ok'" class="notif_creator_newelem">
                 <b>{{LangData('content')}}:</b>
                 <textarea v-model="NewData.content"></textarea>
-            </div>       
+            </div>
+            <div v-if="AddResult !== 'ok'" class="notif_creator_newelem">
+                <b>Даты активности:</b>
+                <div>
+                    <input type="date" v-model="NewData.createdAt" style="width: 49%;"> - <input type="date" v-model="NewData.endAt" style="width: 49%;">
+                </div>                
+            </div>
             <div v-if="AddResult !== 'ok'" class="notif_creator_newelem">
                 <button type="button" class="notif_btn bg_green" @click="AddNewNotif()">{{LangData('create')}}</button>
                 <button type="button" class="notif_btn bg_red" @click="AbortNewNotif()">{{LangData('cancel')}}</button>
             </div>
+            {{NewData}}
         </div>
 
         <!-- Фильтры -->
@@ -146,7 +158,7 @@
         <!-- Статистика -->
         <div v-if="!SelectedNotifId && !CreatorMode" class="notif_notifsElems_botpanel">
             <div style="display: flex; flex-direction: row; gap: 3px;">
-                <button class="notif_btn" :title="LangData('selectall')" @click="SelectAllNotifs()"><i class="bi bi-check-all"></i></button>
+                <button class="notif_btn" :title="LangData('selectall')" @click="SelectAllActualNotifs()"><i class="bi bi-check-all"></i></button>
                 <div v-if="SelectedManNotifs.length > 0" class="elem">
                     <i>Выбрано: </i>{{SelectedManNotifs.length}}
                 </div>
@@ -166,7 +178,7 @@
             </div>
             <div class="notif_fullCard_namearea">
                 <div class="notif_elem_authorarea">
-                    <div class="notif_elem_applogo"></div>
+                    <AppIcon :icon-img="Get_app_iconImg(SelectedNotif.app)" :iconclass="Get_app_iconClass(SelectedNotif.app)" :icon="Get_app_icon(SelectedNotif.app)" :alt="Get_app_name(SelectedNotif.app)" size="md"/>
                     <span>{{SelectedNotif.app ?? 'OSI'}}</span>
                 </div>
                 <div style="display: flex; flex-direction: column;">
@@ -186,6 +198,7 @@
                 <button v-if="!SelectedNotif.pinned" class="notif_btn bg_green"  @click="TogglePinned(SelectedNotif.id)"><i class="bi bi-pin-fill"></i> Закрепить</button>
                 <button v-for="nAction in SelectedNotif.actions" class="notif_btn">{{nAction}}</button>
             </div>
+            {{SelectedNotif}}
          </div>
     </div>    
 </div>
