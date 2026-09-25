@@ -2,10 +2,11 @@
 <style src="./style.css"></style>
 <script>
     import { LangPack } from './lang';
+    import { useNotificationsStore } from '@/stores/notifications';
     import { notificationService } from '@/services/notificationService';
     import { appsConfig } from '@/config/applications'
     import AppIcon from '@/components/os/AppIcon/AppIcon.vue';
-    import OSIICO from './osi.png';
+    import OSIIcon from './osi.png';
 
     export default {
         name: 'OSINotificator',
@@ -27,14 +28,10 @@
             return {
                 UserLang: 'en',
                 lang_data: {},
-
                 Lang_data_type: {},
-
                 appsData: {},
+                osiIco: OSIIcon,
 
-                osiIco: OSIICO,
-
-                allNotifs: [],
                 SelectNotif: true,
                 SelectMMenuArea: 'actions',
                 SelectedNotifId: null,
@@ -44,6 +41,7 @@
                 SelectedDateFilter_to: null,
                 SelectedManNotifs: [],
 
+                DataSourceType: 'actual',
                 CreatorMode: false,
                 NewData: {},
                 NewData_error: null,
@@ -54,16 +52,55 @@
         },
 
         computed: {
+            // Данные из Pinia store (все актуальные)
+            AllActualNotifs() {
+                const store = useNotificationsStore();
+                return store.allActual;
+            },
+            // Данные из Pinia store (все)
+            AllNotifs() {
+                const store = useNotificationsStore();
+                return store.all;
+            },
+            // Данные из Pinia store (напоминания все актуальные)
+            AllActualReminders() {
+                const store = useNotificationsStore();
+                return store.getByTypeActual('reminders');
+            },
+            // Данные из Pinia store (напоминания все)
+            AllReminders() {
+                const store = useNotificationsStore();
+                return store.getByType('reminders');
+            },
+
             SortedNotifs() {
-                const allArr = this.allNotifs;
-                if (!allArr) return [];
+                const DataSourceType = this.DataSourceType;
+                let AllArr = null;
+                switch (DataSourceType) {
+                    case 'all':
+                        AllArr = this.AllNotifs;
+                        break;
+                    case 'reminders':
+                        AllArr = this.AllReminders;
+                        break;
+                    case 'actualreminders':
+                        AllArr = this.AllActualReminders;
+                        break;
+                    case 'actual':
+                        AllArr = this.AllActualNotifs;
+                        break;
+                    default:
+                        break;
+                }
+
+                if (!AllArr) return [];
 
                 const FilterType = this.SelectedTypeFilters ?? [];
                 const FilterStatus = this.SelectedStatusFilter ?? "all";
                 const FilterDateFrom = this.SelectedDateFilter_from ?? null;
                 const FilterDateTo = this.SelectedDateFilter_to ?? null;
 
-                let res = allArr.filter(a => FilterType.includes(a.type));
+                let res = AllArr.filter(a => FilterType.includes(a.type));
 
                 // Фильтр по статусу
                 if (FilterStatus && FilterStatus === "read") {
@@ -75,13 +112,9 @@
                 // Фильтр по дате
                 if (FilterDateFrom || FilterDateTo) {
                     // Начало периода (00:00:00)
-                    const fromTs = FilterDateFrom
-                        ? new Date(FilterDateFrom + 'T00:00:00').getTime()
-                        : -Infinity;
+                    const fromTs = FilterDateFrom ? new Date(FilterDateFrom + 'T00:00:00').getTime() : -Infinity;
                     // Конец периода (23:59:59.999)
-                    const toTs = FilterDateTo
-                        ? new Date(FilterDateTo + 'T23:59:59.999').getTime()
-                        : Infinity;
+                    const toTs = FilterDateTo ? new Date(FilterDateTo + 'T23:59:59.999').getTime() : Infinity;
 
                     res = res.filter(a => {
                         if (!a.createdAt && !a.date && !a.created_at) return false;
@@ -97,10 +130,21 @@
 
             SelectedNotif() {
                 const notifId = this.SelectedNotifId;
-                const allArr = this.allNotifs;
-                let resObj = (!notifId) ? {} : allArr.find(item => item.id === notifId);
+                const AllArr = this.AllActualNotifs;
+                let resObj = (!notifId) ? {} : AllArr.find(item => item.id === notifId);
 
                 return resObj;
+            },
+
+            SourceTypes() {
+                const typesObj = {
+                    'actual': `${this.LangData('notifications')} (${this.LangData('сurrent')})`,
+                    'all': `${this.LangData('notifications')} (${this.LangData('all')})`,
+                    'reminders': `${this.LangData('reminders')} (${this.LangData('all')})`,
+                    'actualreminders': `${this.LangData('reminders')} (${this.LangData('сurrent')})`
+                };
+                
+                return typesObj;
             },
         },
 
@@ -135,11 +179,11 @@
             },
 
             // Выбрать все / Снять выделение
-            SelectAllNotifs() {
+            SelectAllActualNotifs() {
                 const SelectedManNotifs = this.SelectedManNotifs;
-                const allNotifs = this.allNotifs;
+                const AllActualNotifs = this.AllActualNotifs;
 
-                this.SelectedManNotifs = (SelectedManNotifs.length === allNotifs.length) ? [] : allNotifs.map((elem) => elem.id);
+                this.SelectedManNotifs = (SelectedManNotifs.length === AllActualNotifs.length) ? [] : AllActualNotifs.map((elem) => elem.id);
             },
 
             // Создание нового напоминания (на основе данных из формочки)
@@ -147,6 +191,9 @@
                 const NewData = this.NewData;
                 const newTitle = NewData?.title?.trim();
                 const newContent = NewData?.content?.trim();
+                const newCloseTime = NewData?.closeTime;
+                const newCreatedAt = (NewData?.createdAt) ? new Date(NewData.createdAt + 'T00:00:00').getTime() : null;
+                
 
                 if (!newTitle || !newContent) {
                     this.NewData_error = 'undefined';
@@ -156,11 +203,11 @@
                 this.NewData_error = null;
 
                 try {
-                    await this.addNotif_success(newTitle, newContent);
+                    await this.addNotif_success(newTitle, newContent, newCloseTime, newCreatedAt);
                     
                     const res = await notificationService.get_all();
                     
-                    this.allNotifs = Array.isArray(res) ? res : (res?.data ?? res?.items ?? []);
+                    this.AllActualNotifs = Array.isArray(res) ? res : (res?.data ?? res?.items ?? []);
                     this.AddResult = 'ok';
                     this.NewData = {};
 
@@ -219,17 +266,12 @@
             },
 
             // создать уведомление
-            async addNotif_success(title = false, content = false, closeTime = 0) {
+            async addNotif_success(title = false, content = false, closeTime = 0, createdAt = null) {
                 if (!title) return;
                 if (!content) return;
 
-                return await notificationService.add_info(title, content, closeTime);
-            },
-
-            // Получить массив всех уведомлений
-            async getNotif_all() {
-                const res = await notificationService.get_all();
-                this.allNotifs = res;
+                return await notificationService.add_reminders(title, content, closeTime, createdAt);
+                // return await notificationService.add_info(title, content, closeTime, createdAt);                
             },
 
             Chng_SelectMMenuArea(inpVal) {
@@ -245,14 +287,13 @@
 
             // Закрепить/открепить ВСЕ уведомления (по умолч. открепить)
             async markAll_asPinned(inpVal = false) {
-                if (!this.allNotifs?.length) return;
+                if (!this.AllActualNotifs?.length) return;
                 await notificationService.setPinnedAll(inpVal);
-                await this.getNotif_all();
             },
 
             // Пометить все как прочитанные/не прочитанные (по умолч. "не прочитанные")
             async markAll_asRead(selectVal = false) {
-                const FullList = this.allNotifs;
+                const FullList = this.AllActualNotifs;
                 if (!FullList || FullList.length === 0) return;
 
                 if (selectVal) {
@@ -260,18 +301,15 @@
                 } else {
                     await notificationService.markAll_asUnread();
                 }
-
-                this.getNotif_all();
             },
 
             // Удалить все
             async markAll_deleted() {
-                const FullList = this.allNotifs;
+                const FullList = this.AllActualNotifs;
                 if (!FullList || FullList.length === 0) return;
 
                 const FullListIds = FullList.map((elem) => elem.id);
                 await notificationService.removeMany(FullListIds);
-                this.getNotif_all();
             },
 
             // Пометить выбранные как прочитанные/не прочитанные (по умолч. "не прочитанные")
@@ -289,7 +327,6 @@
                 if (!SelectedManNotifs || SelectedManNotifs.length === 0) return;
 
                 await notificationService.setPinnedMany(SelectedManNotifs, selectVal);
-                this.getNotif_all();
             },            
 
             // Удалить выбранные
@@ -298,7 +335,6 @@
                 if (!SelectedManNotifs || SelectedManNotifs.length === 0) return;
 
                 await notificationService.removeMany(SelectedManNotifs);
-                this.getNotif_all();
             },
 
             // Вывод даты-времени в человеко-читабельном формате
@@ -339,8 +375,6 @@
             if(AllApps) AllApps.forEach((elem) => {
                 this.appsData[elem.id] = elem;
             });
-
-            this.getNotif_all();
         }
     }
 </script>

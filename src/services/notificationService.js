@@ -4,14 +4,15 @@ import { useNotificationsStore } from '@/stores/notifications';
 export const notificationService = {
     // -=-=-= БЛОК СОЗДАНИЯ УВЕДОМЛЕНИЙ =-=-=-
     // Системное уведомление
-    add_system(title, content, type = 'info', autoclose = 5) {
+    add_system(title, content, type = 'info', autoclose = 5, createdAt = null) {
         const store = useNotificationsStore();
         return store.add({
             app: 'OSI',
             title,
             content,
             type,
-            autoclose
+            autoclose,
+            createdAt
         });
     },
 
@@ -33,6 +34,11 @@ export const notificationService = {
         return this.add_system(title, content, 'success', autoclose);
     },
 
+    // Создать пользовательское напоминание
+    add_reminders(title, content, autoclose = 5, createdAt = null) {
+        return this.add_system(title, content, 'reminders', autoclose, createdAt);
+    },
+
     // Создать уведомление об ошибке
     add_error(title, content, autoclose = 10) {
         return this.add_system(title, content, 'error', autoclose);
@@ -42,8 +48,8 @@ export const notificationService = {
         return this.add_system(title, content, 'warning', autoclose);
     },
 
-    add_info(title, content, autoclose = 5) {
-        return this.add_system(title, content, 'info', autoclose);
+    add_info(title, content, autoclose = 5, createdAt = null) {
+        return this.add_system(title, content, 'info', autoclose, createdAt);
     },
 
     // Закрепить/открепить уведомление
@@ -101,13 +107,15 @@ export const notificationService = {
                 "info": "Notification",
                 "success": "Confirmation request",
                 "warning": "Important notice",
-                "error": "Error"
+                "error": "Error",
+                "reminders": "Reminder"
             },
             "ru": {
                 "info": "Уведомление",
                 "success": "Запрос подтверждения",
                 "warning": "Важное уведомление",
-                "error": "Ошибка"
+                "error": "Ошибка",
+                "reminders": "Напоминание"
             },
         };
 

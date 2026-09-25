@@ -139,7 +139,7 @@
     gap: 5px;
     min-width: 100%;
     max-width: 100%;
-    padding-right: 10px;
+    padding: 0 10px;
     height: 30px;
     background-color: darkcyan;
     font-weight: 600;
@@ -318,20 +318,6 @@
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.1); }
 }
-
-.notif_elem_applogo {
-    display: flex;
-    flex-direction: column;
-    align-content: center;
-    justify-content: space-around;
-    width: 40px;
-    height: 40px;
-    background-color: white;
-    border-radius: 5px;
-    font-size: small;
-    text-align: center;
-    color: black;
-    flex-shrink: 0; }
 
 .notif_content_area {
     display: flex;
