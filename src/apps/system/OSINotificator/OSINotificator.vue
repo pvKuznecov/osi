@@ -117,8 +117,8 @@
                     const toTs = FilterDateTo ? new Date(FilterDateTo + 'T23:59:59.999').getTime() : Infinity;
 
                     res = res.filter(a => {
-                        if (!a.createdAt && !a.date && !a.created_at) return false;
-                        const raw = a.createdAt ?? a.date ?? a.created_at;
+                        if (!a.createdAt) return false;
+                        const raw = a.createdAt;
                         const ts = new Date(raw).getTime();
                         if (Number.isNaN(ts)) return false;
                         return ts >= fromTs && ts <= toTs;
@@ -191,9 +191,9 @@
                 const NewData = this.NewData;
                 const newTitle = NewData?.title?.trim();
                 const newContent = NewData?.content?.trim();
-                const newCloseTime = NewData?.closeTime;
-                const newCreatedAt = (NewData?.createdAt) ? new Date(NewData.createdAt + 'T00:00:00').getTime() : null;
-                
+                const newCloseTime = NewData?.closeTime || 0;
+                const newCreatedAt = (NewData?.createdAt) ? new Date(NewData.createdAt) : null;
+                const newEndAt = (NewData?.endAt) ? new Date(NewData.endAt) : null;
 
                 if (!newTitle || !newContent) {
                     this.NewData_error = 'undefined';
@@ -203,7 +203,7 @@
                 this.NewData_error = null;
 
                 try {
-                    await this.addNotif_success(newTitle, newContent, newCloseTime, newCreatedAt);
+                    await this.addNotif_success(newTitle, newContent, newCloseTime, newCreatedAt, newEndAt);
                     
                     const res = await notificationService.get_all();
                     
@@ -266,12 +266,11 @@
             },
 
             // создать уведомление
-            async addNotif_success(title = false, content = false, closeTime = 0, createdAt = null) {
+            async addNotif_success(title = false, content = false, closeTime = 0, createdAt = null, endAt = null) {
                 if (!title) return;
                 if (!content) return;
 
-                return await notificationService.add_reminders(title, content, closeTime, createdAt);
-                // return await notificationService.add_info(title, content, closeTime, createdAt);                
+                return await notificationService.add_reminders(title, content, closeTime, createdAt, endAt);       
             },
 
             Chng_SelectMMenuArea(inpVal) {
@@ -310,6 +309,8 @@
 
                 const FullListIds = FullList.map((elem) => elem.id);
                 await notificationService.removeMany(FullListIds);
+                
+                this.SelectedManNotifs = [];
             },
 
             // Пометить выбранные как прочитанные/не прочитанные (по умолч. "не прочитанные")
@@ -335,6 +336,8 @@
                 if (!SelectedManNotifs || SelectedManNotifs.length === 0) return;
 
                 await notificationService.removeMany(SelectedManNotifs);
+
+                this.SelectedManNotifs = [];
             },
 
             // Вывод даты-времени в человеко-читабельном формате
@@ -349,6 +352,21 @@
                 if (diff < 86400) return `${Math.floor(diff / 3600)} ч. назад`;
                 if (diff < 604800) return `${Math.floor(diff / 86400)} дн. назад`;
                 return d.toLocaleString('ru-RU');
+            },
+
+            formatDateTime (dateSec) {
+                if (!dateSec) return '';
+
+                const dateVal = new Date(dateSec);
+                const formattedDate = new Intl.DateTimeFormat('ru-RU', {
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                }).format(dateVal);
+
+                return formattedDate;
             },
         },
 
